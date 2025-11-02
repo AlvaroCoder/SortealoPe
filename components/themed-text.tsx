@@ -33,6 +33,14 @@ export function ThemedText({
   );
 }
 
+/**
+ * colors : 
+ * # FFFFF
+ * # FFF8E8
+ * # FCD581
+ * # D52941
+ * #
+ */
 const styles = StyleSheet.create({
   default: {
     fontSize: 16,
