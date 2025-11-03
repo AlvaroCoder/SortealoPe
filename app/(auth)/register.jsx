@@ -1,7 +1,15 @@
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useRef, useState } from 'react';
+import {
+    Animated,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from "react-native";
 import Button from "../../components/common/Button";
 import { Colors, Typography } from "../../constants/theme";
 
@@ -12,9 +20,13 @@ const GOOGLE_LOGO = "https://res.cloudinary.com/dabyqnijl/image/upload/v17325592
 
 export default function Register() {
   const router = useRouter();
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [headerHeight, setHeaderHeight] = useState(150);
+  const lastScrollY = useRef(0);
 
   const handleRegister = () => {
-    console.log('Registrando usuario...');
+      console.log('Registrando usuario...');
+      router.push("/(drawer)")
   };
 
   const handleLogin = () => {
@@ -25,21 +37,74 @@ export default function Register() {
     console.log('Registro con Google...');
   };
 
+  const handleScroll = (event) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    
+    const scrollingDown = currentScrollY > lastScrollY.current;
+    
+    Animated.timing(scrollY, {
+      toValue: currentScrollY,
+      duration: 100,
+      useNativeDriver: false,
+    }).start();
+
+    if (scrollingDown && currentScrollY > 50 && headerHeight > 0) {
+      setHeaderHeight(0);
+    } else if (!scrollingDown && currentScrollY < 100 && headerHeight === 0) {
+      setHeaderHeight(150);
+    }
+
+    lastScrollY.current = currentScrollY;
+  };
+
+  const imageOpacity = scrollY.interpolate({
+    inputRange: [0, 50],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  // Interpolación para la escala de la imagen
+  const imageScale = scrollY.interpolate({
+    inputRange: [0, 50],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
+
+  const contentMarginTop = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, -50],
+    extrapolate: 'clamp',
+  });
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View 
+        style={[
+          styles.header,
+          { 
+            height: headerHeight,
+            opacity: imageOpacity,
+            transform: [{ scale: imageScale }]
+          }
+        ]}
+      >
         <Image
           source={{ uri: URL_IMAGEN }}
           contentFit="contain"
           transition={1000}
           style={styles.image}
         />
-      </View>
+      </Animated.View>
       
-      <ScrollView 
-        style={styles.content}
+      <Animated.ScrollView 
+        style={[
+          styles.content,
+          { marginTop: contentMarginTop }
+        ]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <Text style={styles.title}>Regístrate</Text>
         
@@ -149,7 +214,7 @@ export default function Register() {
             </Text>
           </View>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
@@ -162,7 +227,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 150,
+    height: "100%",
   },
   header: {
     justifyContent: "flex-end",
@@ -170,6 +235,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingTop: 20,
     paddingBottom: 10,
+    overflow: 'hidden',
   },
   content: {
     flex: 1,
@@ -181,6 +247,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingTop: 40,
     paddingBottom: 30,
+    minHeight: '100%',
   },
   title: {
     fontSize: Typography.sizes["3xl"],
