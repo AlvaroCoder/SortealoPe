@@ -49,7 +49,6 @@ export default function Login() {
       >
         <Text style={styles.title}>Inicia Sesión</Text>
         
-        {/* Formulario de login */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Nombre de usuario</Text>
