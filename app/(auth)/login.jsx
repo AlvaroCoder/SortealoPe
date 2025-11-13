@@ -1,122 +1,79 @@
 import Constants from "expo-constants";
-import { Image } from "expo-image";
-import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import Button from "../../components/common/Button";
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import ButtonLoginGoogle from "../../components/common/Buttons/ButtonLoginGoogle";
+import OutlineTextField from "../../components/common/TextFields/OutlineTextField";
 import { Colors, Typography } from "../../constants/theme";
-
-const URL_IMAGEN =
-  "https://res.cloudinary.com/dabyqnijl/image/upload/v1762043981/sortealope/Mobile-bro_zdw1nq.png";
-
-const GOOGLE_LOGO = "https://res.cloudinary.com/dabyqnijl/image/upload/v1732559213/sortealope/google_icon_zmkfvh.png";
+import FormInitial from "../../views/Form/FormInitial";
 
 export default function Login() {
-  const router = useRouter();
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: ''
+  });
 
-  const handleLogin = () => {
-    console.log('Iniciando sesión...');
-
+  const handleSubmit = () => {
+    console.log("Datos del formulario:", formData);
   };
 
-  const handleRegister = () => {
-    router.push('/(auth)/register');
-  };
-
-  const handleGoogleLogin = () => {
-    console.log('Login con Google...');
-  };
-
-  const handleForgotPassword = () => {
-    console.log('Olvidé mi contraseña...');
-
-  };
+  const updateFields = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          source={{ uri: URL_IMAGEN }}
-          contentFit="contain"
-          transition={1000}
-          style={styles.image}
-        />
-      </View>
-      
+    <View style={[styles.container, { paddingTop: Constants.statusBarHeight }]}>
       <ScrollView 
-        style={styles.content}
+        contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
       >
-        <Text style={styles.title}>Inicia Sesión</Text>
-        
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Nombre de usuario</Text>
-            <TextInput 
-              style={styles.input}
-              placeholder="tu@email.com"
-              placeholderTextColor={Colors.light.textMuted}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-          </View>
+        <FormInitial
+          title="Registro"
+          buttonText="Registrate"
+          onSubmit={handleSubmit}
+        >
+          <OutlineTextField
+            title="Nombre de usuario"
+            placeholder="Ingresa tu nombre de usuario"
+            value={formData.username}
+            type='text'
+            onChangeText={(text) => updateFields('username', text)}
+            required={true}
+            returnKeyType="next"
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Contraseña</Text>
-            <TextInput 
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor={Colors.light.textMuted}
-              secureTextEntry
-              autoComplete="password"
-            />
-          </View>
+          <View style={{ height: 16 }} />
 
-          <TouchableOpacity 
-            style={styles.forgotPasswordContainer}
-            onPress={handleForgotPassword}
-          >
-            <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
-          </TouchableOpacity>
+          <OutlineTextField
+            title="Email"
+            placeholder="Ingresa tu correo electronico"
+            value={formData.email}
+            type='email'
+            onChangeText={(text) => updateFields('email', text)}
+            required={true}
+          />
 
-          <View style={styles.buttonsContainer}>
-            <Button 
-              title="Iniciar Sesión"
-              onPress={handleLogin}
-              size="large"
-              variant="primary"
-              style={styles.primaryButton}
-            />
-    
-          </View>
+          <View style={{ height: 16 }} />
 
-          <View style={styles.separatorContainer}>
+          <OutlineTextField
+            title="Contraseña"
+            value={formData.password}
+            onChangeText={(text) => updateFields('password', text)}
+            placeholder="Crea una contraseña segura"
+            secureTextEntry={true}
+            required={true}
+          />
+        </FormInitial>
+        <View style={styles.divider}>
             <View style={styles.separatorLine} />
-            <Text style={styles.separatorText}>o</Text>
+            <Text style={styles.dividerText}>o</Text>
             <View style={styles.separatorLine} />
           </View>
-
-          <TouchableOpacity 
-            style={styles.googleButton}
-            onPress={handleGoogleLogin}
-          >
-            <Image
-              source={{ uri: GOOGLE_LOGO }}
-              style={styles.googleLogo}
-              contentFit="contain"
-            />
-            <Text style={styles.googleButtonText}>Inicia sesión con Google</Text>
-          </TouchableOpacity>
-
-          <View style={styles.registerLinkContainer}>
-            <Text style={styles.registerLinkText}>
-              ¿No tienes una cuenta? {" "}
-              <Text style={styles.registerLink} onPress={handleRegister}>
-                Regístrate
-              </Text>
-            </Text>
-          </View>
+        <View style={styles.additionalComponents}>
+          <ButtonLoginGoogle/>
         </View>
       </ScrollView>
     </View>
@@ -126,129 +83,37 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: Constants.statusBarHeight,
-    backgroundColor: Colors.principal.red[500],
+    backgroundColor: 'white'
   },
-  image: {
-    width: "100%",
-    height: 150,
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
-  header: {
-    justifyContent: "flex-end",
-    alignItems: "center",
-    paddingHorizontal: 40,
-    paddingTop: 20,
-    paddingBottom: 10,
+  additionalComponents: {
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+    backgroundColor: 'white'
   },
-  content: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-  },
-  scrollContent: {
-    paddingHorizontal: 32,
-    paddingTop: 40,
-    paddingBottom: 30,
-  },
-  title: {
-    fontSize: Typography.sizes["3xl"],
-    fontWeight: Typography.weights.bold,
-    color: Colors.light.text,
-    textAlign: "center",
-    marginBottom: 30,
-    fontFamily: Typography.fonts.display,
-  },
-  form: {
-    gap: 16,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.medium,
-    color: Colors.light.text,
-    marginLeft: 4,
-  },
-  input: {
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderWidth: 2,
-    borderColor: Colors.light.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: Typography.sizes.base,
-    color: Colors.light.text,
-  },
-  forgotPasswordContainer: {
-    alignItems: 'flex-end',
-    marginTop: 4,
-  },
-  forgotPasswordText: {
-    fontSize: Typography.sizes.sm,
-    color: Colors.principal.red[500],
-    fontWeight: Typography.weights.medium,
-  },
-  buttonsContainer: {
-    gap: 12,
-    marginTop: 20,
-  },
-  primaryButton: {
-    width: "100%",
-  },
-  secondaryButton: {
-    width: "100%",
-  },
-  separatorContainer: {
+  divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginBottom: 25,
+    paddingHorizontal : 28
+  },
+  dividerText: {
+    textAlign: 'center',
+    color: '#666',
+    marginHorizontal: 10,
   },
   separatorLine: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.light.border,
+    backgroundColor : Colors.light.border
   },
   separatorText: {
     marginHorizontal: 16,
     fontSize: Typography.sizes.sm,
     color: Colors.light.textMuted,
-    fontWeight: Typography.weights.medium,
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light.background,
-    borderWidth: 2,
-    borderColor: Colors.light.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  googleLogo: {
-    width: 24,
-    height: 24,
-  },
-  googleButtonText: {
-    fontSize: Typography.sizes.base,
-    fontWeight: Typography.weights.medium,
-    color: Colors.light.text,
-  },
-  registerLinkContainer: {
-    alignItems: 'center',
-    marginTop: 24,
-    paddingVertical: 8,
-  },
-  registerLinkText: {
-    fontSize: Typography.sizes.base,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-  },
-  registerLink: {
-    color: Colors.principal.red[500],
-    fontWeight: Typography.weights.semibold,
-  },
-});
+    fontWeight : Typography.weights.medium
+  }
+})

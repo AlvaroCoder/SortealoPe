@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Colors, Typography } from "../../constants/theme";
+import { Colors, Typography } from "../../../constants/theme";
 
 export default function ButtonIcon({
   title = "",

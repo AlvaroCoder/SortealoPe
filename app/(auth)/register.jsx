@@ -3,14 +3,14 @@ import { Image } from "expo-image";
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
-    Animated,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Animated,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
-import Button from "../../components/common/Button";
+import Button from "../../components/common/Buttons/Button";
 import { Colors, Typography } from "../../constants/theme";
 
 const URL_IMAGEN =

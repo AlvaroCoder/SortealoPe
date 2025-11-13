@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import ButtonIcon from '../../components/common/ButtonIcon';
+import ButtonIcon from '../../components/common/Buttons/ButtonIcon';
 import ActionCard from '../../components/common/Card/ActionCard';
 import CardEventMain from '../../components/common/Card/CardEventMain';
 import { Colors, Typography } from '../../constants/theme';

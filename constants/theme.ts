@@ -134,7 +134,7 @@ const PRIMARY_COLORS: PrincipalColors = {
     600: '#B83280',
     700: '#97266D',
     800: '#702459',
-    900: '#521B41',
+    900: '#990D35',
   },
   yellow: {
     50: '#FFFBEB',
