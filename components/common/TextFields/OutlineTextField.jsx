@@ -14,7 +14,8 @@ export default function OutlineTextField({
     maxLength,
     error = "",
     editable = true,
-    returnKeyType="next"
+  returnKeyType = "next",
+    styleContainer=""
 }) {
   const [isFocused, setIsFocused] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -75,7 +76,7 @@ export default function OutlineTextField({
   const shouldShowPasswordToggle = secureTextEntry && value && value.length > 0
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, styleContainer]}>
       <View style={styles.titleContainer}>
         <Text style={[
           styles.title,

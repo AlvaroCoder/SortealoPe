@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ButtonGradiend from '../../components/common/Buttons/ButtonGradiendt';
 import CardEmptyRegisterEvent from '../../components/common/Card/CardEmptyRegisterEvent';
+import Title from '../../components/common/Titles/Title';
 import Title2 from '../../components/common/Titles/Title2';
 import { Colors, Typography } from '../../constants/theme';
 import DataCardEvent from "../../mock/DataCardEvent.json";
@@ -23,6 +24,9 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        <View style={{marginBottom : 20}}>
+          <Title>Bienvenido</Title>
+        </View>
         <View style={styles.eventsSection}>
           <View style={styles.sectionHeader}>
             <Title2>Mis Eventos ({dataCards.length })</Title2>
@@ -39,8 +43,11 @@ export default function HomeScreen() {
           <Title2>Eventos Registrados</Title2>
           <Text>Participa como vendedor en eventos de terceros</Text>
         </View>
-        <CardEmptyRegisterEvent />
+        <View style={{marginHorizontal : 10}}>
+           <CardEmptyRegisterEvent />
+       </View>
         <ButtonGradiend
+          onPress={()=>router.push("/event/create")}
           style={{marginBottom : 40}}
         >
           Crear Evento
@@ -71,16 +78,14 @@ const styles = StyleSheet.create({
   mainBody: {
     flex: 1,
     backgroundColor: Colors.light.background,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: 32,
     paddingBottom: 20,
   },
   eventsSection: {
     marginBottom: 10,
+    marginTop: 10,
   },
   sectionHeader: {
     flexDirection: 'row',

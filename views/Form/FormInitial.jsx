@@ -1,16 +1,18 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import ButtonGradiendt from '../../components/common/Buttons/ButtonGradiendt';
+import Title from '../../components/common/Titles/Title';
 
 export default function FormInitial({
     title = "Registro",
     buttonText = "Registrarse",
     children,
-    onSubmit =()=>{}
+    onSubmit = () => { },
+    textPosition="center"
 }) {
   return (
       <View contentContainerStyle={styles.scrollContainer}>
           <View style={styles.container}>
-              <Text style={styles.title}>{title}</Text>
+              <Title styleTitle={[styles.title, {textAlign : textPosition}]}>{title}</Title>
               
               <View style={styles.formBody}>
                   {children}
@@ -42,11 +44,8 @@ const styles = StyleSheet.create({
         backgroundColor : 'white'
     },
     title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#D52941',
-        marginBottom: 40,
+
+        marginBottom: 10,
     },
     formBody: {
         width: '100%',

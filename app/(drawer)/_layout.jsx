@@ -9,7 +9,7 @@ export default function DrawerLayout() {
         screenOptions={{
           drawerActiveTintColor: Colors.light.primary,
           headerStyle: {
-            backgroundColor: Colors.light.primary,
+            backgroundColor: 'white',
             elevation: 0,
             shadowOpacity: 0,
             shadowColor: "transparent",
@@ -19,7 +19,7 @@ export default function DrawerLayout() {
             },
             shadowRadius: 0
           },
-          headerTintColor: Colors.light.background,
+          headerTintColor: Colors.principal.red[900],
           headerTitleStyle: {
             fontWeight: "bold",
           },
@@ -30,7 +30,7 @@ export default function DrawerLayout() {
           name="index"
           options={{
             drawerLabel: "Inicio",
-            title: "Bienvenido",
+            title: "SORTEALOPE",
             drawerIcon: ({ color, size }) => (
               <Ionicons name="home" size={size} color={color} />
             ),
