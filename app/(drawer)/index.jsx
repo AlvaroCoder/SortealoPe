@@ -1,53 +1,22 @@
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import ButtonIcon from '../../components/common/Buttons/ButtonIcon';
-import ActionCard from '../../components/common/Card/ActionCard';
-import CardEventMain from '../../components/common/Card/CardEventMain';
+import ButtonGradiend from '../../components/common/Buttons/ButtonGradiendt';
+import CardEmptyRegisterEvent from '../../components/common/Card/CardEmptyRegisterEvent';
+import Title2 from '../../components/common/Titles/Title2';
 import { Colors, Typography } from '../../constants/theme';
-
+import DataCardEvent from "../../mock/DataCardEvent.json";
+import CarrouselViewMainCard from '../../views/Sliders/CarrouselViewMainCard';
 export default function HomeScreen() {
   const router = useRouter();
-
-  const handleJoinGroup = () => {
-    console.log('Unirse a grupo');
-  };
-
-  const handleScanQR = () => {
-    console.log('Escanear QR');
-  };
+  const dataCards = DataCardEvent;
 
   const handleViewAllEvents = () => {
     console.log('Ver todos los eventos');
     router.push('/(drawer)/my-events');
   };
 
-  const handleCreateEvent = () => {
-    console.log('Crear evento');
-    router.push('/event/create');
-  };
-
-  const handleStartRaffle = () => {
-    console.log('Comenzar sorteo');
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.quickActions}>
-          <ButtonIcon
-            title="Unirte a un grupo"
-            iconName="people"
-            onPress={handleJoinGroup}
-            variant="primary"
-          />
-          <ButtonIcon
-            title="Escanear QR"
-            iconName="qr-code"
-            onPress={handleScanQR}
-            variant="primary"
-          />
-        </View>
-      </View>
 
       <ScrollView 
         style={styles.mainBody}
@@ -56,34 +25,26 @@ export default function HomeScreen() {
       >
         <View style={styles.eventsSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Mis Eventos</Text>
+            <Title2>Mis Eventos ({dataCards.length })</Title2>
             <TouchableOpacity onPress={handleViewAllEvents}>
               <Text style={styles.viewAllText}>Ver todos</Text>
             </TouchableOpacity>
           </View>
           
-          <CardEventMain/>
-        </View>
-
-        <View style={styles.separatorLine} />
-        <View style={styles.mainActions}>
-          <ActionCard
-            title="Sortear"
-            description="Realiza el sorteo de tus eventos"
-            iconName="trophy"
-            iconColor={Colors.principal.yellow[500]}
-            onPress={handleStartRaffle}
-          />
-          <ActionCard
-            title="Crear Evento"
-            description="Crea un nuevo evento de rifa"
-            iconName="add-circle"
-            iconColor={Colors.principal.red[500]}
-            onPress={handleCreateEvent}
+          <CarrouselViewMainCard
+            data={dataCards}
           />
         </View>
-
-        <View style={styles.bottomSpacer} />
+        <View>
+          <Title2>Eventos Registrados</Title2>
+          <Text>Participa como vendedor en eventos de terceros</Text>
+        </View>
+        <CardEmptyRegisterEvent />
+        <ButtonGradiend
+          style={{marginBottom : 40}}
+        >
+          Crear Evento
+        </ButtonGradiend>
       </ScrollView>
     </View>
   );
@@ -106,10 +67,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     fontFamily: Typography.fonts.display,
   },
-  quickActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
 
   mainBody: {
     flex: 1,
@@ -129,7 +86,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    paddingHorizontal : 13
   },
   sectionTitle: {
     fontSize: Typography.sizes['2xl'],
@@ -142,34 +99,5 @@ const styles = StyleSheet.create({
     fontWeight: Typography.weights.medium,
     color: Colors.principal.red[500],
   },
-  eventsSlider: {
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 250,
-  },
-  noEventsText: {
-    fontSize: Typography.sizes.base,
-    color: Colors.light.textMuted,
-    textAlign: 'center',
-  },
-  mainActions: {
-    minHeight: 200,
-    width: "100%",
-    display: 'flex',
-    flexDirection : 'row',
-    gap: 12,
-  },
 
-  bottomSpacer: {
-    height: 40,
-  },
-  separatorLine: {
-    marginVertical: 20,
-    flex: 1,
-    height: 1,
-    backgroundColor : Colors.light.border
-  }
 });

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../../constants/theme";
+import ButtonGradiend from "../Buttons/ButtonGradiendt";
 import Title from "../Titles/Title";
 
 export default function CardEventMain({
@@ -65,13 +66,6 @@ export default function CardEventMain({
       <View style={styles.divider} />
 
       <View style={styles.bodyContent}>
-        {/**
-         * <Image
-          source={{ uri: urlImagen }}
-          style={styles.image}
-          resizeMode="cover"
-        />
-         */}
         
         <View style={styles.descriptionContainer}>
           <Text style={styles.descriptionTitle}>Descripción</Text>
@@ -80,10 +74,9 @@ export default function CardEventMain({
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.viewEventButton} onPress={onPressEvent}>
-          <Text style={styles.viewEventText}>Ver Evento</Text>
-          <Ionicons name="arrow-forward" size={16} color='white' />
-        </TouchableOpacity>
+        <ButtonGradiend>
+          Ver Evento
+        </ButtonGradiend>
       </View>
     </View>
   );
@@ -91,6 +84,7 @@ export default function CardEventMain({
 
 const styles = StyleSheet.create({
   mainContent: {
+    flexGrow : 1,
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,

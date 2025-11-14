@@ -6,7 +6,9 @@ import { Typography } from '../../../constants/theme';
 
 WebBrowser.maybeCompleteAuthSession();
 
-export default function ButtonLoginGoogle() {
+export default function ButtonLoginGoogle({
+  buttonText="Iniciar sesión con Google"
+}) {
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: '258869415345-muaua0e6vfvd34r6j1b261g7kb01igpq.apps.googleusercontent.com',
     iosClientId: '258869415345-h6ct4c8dsrj15vdm9kr7lktp0f85ks4d.apps.googleusercontent.com',
@@ -56,7 +58,7 @@ export default function ButtonLoginGoogle() {
             }}
             style={styles.icon}
           />
-          <Text style={styles.text}>Iniciar sesión con Google</Text>
+            <Text style={styles.text}>{ buttonText}</Text>
         </View>
       )}
     </Pressable>
