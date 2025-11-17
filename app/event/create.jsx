@@ -1,9 +1,12 @@
+import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import OutlineTextField from '../../components/common/TextFields/OutlineTextField';
 import { Colors } from '../../constants/theme';
 import FormInitial from '../../views/Form/FormInitial';
 
 export default function Create() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -11,8 +14,9 @@ export default function Create() {
       >
         <FormInitial
           title='Nuevo evento'
-          buttonText='Registrar evento'
+          buttonText='Continuar'
           textPosition='left'
+          onSubmit={()=>router.push("/event/uploadImage")}
         >
           <OutlineTextField
             title='Nombre del evento'
@@ -30,12 +34,20 @@ export default function Create() {
               styleContainer={{ flex : 1 }}
             />
             <OutlineTextField
-              title='Cantidad de numeros'
-              placeholder='1 - 100'
+              title='Nro de Talonarios'
+              placeholder='100'
               required={true}
               styleContainer={{ flex : 1}}
             />
           </View>
+
+          <View style={{ height: 16 }} />
+
+          <OutlineTextField
+            title='Tickets por talonario'
+            required={true}
+            placeholder='100'
+          />
 
           <View style={{ height: 16 }} />
 

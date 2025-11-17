@@ -1,6 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { Colors } from '../../../constants/theme'
-
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Colors } from '../../../constants/theme';
 
 export default function CardPriceTicket({
   name = "Plan Básico",

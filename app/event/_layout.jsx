@@ -16,6 +16,12 @@ export default function RootLayout() {
           header : () => <HeaderBackNav title="Pago" />
         }}
       />
+      <Stack.Screen
+        name="uploadImage"
+        options={{
+          header : () => <HeaderBackNav title="Subir Image" />
+        }}
+      />
     </Stack>
   );
 }
