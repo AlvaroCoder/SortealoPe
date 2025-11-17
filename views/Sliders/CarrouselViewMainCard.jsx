@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    FlatList,
-    StyleSheet,
-    View
+  Animated,
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  View
 } from 'react-native';
 import CardEventMain from '../../components/common/Card/CardEventMain';
 
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 15,
     paddingHorizontal: 20,
   },
   dot: {

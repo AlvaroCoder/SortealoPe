@@ -38,7 +38,6 @@ export default function OutlineTextField({
 
   const handleTextChange = (text) => {
     let processedText = text
-    console.log(text);
     
     switch (type) {
       case "number":

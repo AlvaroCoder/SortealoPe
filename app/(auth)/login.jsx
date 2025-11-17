@@ -40,7 +40,7 @@ export default function Login() {
           onSubmit={handleSubmit}
         >
           <OutlineTextField
-            title="Correo electronicor"
+            title="Correo electronico"
             placeholder="Ingresa tu correo electrónico"
             value={formData.email}
             type='email'

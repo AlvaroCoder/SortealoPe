@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../../constants/theme";
-import ButtonGradiend from "../Buttons/ButtonGradiendt";
 import Title from "../Titles/Title";
+import Title2 from "../Titles/Title2";
 
 export default function CardEventMain({
   title = "Sorteo PRO-Fondos COSAI",
@@ -11,14 +11,27 @@ export default function CardEventMain({
   sellers = 10,
   clients = 30,
   status = "Iniciado",
-  urlImagen = "https://res.cloudinary.com/dabyqnijl/image/upload/v1758665799/IMG_0074_xxzakw.png",
+  urlImagen = "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png",
   description = "Descripción breve de los acontecimientos de COSAI SA, teniendo en cuenta que debe ser clara y concisa",
   onPressEvent = () => console.log("Ver evento presionado")
 }) {
   return (
     <View style={styles.mainContent}>
+      <View>
+        <Image
+          style={styles.image}
+          source={{uri : urlImagen}}
+        />
+      </View>
       <View style={styles.headerContent}>
-        <Title style={styles.title}>{title}</Title>
+        <View style={{flexDirection : 'row',gap : 4, alignItems : 'center', width: " 100%"}}>
+          <View style={{flex : 1}}>
+            <Title style={styles.title}>{title}</Title>
+          </View>
+          <View style={{backgroundColor : Colors.principal.yellow[100], borderRadius: 6, paddingHorizontal : 4, paddingVertical : 8}}>
+            <Title2>S/.20</Title2>
+          </View>
+        </View>
         <View style={[styles.statusBadge]}>
           <Text style={styles.statusText}>{status}</Text>
         </View>
@@ -74,9 +87,6 @@ export default function CardEventMain({
           </Text>
         </View>
 
-        <ButtonGradiend>
-          Ver Evento
-        </ButtonGradiend>
       </View>
     </View>
   );

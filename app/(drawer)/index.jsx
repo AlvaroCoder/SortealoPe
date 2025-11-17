@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ButtonGradiend from '../../components/common/Buttons/ButtonGradiendt';
-import CardEmptyRegisterEvent from '../../components/common/Card/CardEmptyRegisterEvent';
 import Title from '../../components/common/Titles/Title';
 import Title2 from '../../components/common/Titles/Title2';
 import { Colors, Typography } from '../../constants/theme';
@@ -24,7 +23,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={{marginBottom : 20}}>
+        <View style={{marginBottom : 5, padding : 10}}>
           <Title>Bienvenido</Title>
         </View>
         <View style={styles.eventsSection}>
@@ -39,19 +38,15 @@ export default function HomeScreen() {
             data={dataCards}
           />
         </View>
-        <View>
-          <Title2>Eventos Registrados</Title2>
-          <Text>Participa como vendedor en eventos de terceros</Text>
+
+        <View style={{padding : 10}}>
+          <ButtonGradiend
+            onPress={()=>router.push("/event/create")}
+            style={{marginBottom : 40}}
+          >
+            Crear Evento
+          </ButtonGradiend>
         </View>
-        <View style={{marginHorizontal : 10}}>
-           <CardEmptyRegisterEvent />
-       </View>
-        <ButtonGradiend
-          onPress={()=>router.push("/event/create")}
-          style={{marginBottom : 40}}
-        >
-          Crear Evento
-        </ButtonGradiend>
       </ScrollView>
     </View>
   );
@@ -84,7 +79,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   eventsSection: {
-    marginBottom: 10,
     marginTop: 10,
   },
   sectionHeader: {
@@ -101,8 +95,8 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     fontSize: Typography.sizes.base,
-    fontWeight: Typography.weights.medium,
-    color: Colors.principal.red[500],
+    color: Colors.principal.red[900],
+    textDecorationLine: 'underline',
   },
 
 });

@@ -1,5 +1,18 @@
 [
     {
+        "id" : 1,
+        "title" : "Sorteo Pro fondos COSAI",
+        "date" : "2024-06-15",
+        "description" : "Sorteo para recaudar fondos para la organización COSAI.",
+        "location" : "Madrid, España",
+        "sellers" : 150,
+        "clients": 200,
+        "price" : 20,
+        "status" : "Iniciado",
+        "urlImage" : ""
+    },
+    {
+        "id" : 2,
         "title" : "Sorteo Pro fondos COSAI",
         "date" : "2024-06-15",
         "description" : "Sorteo para recaudar fondos para la organización COSAI.",
@@ -10,6 +23,7 @@
         "status" : "Iniciado"
     },
     {
+        "id" : 3,
         "title" : "Sorteo Pro fondos COSAI",
         "date" : "2024-06-15",
         "description" : "Sorteo para recaudar fondos para la organización COSAI.",
@@ -20,16 +34,7 @@
         "status" : "Iniciado"
     },
     {
-        "title" : "Sorteo Pro fondos COSAI",
-        "date" : "2024-06-15",
-        "description" : "Sorteo para recaudar fondos para la organización COSAI.",
-        "location" : "Madrid, España",
-        "sellers" : 150,
-        "clients": 200,
-        "price" : 20,
-        "status" : "Iniciado"
-    },
-        {
+        "id" : 4,
         "title" : "Sorteo Pro fondos COSAI",
         "date" : "2024-06-15",
         "description" : "Sorteo para recaudar fondos para la organización COSAI.",
