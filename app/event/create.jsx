@@ -26,14 +26,12 @@ export default function Create() {
             <OutlineTextField
               title='Precio'
               placeholder='ej. S/.50.00'
-              secureTextEntry={true}
               required={true}
               styleContainer={{ flex : 1 }}
             />
             <OutlineTextField
               title='Cantidad de numeros'
               placeholder='1 - 100'
-              secureTextEntry={true}
               required={true}
               styleContainer={{ flex : 1}}
             />

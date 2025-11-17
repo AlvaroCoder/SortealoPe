@@ -10,6 +10,7 @@ export default function CardEventMain({
   location = "Piura",
   sellers = 10,
   clients = 30,
+  price =20,
   status = "Iniciado",
   urlImagen = "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png",
   description = "Descripción breve de los acontecimientos de COSAI SA, teniendo en cuenta que debe ser clara y concisa",
@@ -29,7 +30,7 @@ export default function CardEventMain({
             <Title style={styles.title}>{title}</Title>
           </View>
           <View style={{backgroundColor : Colors.principal.yellow[100], borderRadius: 6, paddingHorizontal : 4, paddingVertical : 8}}>
-            <Title2>S/.20</Title2>
+            <Title2>S/{ price }</Title2>
           </View>
         </View>
         <View style={[styles.statusBadge]}>
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
     flexGrow : 1,
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 16,
+    padding: 10,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

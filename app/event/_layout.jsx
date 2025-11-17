@@ -10,6 +10,12 @@ export default function RootLayout() {
           header : () => <HeaderBackNav title="Registrar Evento" />,
         }}
       />
+      <Stack.Screen
+        name="payment"
+        options={{
+          header : () => <HeaderBackNav title="Pago" />
+        }}
+      />
     </Stack>
   );
 }

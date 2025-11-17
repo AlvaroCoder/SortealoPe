@@ -1,0 +1,35 @@
+[
+    {
+        "id":1,
+        "name" : "Plan Básico",
+        "description" : "Plan de forma básico",
+        "price" : 10,
+        "features": [
+            "Caracteristica 1",
+            "Caracteristica 2",
+            "Caracteristica 3"
+        ]
+    },
+    {
+        "id":2,
+        "name" : "Plan Pro",
+        "description" : "Obten los beneficios pasados y un poco mas",
+        "price" : 10,
+        "features": [
+            "Caracteristica 1",
+            "Caracteristica 2",
+            "Caracteristica 3"
+        ]
+    },
+    {
+        "id":3,
+        "name" : "Plan Premiun",
+        "description" : "Plan de forma premiun que no tienen forma",
+        "price" : 10,
+        "features": [
+            "Caracteristica 1",
+            "Caracteristica 2",
+            "Caracteristica 3"
+        ]
+    }
+]

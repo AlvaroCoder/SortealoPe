@@ -20,6 +20,7 @@ export default function CarrouselViewMainCard({
     location: "Piura",
     sellers: 10,
     clients: 30,
+    price : 20,
     status: "Iniciado",
     urlImagen: "https://res.cloudinary.com/dabyqnijl/image/upload/v1758665799/IMG_0074_xxzakw.png",
     description: "Descripción breve de los acontecimientos de COSAI SA, teniendo en cuenta que debe ser clara y concisa",
@@ -143,7 +144,7 @@ export default function CarrouselViewMainCard({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 20,
+    marginVertical: 10,
   },
   flatListContent: {
     paddingVertical: 10,

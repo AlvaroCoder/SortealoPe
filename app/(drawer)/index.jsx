@@ -41,7 +41,7 @@ export default function HomeScreen() {
 
         <View style={{padding : 10}}>
           <ButtonGradiend
-            onPress={()=>router.push("/event/create")}
+            onPress={()=>router.push("/event/payment")}
             style={{marginBottom : 40}}
           >
             Crear Evento
