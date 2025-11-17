@@ -9,7 +9,7 @@
         "clients": 200,
         "price" : 20,
         "status" : "Iniciado",
-        "urlImage" : ""
+        "urlImagen" : "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png"
     },
     {
         "id" : 2,
@@ -20,7 +20,8 @@
         "sellers" : 150,
         "clients": 200,
         "price" : 20,
-        "status" : "Iniciado"
+        "status" : "Iniciado",
+        "urlImagen" : "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png"
     },
     {
         "id" : 3,
@@ -31,7 +32,8 @@
         "sellers" : 150,
         "clients": 200,
         "price" : 20,
-        "status" : "Iniciado"
+        "status" : "Iniciado",
+        "urlImagen" : "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png"
     },
     {
         "id" : 4,
@@ -42,6 +44,7 @@
         "sellers" : 150,
         "clients": 200,
         "price" : 20,
-        "status" : "Iniciado"
+        "status" : "Iniciado",
+        "urlImagen" : "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png"
     }
 ]
