@@ -1,9 +1,9 @@
 import { Text, View } from 'react-native'
 
-export default function Home() {
+export default function MyEvents() {
   return (
     <View>
-      <Text>Home</Text>
+      <Text>MyEvents</Text>
     </View>
   )
-};
+}

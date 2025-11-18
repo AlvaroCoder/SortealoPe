@@ -1,50 +1,126 @@
 [
     {
-        "id" : 1,
-        "title" : "Sorteo Pro fondos COSAI",
-        "date" : "2024-06-15",
-        "description" : "Sorteo para recaudar fondos para la organización COSAI.",
-        "location" : "Madrid, España",
-        "sellers" : 150,
-        "clients": 200,
-        "price" : 20,
-        "status" : "Iniciado",
-        "urlImagen" : "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png"
+        "id": 1,
+        "title": "Sorteo chips AJOY",
+        "description": "Evento muy interesante y de prueba",
+        "date": "2025-11-02T22:15:00",
+        "place": "Universidad de Piura",
+        "collectionsQuantity": 2,
+        "ticketPrice": 4,
+        "pack": {
+            "id": "1",
+            "name": "default",
+            "price": 0.0,
+            "maximumCapacity": 50
+        },
+        "image": "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png",
+        "host": {
+            "id": 1,
+            "username": "wilL09",
+            "firstName": "User",
+            "lastName": "Prueba",
+            "email": "alvaro@gmail.com",
+            "phone": "123456789",
+            "photo": "url photo",
+            "isActive": null
+        },
+        "category": {
+            "id": 1,
+            "name": "Benéfica"
+        },
+        "collections": [
+            {
+                "id": 1,
+                "seller": {
+                    "id": 1,
+                    "username": "wilL09",
+                    "firstName": "User",
+                    "lastName": "Prueba",
+                    "email": "alvaro@gmail.com",
+                    "phone": "123456789",
+                    "photo": "url photo",
+                    "isActive": null
+                },
+                
+                "ticketsQuantity": 5,
+                "code": "40f591cf-dc28-4f13-b57a-286f2bc289aa",
+                "availableTickets": null,
+                "reservedTickets": null,
+                "soldTickets": null
+            },
+            {
+                "id": 2,
+                "seller": null,
+                
+                "ticketsQuantity": 5,
+                "code": "acca6544-ce03-43cb-9004-06a4fc2ab0d6",
+                "availableTickets": null,
+                "reservedTickets": null,
+                "soldTickets": null
+            }
+        ],
+        "createdAt": "2025-11-16T17:30:27",
+        "updatedAt": "2025-11-16T17:30:27"
     },
     {
-        "id" : 2,
-        "title" : "Sorteo Pro fondos COSAI",
-        "date" : "2024-06-15",
-        "description" : "Sorteo para recaudar fondos para la organización COSAI.",
-        "location" : "Madrid, España",
-        "sellers" : 150,
-        "clients": 200,
-        "price" : 20,
-        "status" : "Iniciado",
-        "urlImagen" : "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png"
-    },
-    {
-        "id" : 3,
-        "title" : "Sorteo Pro fondos COSAI",
-        "date" : "2024-06-15",
-        "description" : "Sorteo para recaudar fondos para la organización COSAI.",
-        "location" : "Madrid, España",
-        "sellers" : 150,
-        "clients": 200,
-        "price" : 20,
-        "status" : "Iniciado",
-        "urlImagen" : "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png"
-    },
-    {
-        "id" : 4,
-        "title" : "Sorteo Pro fondos COSAI",
-        "date" : "2024-06-15",
-        "description" : "Sorteo para recaudar fondos para la organización COSAI.",
-        "location" : "Madrid, España",
-        "sellers" : 150,
-        "clients": 200,
-        "price" : 20,
-        "status" : "Iniciado",
-        "urlImagen" : "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png"
+        "id": 2,
+        "title": "Sorteo pro fondos COSAI",
+        "description": "Evento muy interesante y de prueba",
+        "date": "2025-11-02T22:15:00",
+        "place": "Narnia",
+        "collectionsQuantity": 2,
+        "ticketPrice": 4,
+        "pack": {
+            "id": "1",
+            "name": "default",
+            "price": 0.0,
+            "maximumCapacity": 50
+        },
+        "image": "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png",
+        "host": {
+            "id": 1,
+            "username": "wilL09",
+            "firstName": "User",
+            "lastName": "Prueba",
+            "email": "alvaro@gmail.com",
+            "phone": "123456789",
+            "photo": "url photo",
+            "isActive": null
+        },
+        "category": {
+            "id": 1,
+            "name": "Benéfica"
+        },
+        "collections": [
+            {
+                "id": 3,
+                "seller": {
+                    "id": 1,
+                    "username": "wilL09",
+                    "firstName": "User",
+                    "lastName": "Prueba",
+                    "email": "alvaro@gmail.com",
+                    "phone": "123456789",
+                    "photo": "url photo",
+                    "isActive": null
+                },
+                "ticketsQuantity": 5,
+                "code": "40f591cf-dc28-4f13-b57a-286f2bc289aa",
+                "availableTickets": null,
+                "reservedTickets": null,
+                "soldTickets": null
+            },
+            {
+                "id": 4,
+                "seller": null,
+                "ticketsQuantity": 5,
+                "code": "acca6544-ce03-43cb-9004-06a4fc2ab0d6",
+                "availableTickets": null,
+                "reservedTickets": null,
+                "soldTickets": null
+            }
+        ],
+        "createdAt": "2025-11-16T17:30:27",
+        "updatedAt": "2025-11-16T17:30:27"
     }
 ]

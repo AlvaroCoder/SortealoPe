@@ -17,7 +17,7 @@ export default StyleSheet.create({
     elevation: 5,
   },
   headerContent: {
-    gap: 12,
+    gap : 4
   },
   title: {
     fontSize: 18,
@@ -41,6 +41,7 @@ export default StyleSheet.create({
     flexDirection: "row",
     gap: 24,
     marginTop: 8,
+    marginBottom : 10
   },
   statItem: {
     flexDirection: "row",
@@ -83,7 +84,7 @@ export default StyleSheet.create({
     marginVertical: 16,
   },
   bodyContent: {
-    gap: 16,
+
   },
   image: {
     width: '100%',
@@ -91,7 +92,7 @@ export default StyleSheet.create({
     borderRadius: 8,
   },
   descriptionContainer: {
-    gap: 8,
+
   },
   descriptionTitle: {
     fontSize: 16,

@@ -3,6 +3,7 @@ import { Link } from "expo-router";
 import { Image, Text, View } from "react-native";
 import StyleCardEventMain from "../../../assets/styles/components/StyleCardEventMain";
 import { Colors } from "../../../constants/theme";
+import { useDateFormatter } from "../../../lib/dateFormatter";
 import Title from "../Titles/Title";
 import Title2 from "../Titles/Title2";
 
@@ -11,13 +12,14 @@ export default function CardEventMain({
   title = "Sorteo PRO-Fondos COSAI",
   date = "05 de Noviembre del 2025",
   location = "Piura",
-  sellers = 10,
   clients = 30,
-  price =20,
+  collections=[],
+  ticketPrice =20,
   status = "Iniciado",
   urlImagen = "https://res.cloudinary.com/dabyqnijl/image/upload/v1763347595/Draw_Date_vbaoqm.png",
   description = "Descripción breve de los acontecimientos de COSAI SA, teniendo en cuenta que debe ser clara y concisa",
 }) {
+  const { formatDateToSpanish } = useDateFormatter();
 
   return (
     <View style={styles.mainContent}>
@@ -32,19 +34,16 @@ export default function CardEventMain({
           <View style={{flex : 1}}>
             <Link
               href={{
-                pathname: '/raffle/[idRaffle]',
-                params : {idRaffle : id}
+                pathname: '/event/[idEvent]',
+                params : {idEvent : id}
               }}
             >
               <Title style={styles.title}>{title}</Title>
             </Link>
           </View>
           <View style={{backgroundColor : Colors.principal.yellow[100], borderRadius: 6, paddingHorizontal : 4, paddingVertical : 8}}>
-            <Title2>S/{ price }</Title2>
+            <Title2>S/{ ticketPrice }</Title2>
           </View>
-        </View>
-        <View style={[styles.statusBadge]}>
-          <Text style={styles.statusText}>{status}</Text>
         </View>
         <View style={styles.infoContainer}>
           <View style={styles.infoRow}>
@@ -53,7 +52,7 @@ export default function CardEventMain({
               size={16}
               color={Colors.principal.red[500]}
             />
-            <Text style={styles.infoText}>{date}</Text>
+            <Text style={styles.infoText}>{formatDateToSpanish(date)}</Text>
           </View>
           <View style={styles.infoRow}>
             <Ionicons
@@ -71,7 +70,7 @@ export default function CardEventMain({
               <Ionicons name="person-add" size={18} color={Colors.principal.red[500]} />
             </View>
             <View>
-              <Text style={styles.statNumber}>{sellers}</Text>
+              <Text style={styles.statNumber}>{collections?.filter((coll)=>coll?.seller !== null).length}</Text>
               <Text style={styles.statLabel}>Vendedores</Text>
             </View>
           </View>
@@ -86,8 +85,6 @@ export default function CardEventMain({
           </View>
         </View>
       </View>
-
-      <View style={styles.divider} />
 
       <View style={styles.bodyContent}>
         

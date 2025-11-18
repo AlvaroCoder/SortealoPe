@@ -22,6 +22,12 @@ export default function RootLayout() {
           header : () => <HeaderBackNav title="Subir Image" />
         }}
       />
+      <Stack.Screen
+        name="[idEvent]/index"
+        options={{
+          header : () => <HeaderBackNav title="Evento" />
+        }}
+      />
     </Stack>
   );
 }

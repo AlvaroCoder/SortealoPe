@@ -66,7 +66,7 @@ export default function CardPriceTicket({
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 2,
+    borderWidth : 0.5,
     borderRadius: 12,
     padding: 16,
     marginVertical: 8,
@@ -79,9 +79,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    backgroundColor : 'white'
   },
   containerNormal: {
-    borderColor: Colors.principal.red[100],
+    
     backgroundColor: '#FFFFFF',
   },
   containerSelected: {
@@ -166,17 +167,6 @@ const styles = StyleSheet.create({
   },
   featureTextSelected: {
     color: Colors.principal.red[900],
-  },
-  selectionIndicator: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   selectionIndicatorNormal: {
     borderColor: Colors.principal.red[100],

@@ -1,0 +1,102 @@
+[
+    {
+        "id": 1,
+        "serialNumber": 1,
+        "status": {
+            "id": 3,
+            "name": "pagado"
+        },
+        "buyer": {
+            "id": 1,
+            "username": "wilL09",
+            "firstName": "User",
+            "lastName": "Prueba",
+            "email": "alvaro@gmail.com",
+            "phone": "123456789",
+            "photo": "url photo",
+            "isActive": null
+        },
+        "code": "20c6fdd3-7500-4f27-b1ce-6cc4dc38b327",
+        "createdAt": "2025-11-16T17:30:27",
+        "purchasedAt": "2025-11-16T17:37:59",
+        "paymentModality": null,
+        "operationNumber": "123456"
+    },
+    {
+        "id": 2,
+        "serialNumber": 2,
+        "status": {
+            "id": 3,
+            "name": "pagado"
+        },
+        "buyer": {
+            "id": 1,
+            "username": "wilL09",
+            "firstName": "User",
+            "lastName": "Prueba",
+            "email": "alvaro@gmail.com",
+            "phone": "123456789",
+            "photo": "url photo",
+            "isActive": null
+        },
+        "code": "f6b36514-62e7-4cdf-8f2f-c92652e013cf",
+        "createdAt": "2025-11-16T17:30:27",
+        "purchasedAt": "2025-11-16T17:40:31",
+        "paymentModality": null,
+        "operationNumber": "654321"
+    },
+    {
+        "id": 3,
+        "serialNumber": 3,
+        "status": {
+            "id": 3,
+            "name": "pagado"
+        },
+        "buyer": {
+            "id": 1,
+            "username": "wilL09",
+            "firstName": "User",
+            "lastName": "Prueba",
+            "email": "alvaro@gmail.com",
+            "phone": "123456789",
+            "photo": "url photo",
+            "isActive": null
+        },
+        "code": "7b9c3613-78c7-4407-bd9d-1d33c69955c6",
+        "createdAt": "2025-11-16T17:30:27",
+        "purchasedAt": "2025-11-16T17:45:29",
+        "paymentModality": {
+            "id": 1,
+            "name": "yape"
+        },
+        "operationNumber": "654321"
+    },
+    {
+        "id": 4,
+        "serialNumber": 4,
+        "status": {
+            "id": 1,
+            "name": "disponible"
+        },
+        "buyer": null,
+        "code": "6ccb6bea-ce34-43be-a9aa-1e999d8efb18",
+        "createdAt": "2025-11-16T17:30:27",
+        "purchasedAt": null,
+        "paymentModality": null,
+        "operationNumber": null
+    },
+    {
+        "id": 5,
+        "serialNumber": 5,
+        "status": {
+            "id": 1,
+            "name": "disponible"
+        },
+        "buyer": null,
+        "code": "5cb6a29c-ac00-4fec-968c-c35c0abca921",
+        "createdAt": "2025-11-16T17:30:27",
+        "purchasedAt": null,
+        "paymentModality": null,
+        "operationNumber": null
+    }
+]
