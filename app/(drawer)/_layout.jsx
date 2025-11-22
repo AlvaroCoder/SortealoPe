@@ -1,295 +1,132 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Drawer } from "expo-router/drawer";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Colors } from "../../constants/theme";
+// 🟢 Importamos el Contexto y los componentes de Drawer
+import DrawerInvitadoContent from "../../components/drawer/DrawerInvitado";
+import DrawerUsuarioContent from "../../components/drawer/DrawerUsuario";
+import DrawerVendedorContent from "../../components/drawer/DrawerVendedor";
+import { USER_ROLES, useRaffleContext } from "../../context/RaffleContext";
 
-// Componente personalizado para el Header del Drawer
-function CustomDrawerContent(props) {
-  const { navigation } = props;
+// --- CONSTANTES DE COLOR ---
+const GREEN_900 = Colors.principal.green[900]; 
+const RED_900 = Colors.principal.red[900]; 
+const WHITE = '#FFFFFF';
+// ---------------------------
 
-  return (
-    <View style={styles.drawerContainer}>
-      {/* Logo y nombre de la app */}
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>🎯</Text>
-          </View>
-        </View>
-        <Text style={styles.appName}>SORTEALOPE</Text>
-        <Text style={styles.appTagline}>Tus sorteos favoritos</Text>
-      </View>
-
-      {/* Sección de navegación */}
-      <View style={styles.navigationSection}>
-        <Text style={styles.sectionTitle}>NAVEGACIÓN</Text>
-        
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("index")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="home" size={22} color={Colors.principal.red[500]} />
-          </View>
-          <Text style={styles.navLabel}>Inicio</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("my-events")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="calendar" size={22} color={Colors.principal.red[500]} />
-          </View>
-          <Text style={styles.navLabel}>Mis eventos</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("my-tickets")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="ticket" size={22} color={Colors.principal.red[500]} />
-          </View>
-          <Text style={styles.navLabel}>Mis tickets</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Perfil de usuario */}
-      <View style={styles.profileSection}>
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => navigation.navigate("profile")}
-        >
-          <View style={styles.profileAvatar}>
-            <Ionicons name="person" size={20} color={Colors.white} />
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Juan Pérez</Text>
-            <Text style={styles.profileEmail}>juan@example.com</Text>
-          </View>
-          <Ionicons 
-            name="chevron-forward" 
-            size={18} 
-            color={Colors.principal.red[900]} 
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
+const getDrawerContent = (role, props) => {
+  switch (role) {
+    case USER_ROLES.GUEST:
+      return <DrawerInvitadoContent {...props} />;
+    case USER_ROLES.BUYER:
+      return <DrawerVendedorContent {...props} />; 
+    case USER_ROLES.SELLER:
+      return <DrawerUsuarioContent {...props} />;
+    default:
+      return <DrawerInvitadoContent {...props} />;
+  }
+};
 
 export default function DrawerLayout() {
+  const { userRole } = useRaffleContext();
+  
+  const isGuest = userRole === USER_ROLES.GUEST;
+  const isBuyer = userRole === USER_ROLES.BUYER;
+  const isSeller = userRole === USER_ROLES.SELLER;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
+        drawerContent={(props) => getDrawerContent(userRole, props)}
         screenOptions={{
-          drawerActiveTintColor: Colors.principal.red[900],
-          drawerInactiveTintColor: Colors.principal.red[800],
+          drawerActiveTintColor: GREEN_900,
+          drawerInactiveTintColor: RED_900,
           drawerLabelStyle: {
             fontSize: 16,
             fontWeight: '500',
             marginLeft: -16,
           },
           headerStyle: {
-            backgroundColor: Colors.white,
+            backgroundColor: WHITE,
             elevation: 0,
             shadowOpacity: 0,
             shadowColor: "transparent",
-            shadowOffset: {
-              height: 0,
-              width: 0,
-            },
+            shadowOffset: { height: 0, width: 0 },
             shadowRadius: 0,
           },
-          headerTintColor: Colors.principal.red[900],
+          headerTintColor: GREEN_900, 
           headerTitleStyle: {
             fontWeight: "700",
             fontSize: 18,
           },
           headerShadowVisible: false,
           drawerStyle: {
-            backgroundColor: Colors.white,
+            backgroundColor: WHITE,
             width: 280,
           },
+          drawerItemStyle: { display: 'none' }
         }}
       >
+        {isSeller && (
+          <Drawer.Screen
+            name="monitor/eventos"
+            options={{ drawerLabel: "Eventos Creados", title: "Gestión de Eventos" }}
+          />
+        )}
+        {isSeller && (
+          <Drawer.Screen
+            name="monitor/colecciones"
+            options={{ drawerLabel: "Colecciones y Tickets", title: "Inventario Global" }}
+          />
+        )}
+        {isSeller && (
+          <Drawer.Screen
+            name="monitor/vendedores"
+            options={{ drawerLabel: "Gestión de Vendedores", title: "Equipos de Venta" }}
+          />
+        )}
+        
+        {(isBuyer || isSeller) && (
+          <Drawer.Screen
+            name="vendedor/inventario"
+            options={{ drawerLabel: "Mis Tickets para Vender", title: "Inventario Asignado" }}
+          />
+        )}
+        {(isBuyer || isSeller) && (
+          <Drawer.Screen
+            name="vendedor/crear-evento"
+            options={{ drawerLabel: "Crear Evento / Colección", title: "Creación" }}
+          />
+        )}
+        {(isBuyer || isSeller) && (
+          <Drawer.Screen
+            name="comprador/mis-tickets"
+            options={{ drawerLabel: "Mis Tickets Comprados", title: "Mis Compras" }}
+          />
+        )}
+
+        {/* ======================================================= */}
+        {/* RUTAS COMUNES (TODOS LOS ROLES)               */}
+        {/* ======================================================= */}
+
         <Drawer.Screen
           name="index"
           options={{
-            drawerLabel: "Inicio",
-            title: "Inicio",
+            drawerLabel: "Buscar Eventos",
+            title: "Rifas Disponibles",
             drawerIcon: ({ color, size }) => (
-              <Ionicons name="home" size={size} color={color} />
-            ),
-          }}
-        />
-        
-        <Drawer.Screen
-          name="my-events"
-          options={{
-            drawerLabel: "Mis eventos",
-            title: "Mis Eventos",
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="calendar" size={size} color={color} />
-            ),
-          }}
-        />
-        
-        <Drawer.Screen
-          name="my-tickets"
-          options={{
-            drawerLabel: "Mis tickets",
-            title: "Mis Tickets",
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="ticket" size={size} color={color} />
+              <Ionicons name="search-outline" size={size} color={Colors.principal.green[500]} />
             ),
           }}
         />
         
         <Drawer.Screen
           name="profile"
-          options={{
-            drawerLabel: "Mi perfil",
-            title: "Mi Perfil",
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="person" size={size} color={color} />
-            ),
-            drawerItemStyle: { display: 'none' } // Ocultar del drawer estándar
-          }}
+          options={{ drawerLabel: "Mi perfil", title: "Mi Perfil" }}
         />
+        
       </Drawer>
     </GestureHandlerRootView>
   );
 }
 
-const styles = StyleSheet.create({
-  drawerContainer: {
-    flex: 1,
-    backgroundColor: Colors.white,
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 30,
-    backgroundColor: Colors.principal.yellow[50],
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.principal.red[100],
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    backgroundColor: Colors.principal.yellow[100],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    borderWidth: 3,
-    borderColor: Colors.principal.red[100],
-  },
-  logoText: {
-    fontSize: 32,
-  },
-  appName: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.principal.red[900],
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  appTagline: {
-    fontSize: 14,
-    color: Colors.principal.yellow[100],
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  navigationSection: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.principal.red[900],
-    marginBottom: 16,
-    marginLeft: 16,
-    letterSpacing: 1,
-  },
-  navItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 4,
-  },
-  navIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: Colors.principal.red[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  navLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.principal.red[500],
-  },
-  profileSection: {
-    marginTop: 'auto',
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: Colors.principal.red[100],
-    backgroundColor: 'white',
-  },
-  profileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: 'white',
-    shadowColor: Colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  profileAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.principal.red[500],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.principal.red[900],
-    marginBottom: 2,
-  },
-  profileEmail: {
-    fontSize: 12,
-    color: Colors.principal.red[500],
-  },
-});

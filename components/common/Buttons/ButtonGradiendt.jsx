@@ -9,8 +9,9 @@ export default function ButtonGradiend({
 }) {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.container, style]}>
+      {/* 🟢 Cambiando los colores del gradiente a la nueva paleta 'green' */}
       <LinearGradient
-        colors={[Colors.principal.red[500], Colors.principal.yellow[300]]}
+        colors={[Colors.principal.green[500], Colors.principal.green[700]]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.gradient}

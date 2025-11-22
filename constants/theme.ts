@@ -87,6 +87,7 @@ interface FontFamilies {
 interface PrincipalColors {
   red: ColorScale;
   yellow: ColorScale;
+  green: ColorScale; 
   neutral: ColorScale;
 }
 
@@ -148,6 +149,19 @@ const PRIMARY_COLORS: PrincipalColors = {
     800: '#92400E',
     900: '#78350F',
   },
+  // 🟢 Nueva escala de color 'green' incluyendo los colores solicitados
+  green: {
+    50: '#F0FFF4',
+    100: '#C6F6D5',
+    200: '#9AE6B4',
+    300: '#68D391',
+    400: '#48BB78',
+    500: '#16CD91', // Color solicitado
+    600: '#069F78',
+    700: '#038B5E', // Color solicitado
+    800: '#00624C',
+    900: '#004739',
+  },
   neutral: {
     50: '#F8FAFC',
     100: '#F1F5F9',
@@ -180,7 +194,7 @@ const COLOR_TOKENS: { light: ColorTokens; dark: ColorTokens } = {
     border: PRIMARY_COLORS.neutral[200],
     borderFocus: PRIMARY_COLORS.red[500],
 
-    success: '#10B981',
+    success: PRIMARY_COLORS.green[500], // 🟢 Usando el nuevo color #16CD91
     warning: '#F59E0B',
     error: '#EF4444',
     info: '#3B82F6',
@@ -206,7 +220,7 @@ const COLOR_TOKENS: { light: ColorTokens; dark: ColorTokens } = {
     border: PRIMARY_COLORS.neutral[700],
     borderFocus: PRIMARY_COLORS.red[400],
 
-    success: '#34D399',
+    success: PRIMARY_COLORS.green[400], // 🟢 Usando un tono de verde adecuado para fondo oscuro (e.g., #48BB78)
     warning: '#FBBF24',
     error: '#F87171',
     info: '#60A5FA',
@@ -284,6 +298,7 @@ export const Colors: ColorsStructure = {
   principal: {
     red: PRIMARY_COLORS.red,
     yellow: PRIMARY_COLORS.yellow,
+    green: PRIMARY_COLORS.green, // 🟢 Añadido 'green'
     neutral: PRIMARY_COLORS.neutral,
   },
   raffle: RAFFLE_COLORS
