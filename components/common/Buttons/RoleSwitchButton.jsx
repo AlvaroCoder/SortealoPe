@@ -1,82 +1,70 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
-import { USER_ROLES } from '../../../context/RaffleContext';
+// Importamos USER_ROLES, aunque no se usa directamente en la lógica,
+// es útil para referencia en la aplicación.
 
-const GREEN_500 = Colors.principal.green[500]; 
-const RED_500 = Colors.principal.red[500];
-const WHITE = '#FFFFFF';
-const BLACK = '#000000'; 
-// 
+// --- CONSTANTES DE COLOR ---
+const GREEN_900 = Colors.principal.green[900]; // Borde Activo / Texto
+const GREEN_100 = Colors.principal.green[100]; // Fondo Activo
+const WHITE = '#FFFFFF'; // Color principal para texto e ícono (Inactivo)
+// ---------------------------
 
 export default function RoleSwitchButton({
-    currentRole,
-    updateRole
+    targetRole, 
+    currentRole, 
+    updateRole, 
+    label, 
+    icon
 }) {
-    
-    const isGuest = currentRole === USER_ROLES.GUEST;
-    
-    let targetRole;
-    let buttonLabel;
-
-    if (isGuest) {
-        targetRole = USER_ROLES.BUYER;
-        buttonLabel = "Iniciar Sesión / Registrarse";
-    } else if (currentRole === USER_ROLES.BUYER) {
-        targetRole = USER_ROLES.SELLER;
-        buttonLabel = "Cambiar a Vendedor (Mock)";
-    } else if (currentRole === USER_ROLES.SELLER) {
-        targetRole = USER_ROLES.BUYER;
-        buttonLabel = "Cambiar a Comprador (Mock)";
-    } else {
-        targetRole = USER_ROLES.GUEST;
-        buttonLabel = "Cerrar Sesión";
+    // Si el rol actual es el target (ACTIVO)
+    if (currentRole === targetRole) {
+        return (
+            <View style={[styles.baseButton, styles.activeRoleButton]}>
+                <Ionicons name="checkmark-circle-outline" size={24} color={GREEN_900} />
+                {/* El texto activo es de color GREEN_900 para contraste con el fondo claro GREEN_100 */}
+                <Text style={[styles.roleSwitchText, { color: GREEN_900, marginTop: 4 }]}>{label} (Actual)</Text>
+            </View>
+        );
     }
 
-    const buttonStyle = [
-      styles.roleSwitchButton, 
-      isGuest ? styles.authButton : styles.logoutButton
-    ];
-
-  return (
-    <TouchableOpacity 
-      style={buttonStyle} 
-      onPress={() => updateRole(targetRole)}
-    >
-      <Ionicons 
-        name={isGuest ? "log-in-outline" : "log-out-outline"} 
-        size={20} 
-        color={WHITE} 
-      />
-      <Text style={styles.roleSwitchText}>{buttonLabel}</Text>
-    </TouchableOpacity>
-  )
+    // Si el rol es diferente (INACTIVO)
+    return (
+        <TouchableOpacity 
+            style={[styles.baseButton, styles.inactiveRoleButton]} 
+            onPress={() => updateRole(targetRole)}
+        >
+            <Ionicons name={icon} size={24} color={WHITE} />
+            {/* El texto inactivo es blanco para contraste con el fondo transparente */}
+            <Text style={[styles.roleSwitchText, { color: WHITE, marginTop: 4 }]}>{label}</Text>
+        </TouchableOpacity>
+    );
 };
 
 const styles = StyleSheet.create({
-  roleSwitchButton: {
-    flexDirection: 'row',
+  baseButton: {
+    // 🟢 Estilo Vertical
+    flexDirection: 'column', 
     alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
     padding: 12,
-    marginTop: 10,
-    shadowColor: BLACK,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 4,
+    borderRadius: 8,
+    marginTop: 5,
+    // Eliminamos la sombra para permitir la transparencia
   },
-  authButton: {
-    backgroundColor: GREEN_500, 
+  inactiveRoleButton: {
+    // 🟢 Fondo Transparente
+    backgroundColor: 'transparent', 
   },
-  logoutButton: {
-    backgroundColor: RED_500, 
+  activeRoleButton: {
+    // Estilo para el rol que SÍ está activo (sutil resaltado)
+    backgroundColor: GREEN_100,
+    borderWidth: 1,
+    borderColor: GREEN_900,
   },
   roleSwitchText: {
-    color: WHITE,
-    fontSize: 14,
+    fontSize: 12, // Tamaño más pequeño para formato vertical
     fontWeight: 'bold',
-    marginLeft: 8,
+    marginLeft: 0, // Centrado
+    textAlign: 'center',
   }
-})
+});

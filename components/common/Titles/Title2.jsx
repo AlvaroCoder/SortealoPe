@@ -2,10 +2,11 @@ import { StyleSheet, Text } from 'react-native'
 import { Typography } from '../../../constants/theme'
 
 export default function Title2({
-    children
+    children,
+    styleTitle={}
 }) {
   return (
-      <Text style={[styles.title]}>{ children  }</Text>
+      <Text style={[styles.title, styleTitle]}>{ children  }</Text>
   )
 };
 

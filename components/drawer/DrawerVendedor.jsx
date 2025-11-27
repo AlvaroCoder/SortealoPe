@@ -1,19 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { Colors } from "../../constants/theme";
 import { useRaffleContext } from "../../context/RaffleContext";
-import RoleSwitchButton from "../common/Buttons/RoleSwitchButton";
-
-
 
 const GREEN_500 = Colors.principal.green[500]; 
 const GREEN_900 = Colors.principal.green[900]; 
-const RED_500 = Colors.principal.red[500];
 const WHITE = '#FFFFFF';
 const RED_900 = Colors.principal.red[900]; 
 const GREEN_50 = Colors.principal.green[50]; 
@@ -23,7 +19,10 @@ const BLACK = '#000000';
 
 export default function DrawerVendedorContent(props) {
   const { navigation } = props;
-  const { userRole, updateRole, canViewSales, canViewPurchasedTickets, canCreateEvent } = useRaffleContext();
+  const { canViewSales, canViewPurchasedTickets, canCreateEvent } = useRaffleContext();
+
+  const userName = "Vendedor/Monitor";
+  const userEmail = "vendedor@example.com";
 
   return (
     <View style={styles.drawerContainer}>
@@ -100,9 +99,9 @@ export default function DrawerVendedorContent(props) {
             <Ionicons name="business" size={20} color={WHITE} /> 
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{userRole}</Text>
+            <Text style={styles.profileName}>{userName}</Text>
             <View>
-              <Text style={styles.profileEmail}>vendedor@example.com</Text>
+              <Text style={styles.profileEmail}>{userEmail}</Text>
             </View>
           </View>
           <Ionicons 
@@ -111,8 +110,6 @@ export default function DrawerVendedorContent(props) {
             color={GREEN_900} 
           />
         </TouchableOpacity>
-        
-        <RoleSwitchButton currentRole={userRole} updateRole={updateRole} />
       </View>
     </View>
   );
@@ -242,25 +239,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: GREEN_500, 
   },
+  roleSwitchTitle: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: NEUTRAL_700,
+      marginTop: 10,
+      marginBottom: 5,
+  },
   roleSwitchButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: RED_500,
-    borderRadius: 12,
     padding: 12,
-    marginTop: 10,
+    borderRadius: 8,
+    backgroundColor: GREEN_500,
+    marginTop: 5,
     shadowColor: BLACK,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 4,
   },
+  activeRoleButton: {
+      backgroundColor: Colors.principal.green[100],
+      borderWidth: 1,
+      borderColor: GREEN_900,
+      elevation: 0,
+  },
   roleSwitchText: {
     color: WHITE,
     fontSize: 14,
     fontWeight: 'bold',
-    marginLeft: 8,
+    marginLeft: 10,
   },
   divider: {
     height: 1,

@@ -1,9 +1,9 @@
 import { createContext, useContext, useState } from 'react';
 
 export const USER_ROLES = {
-  GUEST: 'Usuario',      
   BUYER: 'Comprador',   
   SELLER: 'Vendedor',   
+  ADMIN: 'Administrador', 
 };
 
 const RaffleContext = createContext();
@@ -17,7 +17,7 @@ export const useRaffleContext = () => {
 };
 
 export const RaffleProvider = ({ children }) => {
-  const [userRole, setUserRole] = useState(USER_ROLES.GUEST);
+  const [userRole, setUserRole] = useState(USER_ROLES.ADMIN); 
   const [userId, setUserId] = useState(null);
 
   const updateRole = (newRole, id) => {
@@ -30,23 +30,27 @@ export const RaffleProvider = ({ children }) => {
     }
   };
 
-  const canCreateEvent = userRole === USER_ROLES.SELLER;
+  const isBuyer = userRole === USER_ROLES.BUYER;
+  const isSeller = userRole === USER_ROLES.SELLER;
+  const isAdmin = userRole === USER_ROLES.ADMIN;
 
-  const canBuyTickets = userRole === USER_ROLES.BUYER || userRole === USER_ROLES.SELLER;
+  const canMonitorApp = isAdmin; 
 
-  const canViewSales = userRole === USER_ROLES.SELLER;
-
-  const canViewPurchasedTickets = userRole === USER_ROLES.BUYER || userRole === USER_ROLES.SELLER;
+  const canCreateEvent = isAdmin || isSeller; 
+  const canViewSales = isAdmin || isSeller; 
+  const canBuyTickets = isAdmin || isSeller || isBuyer; 
+  const canViewPurchasedTickets = isAdmin || isSeller || isBuyer;
 
   const value = {
     userRole,
     userId,
     updateRole,
     
-    isGuest: userRole === USER_ROLES.GUEST,
-    isBuyer: userRole === USER_ROLES.BUYER,
-    isSeller: userRole === USER_ROLES.SELLER,
-
+    isBuyer,
+    isSeller,
+    isAdmin, 
+    
+    canMonitorApp, 
     canCreateEvent,
     canBuyTickets,
     canViewSales,

@@ -1,9 +1,10 @@
 import { Text, View } from 'react-native'
 
-export default function Home() {
+export default function Inventario() {
   return (
     <View>
-      <Text>Home</Text>
+      <Text>Inventario</Text>
     </View>
   )
 };
+

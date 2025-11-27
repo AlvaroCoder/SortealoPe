@@ -1,36 +1,61 @@
-import { Ionicons } from "@expo/vector-icons";
 import { Drawer } from "expo-router/drawer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Colors } from "../../constants/theme";
-// 🟢 Importamos el Contexto y los componentes de Drawer
-import DrawerInvitadoContent from "../../components/drawer/DrawerInvitado";
-import DrawerUsuarioContent from "../../components/drawer/DrawerUsuario";
+import DrawerAdministradorContent from "../../components/drawer/DrawerAdministrador";
+import DrawerCompradorContent from "../../components/drawer/DrawerComprador";
 import DrawerVendedorContent from "../../components/drawer/DrawerVendedor";
+import { Colors } from "../../constants/theme";
 import { USER_ROLES, useRaffleContext } from "../../context/RaffleContext";
 
-// --- CONSTANTES DE COLOR ---
+
 const GREEN_900 = Colors.principal.green[900]; 
 const RED_900 = Colors.principal.red[900]; 
 const WHITE = '#FFFFFF';
-// ---------------------------
 
 const getDrawerContent = (role, props) => {
   switch (role) {
-    case USER_ROLES.GUEST:
-      return <DrawerInvitadoContent {...props} />;
-    case USER_ROLES.BUYER:
-      return <DrawerVendedorContent {...props} />; 
+    case USER_ROLES.ADMIN:
+      return <DrawerAdministradorContent {...props} />; 
     case USER_ROLES.SELLER:
-      return <DrawerUsuarioContent {...props} />;
+      return <DrawerVendedorContent {...props} />;
+    case USER_ROLES.BUYER:
+      return <DrawerCompradorContent {...props} />; 
     default:
-      return <DrawerInvitadoContent {...props} />;
+      return <DrawerCompradorContent {...props} />;
   }
+};
+
+const getConditionalScreens = (isSeller, isBuyer, isAdmin) => {
+  const screens = [];
+
+  if (isAdmin) {
+    screens.push(
+      <Drawer.Screen key="monitor/eventos" name="monitor/eventos" options={{ drawerLabel: "Eventos Creados", title: "Gestión de Eventos" }} />,
+      <Drawer.Screen key="monitor/colecciones" name="monitor/colecciones" options={{ drawerLabel: "Colecciones y Tickets", title: "Inventario Global" }} />,
+      <Drawer.Screen key="monitor/vendedores" name="monitor/vendedores" options={{ drawerLabel: "Gestión de Vendedores", title: "Equipos de Venta" }} />
+    );
+  }
+
+  
+  if (isAdmin || isSeller) {
+    screens.push(
+      <Drawer.Screen key="vendedor/crear-evento" name="vendedor/crear-evento" options={{ drawerLabel: "Crear Evento / Colección", title: "Creación" }} />
+    );
+  }
+
+  if (isAdmin || isSeller || isBuyer) {
+      screens.push(
+        <Drawer.Screen key="comprador/mis-tickets" name="comprador/mis-tickets" options={{ drawerLabel: "Mis Tickets Comprados", title: "Mis Compras" }} />
+      );
+  }
+
+  return screens;
 };
 
 export default function DrawerLayout() {
   const { userRole } = useRaffleContext();
+  console.log(userRole);
   
-  const isGuest = userRole === USER_ROLES.GUEST;
+  const isAdmin = userRole === USER_ROLES.ADMIN;
   const isBuyer = userRole === USER_ROLES.BUYER;
   const isSeller = userRole === USER_ROLES.SELLER;
 
@@ -47,86 +72,47 @@ export default function DrawerLayout() {
             marginLeft: -16,
           },
           headerStyle: {
-            backgroundColor: WHITE,
+            backgroundColor: GREEN_900,
             elevation: 0,
             shadowOpacity: 0,
             shadowColor: "transparent",
             shadowOffset: { height: 0, width: 0 },
             shadowRadius: 0,
+            
           },
-          headerTintColor: GREEN_900, 
+          headerTintColor: WHITE, 
           headerTitleStyle: {
             fontWeight: "700",
             fontSize: 18,
+            color: WHITE, 
           },
           headerShadowVisible: false,
           drawerStyle: {
             backgroundColor: WHITE,
             width: 280,
           },
-          drawerItemStyle: { display: 'none' }
+          drawerItemStyle: { display: 'none' } 
         }}
       >
-        {isSeller && (
-          <Drawer.Screen
-            name="monitor/eventos"
-            options={{ drawerLabel: "Eventos Creados", title: "Gestión de Eventos" }}
-          />
-        )}
-        {isSeller && (
-          <Drawer.Screen
-            name="monitor/colecciones"
-            options={{ drawerLabel: "Colecciones y Tickets", title: "Inventario Global" }}
-          />
-        )}
-        {isSeller && (
-          <Drawer.Screen
-            name="monitor/vendedores"
-            options={{ drawerLabel: "Gestión de Vendedores", title: "Equipos de Venta" }}
-          />
-        )}
-        
-        {(isBuyer || isSeller) && (
-          <Drawer.Screen
-            name="vendedor/inventario"
-            options={{ drawerLabel: "Mis Tickets para Vender", title: "Inventario Asignado" }}
-          />
-        )}
-        {(isBuyer || isSeller) && (
-          <Drawer.Screen
-            name="vendedor/crear-evento"
-            options={{ drawerLabel: "Crear Evento / Colección", title: "Creación" }}
-          />
-        )}
-        {(isBuyer || isSeller) && (
-          <Drawer.Screen
-            name="comprador/mis-tickets"
-            options={{ drawerLabel: "Mis Tickets Comprados", title: "Mis Compras" }}
-          />
-        )}
-
-        {/* ======================================================= */}
-        {/* RUTAS COMUNES (TODOS LOS ROLES)               */}
-        {/* ======================================================= */}
-
-        <Drawer.Screen
-          name="index"
-          options={{
-            drawerLabel: "Buscar Eventos",
-            title: "Rifas Disponibles",
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="search-outline" size={size} color={Colors.principal.green[500]} />
-            ),
-          }}
+        <Drawer.Screen 
+          name="(tabs)" 
+          options={{ 
+            title: 'Inicio Principal'
+          }} 
         />
         
-        <Drawer.Screen
-          name="profile"
-          options={{ drawerLabel: "Mi perfil", title: "Mi Perfil" }}
+        {getConditionalScreens(isSeller, isBuyer, isAdmin)}
+        
+        <Drawer.Screen 
+          name="index" 
+          options={{ title: "Buscar Eventos" }} 
+        />
+        <Drawer.Screen 
+          name="profile" 
+          options={{ title: "Mi Perfil" }} 
         />
         
       </Drawer>
     </GestureHandlerRootView>
   );
 }
-
