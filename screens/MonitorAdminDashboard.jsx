@@ -3,8 +3,8 @@ import MetricCard from "../components/common/Card/MetricCard";
 import { Colors, Typography } from "../constants/theme";
 import DataCardEvent from "../mock/DataCardEvent.json";
 import RolSwitchBar from "../views/Bars/RolSwitchBar";
+import TimelinePrincipalEvents from "../views/Monitor/TimelinePrincipalEvents";
 import CarrouselViewMainCard from "../views/Sliders/CarrouselViewMainCard";
-import VendorListItem from "../views/Sliders/VendorListItem";
 
 const GREEN_900 = Colors.principal.green[900];
 const NEUTRAL_200 = Colors.principal.neutral[200];
@@ -17,14 +17,7 @@ const kpiData = [
     label: "Compradores Totales",
     value: "1,200",
     icon: "person-circle-outline",
-  },
-  { label: "Recaudación Total", value: "S/ 58,450", icon: "wallet-outline" },
-];
-
-const mockVendorData = [
-  { id: 1, name: "Ana Torres", sales: 1200, icon: "woman-outline" },
-  { id: 2, name: "Carlos Ruiz", sales: 980, icon: "man-outline" },
-  { id: 3, name: "María López", sales: 1550, icon: "person-outline" },
+  }
 ];
 
 export default function MonitorAdminDashboard({ userRole, updateRole }) {
@@ -39,6 +32,13 @@ export default function MonitorAdminDashboard({ userRole, updateRole }) {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Eventos Creados</Text>
+          <CarrouselViewMainCard data={mockEventData} />
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Métricas del Sistema</Text>
           <View style={styles.metricGrid}>
             {kpiData.map((kpi, index) => (
@@ -49,20 +49,9 @@ export default function MonitorAdminDashboard({ userRole, updateRole }) {
 
         <View style={styles.divider} />
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Eventos Creados</Text>
-          <CarrouselViewMainCard data={mockEventData} />
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Rendimiento de Vendedores</Text>
-          <View style={styles.vendorList}>
-            {mockVendorData.map((vendor) => (
-              <VendorListItem key={vendor.id} {...vendor} />
-            ))}
-          </View>
+        <View style={[styles.section, {marginBottom : 100}]}>
+          <Text style={styles.sectionTitle}>Próximos eventos</Text>
+          <TimelinePrincipalEvents/>
         </View>
       </ScrollView>
     </View>
@@ -87,7 +76,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 24,
-    marginBottom: 10,
+    
   },
   sectionTitle: {
     fontSize: Typography.sizes.xl,
@@ -103,5 +92,6 @@ const styles = StyleSheet.create({
   },
   vendorList: {
     marginTop: 10,
+    marginBottom : 100
   },
 });

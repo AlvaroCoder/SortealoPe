@@ -1,35 +1,44 @@
 import { Ionicons } from "@expo/vector-icons";
 import {
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { Colors } from "../../constants/theme";
 import { useRaffleContext } from "../../context/RaffleContext";
+import ButtonProfileDrawer from "../common/Buttons/ButtonProfileDrawer";
 
 const GREEN_500 = Colors.principal.green[500]; 
 const GREEN_900 = Colors.principal.green[900]; 
-const RED_500 = Colors.principal.red[500];
 const WHITE = '#FFFFFF';
-const RED_900 = Colors.principal.red[900]; 
+const GREEN_50 = Colors.principal.green[50]; 
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_100 = Colors.principal.neutral[100];
-const BLACK = '#000000'; 
-
+const URL_IMAGEN_MASCOTA = "https://res.cloudinary.com/dabyqnijl/image/upload/v1764234644/COSAI_LOGOS_1_1_dbzabh.png"
 
 
 export default function DrawerAdministradorContent(props) {
   const { navigation } = props;
   const { userRole } = useRaffleContext();  
+
   const userName = "Admin Principal";
+
+  const handleProfilePress = () => {
+    navigation.navigate("profile");
+  };
 
   return (
     <View style={styles.drawerContainer}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>👑</Text>
+            <Image 
+                source={{ uri: URL_IMAGEN_MASCOTA }} 
+                style={styles.mascotImage}
+                resizeMode="cover"
+            />
           </View>
         </View>
         <Text style={styles.appName}>SORTEALOPE</Text>
@@ -44,7 +53,7 @@ export default function DrawerAdministradorContent(props) {
           onPress={() => navigation.navigate("monitor/eventos")}
         >
           <View style={styles.navIconContainer}>
-            <Ionicons name="calendar-outline" size={22} color={RED_500} />
+            <Ionicons name="calendar-outline" size={22} color={GREEN_900} />
           </View>
           <Text style={styles.navLabel}>Mis Eventos</Text>
         </TouchableOpacity>
@@ -54,7 +63,7 @@ export default function DrawerAdministradorContent(props) {
           onPress={() => navigation.navigate("monitor/colecciones")}
         >
           <View style={styles.navIconContainer}>
-            <Ionicons name="receipt-outline" size={22} color={RED_500} />
+            <Ionicons name="receipt-outline" size={22} color={GREEN_900} />
           </View>
           <Text style={styles.navLabel}>Mis Colecciones</Text>
         </TouchableOpacity>
@@ -64,7 +73,7 @@ export default function DrawerAdministradorContent(props) {
           onPress={() => navigation.navigate("monitor/vendedores")}
         >
           <View style={styles.navIconContainer}>
-            <Ionicons name="people-outline" size={22} color={RED_500} />
+            <Ionicons name="people-outline" size={22} color={GREEN_900} />
           </View>
           <Text style={styles.navLabel}>Mis Vendedores</Text>
         </TouchableOpacity>
@@ -78,7 +87,7 @@ export default function DrawerAdministradorContent(props) {
           onPress={() => navigation.navigate("comprador/mis-tickets")}
         >
           <View style={styles.navIconContainer}>
-            <Ionicons name="ticket-outline" size={22} color={GREEN_500} />
+            <Ionicons name="ticket-outline" size={22} color={GREEN_900} />
           </View>
           <Text style={styles.navLabel}>Mis Tickets</Text>
         </TouchableOpacity>
@@ -88,7 +97,7 @@ export default function DrawerAdministradorContent(props) {
           onPress={() => navigation.navigate("index")}
         >
           <View style={styles.navIconContainer}>
-            <Ionicons name="search-outline" size={22} color={GREEN_500} />
+            <Ionicons name="search-outline" size={22} color={GREEN_900} />
           </View>
           <Text style={styles.navLabel}>Catálogo General</Text>
         </TouchableOpacity>
@@ -96,26 +105,12 @@ export default function DrawerAdministradorContent(props) {
       </View>
 
       <View style={styles.profileSection}>
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => navigation.navigate("profile")}
-        >
-          <View style={styles.profileAvatar}>
-            <Ionicons name="person" size={20} color={WHITE} /> 
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{userName}</Text>
-            <View>
-              <Text style={styles.profileEmail}>Rol: {userRole}</Text>
-            </View>
-          </View>
-          <Ionicons 
-            name="chevron-forward" 
-            size={18} 
-            color={GREEN_900} 
-          />
-        </TouchableOpacity>
-  
+        <ButtonProfileDrawer
+            userName={userName}
+            userRole={userRole}
+            onPress={handleProfilePress}
+        />
+        
       </View>
     </View>
   );
@@ -130,7 +125,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 40,
     paddingBottom: 30,
-    backgroundColor: Colors.principal.red[50],
+    backgroundColor: GREEN_50,
     borderBottomWidth: 1,
     borderBottomColor: NEUTRAL_100,
   },
@@ -142,26 +137,28 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 20,
-    backgroundColor: Colors.principal.red[100],
+    backgroundColor: GREEN_50,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 3,
-    borderColor: Colors.principal.red[200],
+    borderColor: NEUTRAL_100,
+    overflow: 'hidden',
   },
-  logoText: {
-    fontSize: 32,
+  mascotImage: {
+    width: '100%',
+    height: '100%',
   },
   appName: {
     fontSize: 24,
     fontWeight: '800',
-    color: RED_900, 
+    color: GREEN_900, 
     textAlign: 'center',
     marginBottom: 4,
   },
   appTagline: {
     fontSize: 14,
-    color: RED_500,
+    color: GREEN_500,
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -173,7 +170,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: RED_900, 
+    color: GREEN_900, 
     marginBottom: 16,
     marginLeft: 16,
     letterSpacing: 1,
@@ -190,7 +187,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: Colors.principal.red[50], 
+    backgroundColor: Colors.principal.green[100], 
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -198,7 +195,7 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: NEUTRAL_700, 
+    color: GREEN_900, 
   },
   profileSection: {
     marginTop: 'auto',
@@ -207,75 +204,12 @@ const styles = StyleSheet.create({
     borderTopColor: NEUTRAL_100,
     backgroundColor: WHITE,
   },
-  profileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: WHITE,
-    shadowColor: BLACK,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    marginBottom: 10, 
-  },
-  profileAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: RED_500,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: RED_900, 
-    marginBottom: 2,
-  },
-  profileEmail: {
-    fontSize: 12,
-    color: GREEN_500, 
-  },
   roleSwitchTitle: {
       fontSize: 12,
       fontWeight: '700',
       color: NEUTRAL_700,
       marginTop: 10,
       marginBottom: 5,
-  },
-  roleSwitchButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: GREEN_500,
-    marginTop: 5,
-    shadowColor: BLACK,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  activeRoleButton: {
-      backgroundColor: Colors.principal.green[100],
-      borderWidth: 1,
-      borderColor: GREEN_900,
-      elevation: 0,
-  },
-  roleSwitchText: {
-    color: WHITE,
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 10,
   },
   divider: {
     height: 1,

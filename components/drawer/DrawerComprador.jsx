@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { Colors } from "../../constants/theme";
 import { useRaffleContext } from "../../context/RaffleContext";
+import ButtonProfileDrawer from "../common/Buttons/ButtonProfileDrawer";
 
 
 const GREEN_500 = Colors.principal.green[500]; 
@@ -20,10 +21,7 @@ const BLACK = '#000000';
 
 export default function DrawerCompradorContent(props) {
   const { navigation } = props;
-  const { canViewPurchasedTickets } = useRaffleContext();
-
-  const userName = "Comprador Registrado";
-  const userEmail = "comprador@example.com";
+  const { canViewPurchasedTickets, userRole } = useRaffleContext();
 
   return (
     <View style={styles.drawerContainer}>
@@ -54,25 +52,11 @@ export default function DrawerCompradorContent(props) {
       </View>
 
       <View style={styles.profileSection}>
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => navigation.navigate("profile")}
-        >
-          <View style={styles.profileAvatar}>
-            <Ionicons name="person" size={20} color={WHITE} /> 
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{userName}</Text>
-            <View>
-              <Text style={styles.profileEmail}>{userEmail}</Text>
-            </View>
-          </View>
-          <Ionicons 
-            name="chevron-forward" 
-            size={18} 
-            color={GREEN_900} 
-          />
-        </TouchableOpacity>
+        <ButtonProfileDrawer
+        userName={"AlvaroCoder"}
+        userRole={userRole}
+        onPress={()=>{}}
+      />
       </View>
     </View>
   );

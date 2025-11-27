@@ -1,35 +1,43 @@
 import { Ionicons } from "@expo/vector-icons";
 import {
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { Colors } from "../../constants/theme";
 import { useRaffleContext } from "../../context/RaffleContext";
+import ButtonProfileDrawer from "../common/Buttons/ButtonProfileDrawer";
 
 const GREEN_500 = Colors.principal.green[500]; 
 const GREEN_900 = Colors.principal.green[900]; 
 const WHITE = '#FFFFFF';
-const RED_900 = Colors.principal.red[900]; 
 const GREEN_50 = Colors.principal.green[50]; 
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_100 = Colors.principal.neutral[100];
-const BLACK = '#000000'; 
+const URL_IMAGEN_MASCOTA = "https://res.cloudinary.com/dabyqnijl/image/upload/v1764234644/COSAI_LOGOS_1_1_dbzabh.png"
 
 export default function DrawerVendedorContent(props) {
   const { navigation } = props;
-  const { canViewSales, canViewPurchasedTickets, canCreateEvent } = useRaffleContext();
+  const { canViewSales, canViewPurchasedTickets, userRole } = useRaffleContext();
 
-  const userName = "Vendedor/Monitor";
-  const userEmail = "vendedor@example.com";
+  const userName = "Vendedor Estrella";
+
+  const handleProfilePress = () => {
+    navigation.navigate("profile");
+  };
 
   return (
     <View style={styles.drawerContainer}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>💰</Text>
+            <Image 
+                source={{ uri: URL_IMAGEN_MASCOTA }} 
+                style={styles.mascotImage}
+                resizeMode="contain"
+            />
           </View>
         </View>
         <Text style={styles.appName}>SORTEALOPE</Text>
@@ -45,21 +53,9 @@ export default function DrawerVendedorContent(props) {
             onPress={() => navigation.navigate("vendedor/inventario")}
           >
             <View style={styles.navIconContainer}>
-              <Ionicons name="pricetags-outline" size={22} color={GREEN_500} />
+              <Ionicons name="pricetags-outline" size={22} color={GREEN_900} />
             </View>
             <Text style={styles.navLabel}>Mis Tickets para Vender</Text>
-          </TouchableOpacity>
-        )}
-
-        {canCreateEvent && (
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => navigation.navigate("vendedor/crear-evento")}
-          >
-            <View style={styles.navIconContainer}>
-              <Ionicons name="add-circle-outline" size={22} color={GREEN_500} />
-            </View>
-            <Text style={styles.navLabel}>Crear Evento / Colección</Text>
           </TouchableOpacity>
         )}
 
@@ -69,47 +65,22 @@ export default function DrawerVendedorContent(props) {
             onPress={() => navigation.navigate("comprador/mis-tickets")}
           >
             <View style={styles.navIconContainer}>
-              <Ionicons name="receipt-outline" size={22} color={GREEN_500} />
+              <Ionicons name="receipt-outline" size={22} color={GREEN_900} />
             </View>
             <Text style={styles.navLabel}>Tickets Comprados</Text>
           </TouchableOpacity>
         )}
         
-        <View style={styles.divider} />
-        
-        <Text style={styles.sectionTitle}>GENERAL</Text>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("index")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="search-outline" size={22} color={GREEN_500} />
-          </View>
-          <Text style={styles.navLabel}>Buscar Eventos</Text>
-        </TouchableOpacity>
         
       </View>
 
       <View style={styles.profileSection}>
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => navigation.navigate("profile")}
-        >
-          <View style={styles.profileAvatar}>
-            <Ionicons name="business" size={20} color={WHITE} /> 
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{userName}</Text>
-            <View>
-              <Text style={styles.profileEmail}>{userEmail}</Text>
-            </View>
-          </View>
-          <Ionicons 
-            name="chevron-forward" 
-            size={18} 
-            color={GREEN_900} 
-          />
-        </TouchableOpacity>
+        <ButtonProfileDrawer
+            userName={userName}
+            userRole={userRole}
+            onPress={handleProfilePress}
+        />
+      
       </View>
     </View>
   );
@@ -142,14 +113,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 3,
     borderColor: NEUTRAL_100,
+    overflow: 'hidden',
   },
-  logoText: {
-    fontSize: 32,
+  mascotImage: {
+    width: '100%',
+    height: '100%',
   },
   appName: {
     fontSize: 24,
     fontWeight: '800',
-    color: RED_900, 
+    color: GREEN_900, 
     textAlign: 'center',
     marginBottom: 4,
   },
@@ -167,6 +140,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '700',
+    // 🟢 Título de Sección en Verde Oscuro
     color: GREEN_900, 
     marginBottom: 16,
     marginLeft: 16,
@@ -184,7 +158,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: GREEN_50, 
+    // 🟢 Fondo de Icono en Verde Muy Claro
+    backgroundColor: Colors.principal.green[100], 
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -192,7 +167,8 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: NEUTRAL_700, 
+    // 🟢 Texto de Navegación en Verde Oscuro
+    color: GREEN_900, 
   },
   profileSection: {
     marginTop: 'auto',
@@ -201,44 +177,6 @@ const styles = StyleSheet.create({
     borderTopColor: NEUTRAL_100,
     backgroundColor: WHITE,
   },
-  profileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: WHITE,
-    shadowColor: BLACK,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    marginBottom: 10, 
-  },
-  profileAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: GREEN_500, 
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: RED_900, 
-    marginBottom: 2,
-  },
-  profileEmail: {
-    fontSize: 12,
-    color: GREEN_500, 
-  },
   roleSwitchTitle: {
       fontSize: 12,
       fontWeight: '700',
@@ -246,30 +184,15 @@ const styles = StyleSheet.create({
       marginTop: 10,
       marginBottom: 5,
   },
-  roleSwitchButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: GREEN_500,
-    marginTop: 5,
-    shadowColor: BLACK,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 4,
+  roleSwitchPlaceholder: { 
+      padding: 10, 
+      backgroundColor: Colors.principal.red[100], 
+      borderRadius: 8, 
+      marginTop: 5 
   },
-  activeRoleButton: {
-      backgroundColor: Colors.principal.green[100],
-      borderWidth: 1,
-      borderColor: GREEN_900,
-      elevation: 0,
-  },
-  roleSwitchText: {
-    color: WHITE,
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 10,
+  roleSwitchPlaceholderText: {
+       color: Colors.principal.red[900], 
+       textAlign: 'center' 
   },
   divider: {
     height: 1,

@@ -20,8 +20,8 @@ export default function Index() {
   }
   
   if (userRole === USER_ROLES.BUYER) {
-    return <MonitorBuyerDashboard userRole={userRole} updateRole={updateRole}/>
+    return <MonitorBuyerDashboard />
   }
 
-  return <MonitorBuyerDashboard router={router} />;
+  return <MonitorBuyerDashboard />;
 }

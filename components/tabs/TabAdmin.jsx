@@ -13,25 +13,25 @@ export default function TabAdminLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarLabelStyle: styles.tabBarLabel,
+        tabBarLabelStyle: { display: 'none' }, 
         tabBarStyle: styles.floatingTabBar,
         tabBarActiveTintColor: WHITE, 
         tabBarInactiveTintColor: Colors.principal.green[200], 
-        
+        tabBarItemStyle: styles.tabBarItem, 
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Inicio',
-          tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={26} color={color} />,
+          tabBarLabel : ()=>{return null}
+
         }}
       />
       
       <Tabs.Screen
         name="crear" 
         options={{
-          title: '', 
           tabBarIcon: ({ focused }) => (
             <View style={[
               styles.fabButton, 
@@ -40,67 +40,32 @@ export default function TabAdminLayout() {
             ]}>
               <Ionicons 
                 name="add-circle-outline" 
-                size={30} 
+                size={32} 
                 color={FAB_ICON_COLOR} 
               />
             </View>
           ),
+          tabBarLabel: () => { return null },
         }}
       />
 
       <Tabs.Screen
         name="mis-eventos" 
         options={{
-          title: 'Mis Eventos',
-          tabBarIcon: ({ color }) => <Ionicons name="calendar-outline" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="calendar-outline" size={26} color={color} />,
+          tabBarLabel : ()=>{return null}
         }}
       />  
-
-      {/** Tabs secundarias que no quiero que aparezcan */}
-
-      <Tabs.Screen
-        name='comprador/mis-tickets'
-        options={{
-          href : null
-        }}
-      />
-      
-      <Tabs.Screen
-        name='explorar'
-        options={{
-          href : null
-        }}
-      />
-
-      <Tabs.Screen
-        name='mis-vendedores'
-        options={{
-          href : null
-        }}
-      />
-
-      <Tabs.Screen
-        name='perfil'
-        options={{
-          href : null
-        }}
-      />
-
-      <Tabs.Screen
-        name='vendedor/inventario'
-        options={{
-          href : null
-        }}
-      />
+      <Tabs.Screen name='comprador/mis-tickets' options={{ href : null }}/>
+      <Tabs.Screen name='explorar' options={{ href : null }}/>
+      <Tabs.Screen name='mis-vendedores' options={{ href : null }}/>
+      <Tabs.Screen name='perfil' options={{ href : null }}/>
+      <Tabs.Screen name='vendedor/inventario' options={{ href : null }}/>
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
-  tabBarLabel: {
-    fontWeight: '600',
-    fontSize: 10,
-  },
   floatingTabBar: {
     position: 'absolute',
     bottom: 20,
@@ -108,7 +73,8 @@ const styles = StyleSheet.create({
     right: 20,
     height: 60,
     borderRadius: 30, 
-    paddingBottom: 5,
+    paddingBottom: 0,
+    paddingTop : 10,
     backgroundColor: GREEN_900, 
     borderTopWidth: 0, 
     elevation: 10,
@@ -117,13 +83,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
   },
+  tabBarItem: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 0, 
+  },
   fabButton: {
     width: 60,
     height: 60,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    top: -15, 
+    top: -5, 
     borderWidth: 4,
     borderColor: GREEN_900, 
     elevation: 8,

@@ -22,7 +22,8 @@ export default function TabVendedorLayout() {
         name="index"
         options={{
           title: 'Inicio',
-          tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={26} color={color} />,
+          tabBarLabel : ()=>{return null}
         }}
       />
       
@@ -30,8 +31,10 @@ export default function TabVendedorLayout() {
         name="vendedor/inventario"
         options={{
           title: 'Mis Tickets',
-          tabBarIcon: ({ color }) => <Ionicons name="pricetags-outline" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="pricetags-outline" size={26} color={color} />,
           href: 'vendedor/inventario',
+          tabBarLabel : ()=>{return null}
+
         }}
       />
 
@@ -96,7 +99,8 @@ const styles = StyleSheet.create({
     right: 20,
     height: 60,
     borderRadius: 30, 
-    paddingBottom: 5,
+    paddingBottom: 0,
+    paddingTop :10,
     backgroundColor: GREEN_900, 
     borderTopWidth: 0, 
     elevation: 10,
