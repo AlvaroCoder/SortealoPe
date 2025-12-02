@@ -23,9 +23,9 @@ export default function RootLayout() {
         }}
       />
       <Stack.Screen
-        name="[idEvent]/index"
+        name="[id]"
         options={{
-          header : () => <HeaderBackNav title="Evento" />
+          header : ()=><HeaderBackNav title="Evento" />
         }}
       />
     </Stack>

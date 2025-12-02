@@ -28,6 +28,8 @@
             "id": 1,
             "name": "Benéfica"
         },
+        "totalTickets" : 1000,
+        "availableTickets" : 200,
         "collections": [
             {
                 "id": 1,
@@ -91,6 +93,8 @@
             "id": 1,
             "name": "Benéfica"
         },
+        "totalTickets" : 1000,
+        "availableTickets" : 40,
         "collections": [
             {
                 "id": 3,

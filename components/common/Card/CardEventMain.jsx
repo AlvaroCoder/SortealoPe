@@ -38,13 +38,9 @@ export default function CardEventMain({
   id="",
   title = "Sorteo PRO-Fondos COSAI",
   date = "05 de Noviembre del 2025",
-  location = "Piura",
-  clients = 30,
-  collections=[],
   ticketPrice =20,
   status = "Iniciado",
   urlImagen = "https://res.cloudinary.com/dabyqnijl/image/upload/v1764608015/WhatsApp_Image_2025-11-26_at_16.47.57_gjgygx.jpg",
-  description = "Descripción breve de los acontecimientos de COSAI SA, teniendo en cuenta que debe ser clara y concisa",
 }) {
   const { formatDateToSpanish } = useDateFormatter();
   // Nota: Deberías obtener el tema (light/dark) de tu contexto de aplicación si lo usas.
@@ -68,8 +64,8 @@ export default function CardEventMain({
           <View style={{flex : 1}}>
             <Link
               href={{
-                pathname: '/event/[idEvent]',
-                params : {idEvent : id}
+                pathname: '/event/[id]',
+                params : {id}
               }}
             >
               <Title style={styles.title}>{title}</Title>

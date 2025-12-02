@@ -4,6 +4,9 @@ import { useRouter } from 'expo-router'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { Colors } from '../../../constants/theme'
 
+const GREEN_900 = Colors.principal.green[900];
+const WHITE = '#FFFFFF';
+
 export default function HeaderBackNav({
     title = "Registrar evento",
     showBackButton = true
@@ -23,7 +26,7 @@ export default function HeaderBackNav({
           style={styles.backButton} 
           onPress={handleBack}
         >
-          <Ionicons name='arrow-back-outline' color={Colors.principal.red[900]} size={20}/>
+          <Ionicons name='arrow-back-outline' color={WHITE} size={24}/>
         </TouchableOpacity>
       )}
       
@@ -38,33 +41,26 @@ export default function HeaderBackNav({
 
 const styles = StyleSheet.create({
     container: {
-      marginTop: Constants.statusBarHeight,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    backgroundColor: 'white',
-  },
-  backButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: 'transparent',
-  },
-  backButtonText: {
-    fontSize: 24,
-    color: Colors.principal.red[900],
-    fontWeight: 'bold',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.principal.red[900],
-    textAlign: 'center',
-    flex: 1,
-    marginHorizontal: 8,
-  },
-  placeholder: {
-    width: 40,
-  },
+      paddingTop: Constants.statusBarHeight + 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      backgroundColor: GREEN_900, 
+    },
+    backButton: {
+      padding: 5,
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: WHITE, 
+      textAlign: 'center',
+      flex: 1,
+      marginHorizontal: 8,
+    },
+    placeholder: {
+      width: 34, 
+    },
 })
