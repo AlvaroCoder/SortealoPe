@@ -42,7 +42,7 @@ export default function DrawerAdministradorContent(props) {
           </View>
         </View>
         <Text style={styles.appName}>SORTEALOPE</Text>
-        <Text style={styles.appTagline}>Panel de Administración</Text>
+        <Text style={styles.appTagline}>Panel Administrador</Text>
       </View>
 
       <View style={styles.navigationSection}>

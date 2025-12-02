@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import {
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -18,37 +19,49 @@ const GREEN_50 = Colors.principal.green[50];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_100 = Colors.principal.neutral[100];
 const BLACK = '#000000'; 
+const URL_IMAGEN_MASCOTA = "https://res.cloudinary.com/dabyqnijl/image/upload/v1764234644/COSAI_LOGOS_1_1_dbzabh.png"
+
 
 export default function DrawerCompradorContent(props) {
   const { navigation } = props;
-  const { canViewPurchasedTickets, userRole } = useRaffleContext();
+  const { userRole } = useRaffleContext();
 
   return (
     <View style={styles.drawerContainer}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>🎫</Text>
+            <Image
+              source={{ uri: URL_IMAGEN_MASCOTA }}
+              style={styles.mascotImage}
+              resizeMode="cover"
+            />
           </View>
         </View>
         <Text style={styles.appName}>SORTEALOPE</Text>
-        <Text style={styles.appTagline}>Mi Billetera de Tickets</Text>
+        <Text style={styles.appTagline}>Panel Comprador</Text>
       </View>
 
       <View style={styles.navigationSection}>
-        <Text style={styles.sectionTitle}>MIS COMPRAS</Text>
-        
-        {canViewPurchasedTickets && (
+        <Text style={styles.sectionTitle}>INFORMACIÓN </Text>
+        <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => navigation.navigate("comprador/mis-tickets")}
+          >
+            <View style={styles.navIconContainer}>
+              <Ionicons name="receipt-outline" size={22} color={GREEN_900} />
+            </View>
+            <Text style={styles.navLabel}>Tickets Comprados</Text>
+        </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
             onPress={() => navigation.navigate("comprador/mis-tickets")}
           >
             <View style={styles.navIconContainer}>
-              <Ionicons name="receipt-outline" size={22} color={RED_900} />
+              <Ionicons name="receipt-outline" size={22} color={GREEN_900} />
             </View>
-            <Text style={styles.navLabel}>Mis Tickets Comprados</Text>
+            <Text style={styles.navLabel}>Tickets Reservados</Text>
           </TouchableOpacity>
-        )}
       </View>
 
       <View style={styles.profileSection}>
@@ -96,13 +109,13 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 24,
     fontWeight: '800',
-    color: RED_900, 
+    color: GREEN_900, 
     textAlign: 'center',
     marginBottom: 4,
   },
   appTagline: {
     fontSize: 14,
-    color: NEUTRAL_700, 
+    color: GREEN_500, 
     textAlign: 'center',
     fontWeight: '500',
   },
@@ -114,7 +127,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: RED_900, 
+    color: GREEN_900, 
     marginBottom: 16,
     marginLeft: 16,
     letterSpacing: 1,
@@ -139,7 +152,7 @@ const styles = StyleSheet.create({
   navLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: NEUTRAL_700, 
+    color: GREEN_900, 
   },
   profileSection: {
     marginTop: 'auto',
@@ -223,5 +236,9 @@ const styles = StyleSheet.create({
     backgroundColor: NEUTRAL_100,
     marginVertical: 16,
     marginHorizontal: 16,
-  }
+  },
+  mascotImage: {
+    width: '100%',
+    height: '100%',
+  },
 });

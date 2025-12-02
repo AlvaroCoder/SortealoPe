@@ -17,7 +17,8 @@ export default StyleSheet.create({
     elevation: 5,
   },
   headerContent: {
-    gap : 4
+    gap: 4,
+
   },
   title: {
     fontSize: 18,
@@ -88,7 +89,7 @@ export default StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 160,
+    height: 320,
     borderRadius: 8,
   },
   descriptionContainer: {

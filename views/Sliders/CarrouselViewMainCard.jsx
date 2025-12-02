@@ -24,7 +24,7 @@ export default function CarrouselViewMainCard({
     clients: 30,
     price : 20,
     status: "Iniciado",
-    urlImagen: "https://res.cloudinary.com/dabyqnijl/image/upload/v1758665799/IMG_0074_xxzakw.png",
+    urlImagen: "https://res.cloudinary.com/dabyqnijl/image/upload/v1764608015/WhatsApp_Image_2025-11-26_at_16.47.57_gjgygx.jpg",
     description: "Descripción breve de los acontecimientos de COSAI SA, teniendo en cuenta que debe ser clara y concisa",
     onPressEvent: () => console.log("Ver evento presionado")
   }],

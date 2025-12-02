@@ -1,5 +1,6 @@
 import { Drawer } from "expo-router/drawer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import ProfileHeader from "../../components/common/Navigations/ProfileHeader";
 import DrawerAdministradorContent from "../../components/drawer/DrawerAdministrador";
 import DrawerCompradorContent from "../../components/drawer/DrawerComprador";
 import DrawerVendedorContent from "../../components/drawer/DrawerVendedor";
@@ -53,7 +54,6 @@ const getConditionalScreens = (isSeller, isBuyer, isAdmin) => {
 
 export default function DrawerLayout() {
   const { userRole } = useRaffleContext();
-  console.log(userRole);
   
   const isAdmin = userRole === USER_ROLES.ADMIN;
   const isBuyer = userRole === USER_ROLES.BUYER;
@@ -109,7 +109,18 @@ export default function DrawerLayout() {
         />
         <Drawer.Screen 
           name="profile" 
-          options={{ title: "Mi Perfil" }} 
+          options={{
+            title: "Mi Perfil",
+            header: ({ navigation, route, options }) => (
+                <ProfileHeader
+                    navigation={navigation}
+                    title={options.title}
+                    backgroundColor={GREEN_900}
+                    headerTintColor={WHITE}
+                />
+            )
+          }}
+          
         />
         
       </Drawer>
