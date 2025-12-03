@@ -153,14 +153,13 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
     },
 
-    // --- CONTENIDO PRINCIPAL ---
     contentSection: {
         paddingHorizontal: 24,
         paddingTop: 20,
         backgroundColor: WHITE,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        marginTop: -20, // Efecto de superposición
+        marginTop: -20, 
     },
     eventTitle: {
         fontSize: Typography.sizes['3xl'],

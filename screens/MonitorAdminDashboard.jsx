@@ -11,12 +11,23 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const WHITE = "#FFFFFF";
 
 const kpiData = [
-  { label: "Eventos Creados", value: "24", icon: "calendar-outline" },
-  { label: "Vendedores Activos", value: "15", icon: "people-outline" },
+  {
+    label: "Eventos Totales",
+    value: "24",
+    icon: "calendar-outline",
+    route : "/metricas/eventos"
+  },
+  {
+    label: "Vendedores Totales",
+    value: "15",
+    icon: "people-outline",
+    route : "/metricas/vendedor"
+  },
   {
     label: "Compradores Totales",
     value: "1,200",
     icon: "person-circle-outline",
+    route : "/metricas/comprador"
   }
 ];
 

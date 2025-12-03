@@ -28,7 +28,7 @@ export default function TabVendedorLayout() {
       />
       
       <Tabs.Screen
-        name="vendedor/inventario"
+        name="vendedor/index"
         options={{
           title: 'Mis Tickets',
           tabBarIcon: ({ color }) => <Ionicons name="pricetags-outline" size={26} color={color} />,

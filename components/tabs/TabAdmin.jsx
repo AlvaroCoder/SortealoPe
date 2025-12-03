@@ -60,7 +60,7 @@ export default function TabAdminLayout() {
       <Tabs.Screen name='explorar' options={{ href : null }}/>
       <Tabs.Screen name='mis-vendedores' options={{ href : null }}/>
       <Tabs.Screen name='perfil' options={{ href : null }}/>
-      <Tabs.Screen name='vendedor/inventario' options={{ href : null }}/>
+      <Tabs.Screen name='vendedor/index' options={{ href : null }}/>
     </Tabs>
   );
 }
