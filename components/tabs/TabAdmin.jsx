@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Colors } from '../../constants/theme';
+import HeaderBackNav from '../common/Navigations/HeaderBackNav';
 
 const GREEN_900 = Colors.principal.green[900];
 const WHITE = '#FFFFFF';
@@ -46,6 +47,7 @@ export default function TabAdminLayout() {
             </View>
           ),
           tabBarLabel: () => { return null },
+          header : ()=> <HeaderBackNav title='Crear' />
         }}
       />
 

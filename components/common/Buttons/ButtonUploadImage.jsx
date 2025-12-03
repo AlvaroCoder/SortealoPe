@@ -2,14 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import {
-    Alert,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { Colors } from '../../../constants/theme';
+
+const GREEN_900 = Colors.principal.green[900];
+const GREEN_500 = Colors.principal.green[500];
+const GREEN_100 = Colors.principal.green[100];
+const GREEN_200 = Colors.principal.green[200];
+const WHITE = Colors.principal.white;
 
 export default function ButtonUploadImage({
   onImageSelected = () => {},
@@ -76,7 +82,7 @@ export default function ButtonUploadImage({
           activeOpacity={0.8}
         >
           <View style={styles.uploadIcon}>
-            <Text style={styles.uploadIconText}><Ionicons name='camera-outline' size={30} /></Text>
+            <Ionicons name='camera-outline' size={30} color={GREEN_900}/>
           </View>
           <Text style={styles.uploadTitle}>{title}</Text>
           <Text style={styles.uploadSubtitle}>{subtitle}</Text>
@@ -92,36 +98,34 @@ const styles = StyleSheet.create({
   },
   uploadButton: {
     borderWidth: 2,
-    borderColor: Colors.principal.red[200],
+    borderColor: GREEN_200,
     borderStyle: 'dashed',
     borderRadius: 12,
     padding: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.principal.yellow[50],
+    backgroundColor: GREEN_100,
   },
   uploadIcon: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.principal.red[100],
+    backgroundColor: GREEN_200,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
   },
-  uploadIconText: {
-    fontSize: 24,
-  },
+  
   uploadTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.principal.red[900],
+    color: GREEN_900,
     marginBottom: 4,
     textAlign: 'center',
   },
   uploadSubtitle: {
     fontSize: 14,
-    color: Colors.principal.red[900],
+    color: GREEN_900,
     textAlign: 'center',
   },
   imageContainer: {
@@ -129,7 +133,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: Colors.principal.red[200],
+    borderColor: GREEN_500,
   },
   image: {
     width: '100%',
@@ -139,13 +143,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 12,
     left: 12,
-    backgroundColor: 'rgba(213, 41, 65, 0.9)',
+    backgroundColor: 'rgba(22, 101, 52, 0.9)', 
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
   changeButtonText: {
-    color: 'white',
+    color: WHITE,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -161,7 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   removeButtonText: {
-    color: 'white',
+    color: WHITE,
     fontSize: 16,
     fontWeight: 'bold',
   },

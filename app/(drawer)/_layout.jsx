@@ -97,10 +97,16 @@ export default function DrawerLayout() {
         <Drawer.Screen 
           name="(tabs)" 
           options={{ 
-            title: 'Inicio Principal'
+            title: 'Inicio Principal',
           }} 
         />
-        
+
+        <Drawer.Screen
+          name="(tabs)/crear"
+          options={{
+            headerShown : false
+          }}
+        />  
         {getConditionalScreens(isSeller, isBuyer, isAdmin)}
         
         <Drawer.Screen 

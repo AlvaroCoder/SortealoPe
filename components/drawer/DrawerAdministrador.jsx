@@ -57,16 +57,7 @@ export default function DrawerAdministradorContent(props) {
           </View>
           <Text style={styles.navLabel}>Mis Eventos</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("monitor/colecciones")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="receipt-outline" size={22} color={GREEN_900} />
-          </View>
-          <Text style={styles.navLabel}>Mis Colecciones</Text>
-        </TouchableOpacity>
+      
         
         <TouchableOpacity
           style={styles.navItem}
@@ -90,16 +81,6 @@ export default function DrawerAdministradorContent(props) {
             <Ionicons name="ticket-outline" size={22} color={GREEN_900} />
           </View>
           <Text style={styles.navLabel}>Mis Tickets</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("index")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="search-outline" size={22} color={GREEN_900} />
-          </View>
-          <Text style={styles.navLabel}>Catálogo General</Text>
         </TouchableOpacity>
         
       </View>
