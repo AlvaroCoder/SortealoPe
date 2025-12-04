@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
+import CollectionOption from '../common/Card/ColletionOption';
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
@@ -14,24 +15,10 @@ const GREEN_100 = Colors.principal.green[100];
 
 const COLLECTIONS = [
     { tickets: 100, price: 10.00, label: "Paquete Bronce" },
-    { tickets: 200, price: 15.00, label: "Paquete Plata" },
-    { tickets: 500, price: 25.00, label: "Paquete Oro" },
-    { tickets: 1000, price: 40.00, label: "Paquete Platino" },
+    { tickets: 200, price: 20.00, label: "Paquete Plata" },
+    { tickets: 500, price: 50.00, label: "Paquete Oro" },
+    { tickets: 1000, price: 100.00, label: "Paquete Platino" },
 ];
-
-const CollectionOption = ({ item, isSelected, onPress }) => (
-    <TouchableOpacity
-        style={[styles.collectionCard, isSelected && styles.collectionCardSelected]}
-        onPress={() => onPress(item)}
-    >
-        <Text style={styles.collectionLabel}>{item.label}</Text>
-        <Text style={styles.collectionTickets}>{item.tickets} Tickets</Text>
-        <Text style={styles.collectionPrice}>S/ {item.price.toFixed(2)} c/u</Text>
-        {isSelected && (
-            <Ionicons name="checkmark-circle" size={20} color={GREEN_900} style={styles.collectionCheck} />
-        )}
-    </TouchableOpacity>
-);
 
 export default function Step1Content({ form, setForm, onNext }) {
     const totalRevenue = useMemo(() => {
@@ -70,10 +57,9 @@ export default function Step1Content({ form, setForm, onNext }) {
             <Text style={styles.stepTitleText}>1. Define el Paquete de Tickets</Text>
             <Text style={styles.stepSubtitleText}>Selecciona un paquete predefinido o usa la opción personalizada abajo.</Text>
             
-            {/* 🟢 LISTA DE COLECCIONES PREDEFINIDAS */}
             <View style={styles.collectionListContainer}>
                 {COLLECTIONS.map((item) => (
-                    <CollectionOption 
+                    <CollectionOption
                         key={item.tickets}
                         item={item}
                         isSelected={isSelected(item)}
@@ -82,9 +68,9 @@ export default function Step1Content({ form, setForm, onNext }) {
                 ))}
             </View>
             
-            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>— O personalizar el paquete —</Text>
+            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>— Haz un cálculo aproximado —</Text>
 
-            <Text style={styles.inputLabel}>Cantidad de Tickets a Emitir (Volumen)</Text>
+            <Text style={styles.inputLabel}>Cantidad de Vendedores </Text>
             <TextInput
                 style={[styles.textInput, isCustom && styles.textInputActive]}
                 keyboardType="numeric"
@@ -95,7 +81,18 @@ export default function Step1Content({ form, setForm, onNext }) {
                 placeholderTextColor={NEUTRAL_200}
             />
 
-            <Text style={styles.inputLabel}>Precio Unitario del Ticket (Soles)</Text>
+            <Text style={styles.inputLabel}>Tickets por Vendedor</Text>
+            <TextInput
+                style={[styles.textInput, isCustom && styles.textInputActive]}
+                keyboardType="numeric"
+                placeholder="Ej: 10.00, 25.50"
+                value={form.unitPrice}
+                onFocus={() => setForm(prev => ({ ...prev, customMode: true }))}
+                onChangeText={(text) => setForm(prev => ({ ...prev, unitPrice: text.replace(/[^0-9.]/g, ''), customMode: true }))}
+                placeholderTextColor={NEUTRAL_200}
+            />
+
+            <Text style={styles.inputLabel}>Precio Unitario</Text>
             <TextInput
                 style={[styles.textInput, isCustom && styles.textInputActive]}
                 keyboardType="numeric"
@@ -144,51 +141,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginVertical: 10,
     },
-
-    collectionListContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    collectionCard: {
-        width: '48%', 
-        backgroundColor: GREEN_100,
-        borderRadius: 12,
-        padding: 15,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: GREEN_100,
-        position: 'relative',
-    },
-    collectionCardSelected: {
-        borderColor: GREEN_500,
-        backgroundColor: Colors.principal.green[50],
-        borderWidth: 2,
-    },
-    collectionLabel: {
-        fontSize: Typography.sizes.md,
-        fontWeight: Typography.weights.bold,
-        color: GREEN_900,
-        marginBottom: 5,
-    },
-    collectionTickets: {
-        fontSize: Typography.sizes.lg,
-        fontWeight: Typography.weights.extrabold,
-        color: RED_500,
-    },
-    collectionPrice: {
-        fontSize: Typography.sizes.sm,
-        color: NEUTRAL_700,
-        marginTop: 4,
-    },
-    collectionCheck: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-    },
-
-    // --- ESTILOS DE FORMULARIO ---
     inputLabel: {
         fontSize: Typography.sizes.md,
         fontWeight: Typography.weights.medium,
@@ -236,8 +188,13 @@ const styles = StyleSheet.create({
         fontWeight: Typography.weights.medium,
         color: GREEN_900,
     },
+    collectionListContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
 
-    // --- BOTONES DE ACCIÓN (Centrado) ---
     buttonContainer: {
         alignItems: 'center',
         marginTop: 30,

@@ -11,7 +11,7 @@ const WHITE = Colors.principal.white;
 export default function Step2Content({ form, setForm, onNext, onBack }) {
   
   const handleNext = () => {
-    if (!form.title || !form.description || !form.prizeValue || !form.location || !form.date) {
+    if (!form.title || !form.description || !form.location || !form.date) {
         Alert.alert("Error", "Por favor, completa todos los campos del evento.");
         return;
     }
@@ -49,16 +49,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
                 multiline
                 numberOfLines={4}
             />
-            
-            <Text style={styles.inputLabel}>Valor Estimado del Premio (S/)</Text>
-            <TextInput
-                style={styles.textInput}
-                keyboardType="numeric"
-                placeholder="Ej: 5000.00"
-                value={form.prizeValue}
-                onChangeText={(text) => updateForm('prizeValue', text.replace(/[^0-9.]/g, ''))}
-                placeholderTextColor={NEUTRAL_200}
-            />
 
             <Text style={styles.inputLabel}>Lugar del Sorteo o Evento</Text>
             <TextInput
@@ -78,7 +68,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
                 placeholderTextColor={NEUTRAL_200}
             />
             
-
             <View style={styles.actionRow}>
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
                     <Ionicons name="arrow-back-outline" style={{color : GREEN_900}} size={24} />
@@ -93,7 +82,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
 }
 
 const styles = StyleSheet.create({
-  // Aseguramos que el ScrollView ocupe toda la pantalla
   container: {
     flex: 1,
     paddingHorizontal: 4,
@@ -116,7 +104,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   
-  // --- ESTILOS DE FORMULARIO ---
   inputLabel: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.medium,
@@ -129,17 +116,15 @@ const styles = StyleSheet.create({
     borderColor: NEUTRAL_200,
     borderRadius: 12,
     padding: 15,
-    fontSize: Typography.sizes.lg,
     color: GREEN_900,
     backgroundColor: WHITE,
   },
   textArea: {
       minHeight: 100,
-      textAlignVertical: 'top', // Alineación superior para áreas de texto
+      textAlignVertical: 'top', 
       paddingTop: 15,
   },
 
-  // --- BOTONES DE ACCIÓN ---
   actionRow: {
     flexDirection: "row",
     justifyContent: "space-between",

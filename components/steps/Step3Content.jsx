@@ -9,25 +9,19 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const GREEN_100 = Colors.principal.green[100];
 
-// URL mock para simular la subida de una imagen
 const MOCK_IMAGE_URL = 'https://placehold.co/400x200/16CD91/FFFFFF?text=Dise%C3%B1o+del+Ticket'; 
 
 export default function Step3Content({ form, setForm, onSubmit, onBack }) {
     
     const pickImage = (imageType) => {
-        // En una aplicación real, aquí llamarías a ImagePicker.launchImageLibraryAsync
         
-        // Usamos una URL mock para demostrar la selección
         const imageUrl = MOCK_IMAGE_URL + `+${imageType}`;
         
-        // Alerta para simular el proceso de carga
         Alert.alert("Simulación de Carga", `Imagen para ${imageType} seleccionada.`);
         
-        // Guardamos la URL en el formulario
         setForm(prev => ({ ...prev, [imageType]: imageUrl }));
     };
 
-    // Función para obtener la vista previa
     const getPreview = (imageType) => {
         const source = form[imageType] ? { uri: form[imageType] } : null;
         
@@ -61,7 +55,6 @@ export default function Step3Content({ form, setForm, onSubmit, onBack }) {
                 Sube la imagen de la rifa (Banner principal) y el diseño visual que tendrán los tickets.
             </Text>
             
-            {/* 1. CARGA DE IMAGEN DEL TICKET (Obligatorio) */}
             <Text style={styles.inputLabel}>Diseño Visual del Ticket (*)</Text>
             <TouchableOpacity 
                 onPress={() => pickImage('ticketDesign')}
@@ -70,7 +63,6 @@ export default function Step3Content({ form, setForm, onSubmit, onBack }) {
                 {getPreview('ticketDesign')}
             </TouchableOpacity>
 
-            {/* 2. CARGA DE BANNER PRINCIPAL (Opcional) */}
             <Text style={styles.inputLabel}>Imagen Principal de la Rifa (Banner)</Text>
             <ButtonUploadImage />
             

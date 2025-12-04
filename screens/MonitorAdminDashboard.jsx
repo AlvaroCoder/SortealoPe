@@ -16,18 +16,6 @@ const kpiData = [
     value: "24",
     icon: "calendar-outline",
     route : "/metricas/eventos"
-  },
-  {
-    label: "Vendedores Totales",
-    value: "15",
-    icon: "people-outline",
-    route : "/metricas/vendedor"
-  },
-  {
-    label: "Compradores Totales",
-    value: "1,200",
-    icon: "person-circle-outline",
-    route : "/metricas/comprador"
   }
 ];
 

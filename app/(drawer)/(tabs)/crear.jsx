@@ -67,9 +67,7 @@ export default function CreateEventStepper() {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-            
             <StepperHeader currentStep={currentStep} />
-
             <View style={styles.contentWrapper}>
                 {renderContent()}
             </View>
