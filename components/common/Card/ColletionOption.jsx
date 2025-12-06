@@ -4,10 +4,8 @@ import { Colors, Typography } from '../../../constants/theme';
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
-const RED_500 = Colors.principal.red[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
-const GREEN_100 = Colors.principal.green[100];
-
+const BLUE_900 = Colors.principal.blue[900];
 export default function CollectionOption({ item, isSelected, onPress }) {
   return (
     <TouchableOpacity
@@ -33,12 +31,12 @@ const styles = StyleSheet.create({
     },
     collectionCard: {
         width: '48%', 
-        backgroundColor: GREEN_100,
+        backgroundColor: 'white',
         borderRadius: 12,
         padding: 15,
         marginBottom: 10,
         borderWidth: 1,
-        borderColor: GREEN_100,
+        borderColor: Colors.principal.blue[700],
         position: 'relative',
     },
     collectionCardSelected: {
@@ -49,13 +47,13 @@ const styles = StyleSheet.create({
     collectionLabel: {
         fontSize: Typography.sizes.md,
         fontWeight: Typography.weights.bold,
-        color: GREEN_900,
+        color: BLUE_900,
         marginBottom: 5,
     },
     collectionTickets: {
         fontSize: Typography.sizes.lg,
         fontWeight: Typography.weights.extrabold,
-        color: RED_500,
+        color: Colors.principal.blue[900],
     },
     collectionPrice: {
         fontSize: Typography.sizes.sm,

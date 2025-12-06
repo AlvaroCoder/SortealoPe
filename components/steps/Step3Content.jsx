@@ -3,11 +3,11 @@ import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-na
 import { Colors, Typography } from '../../constants/theme';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
 import ButtonUploadImage from '../common/Buttons/ButtonUploadImage';
+import Title from '../common/Titles/Title';
 
 const GREEN_900 = Colors.principal.green[900];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
-const GREEN_100 = Colors.principal.green[100];
 
 const MOCK_IMAGE_URL = 'https://placehold.co/400x200/16CD91/FFFFFF?text=Dise%C3%B1o+del+Ticket'; 
 
@@ -50,7 +50,9 @@ export default function Step3Content({ form, setForm, onSubmit, onBack }) {
 
     return (
         <View style={styles.stepContent}>
-            <Text style={styles.stepTitleText}>3. Diseño y Archivos Promocionales</Text>
+            <Title>
+                3. Diseño y Archivos Promocionales
+            </Title>
             <Text style={styles.stepSubtitleText}>
                 Sube la imagen de la rifa (Banner principal) y el diseño visual que tendrán los tickets.
             </Text>
@@ -98,7 +100,6 @@ const styles = StyleSheet.create({
     inputLabel: {
         fontSize: Typography.sizes.md,
         fontWeight: Typography.weights.medium,
-        color: GREEN_900,
         marginTop: 15,
         marginBottom: 8,
     },
@@ -109,13 +110,12 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
     
-    // --- ESTILOS DE CARGA DE IMAGEN ---
     imageUploadWrapper: {
         borderRadius: 12,
         overflow: 'hidden',
         borderWidth: 2,
         borderColor: NEUTRAL_200,
-        backgroundColor: GREEN_100,
+        
         marginBottom: 10,
     },
     imagePreviewContainer: {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: Colors.principal.green[50],
+      
         padding: 20,
     },
     placeholderTextSmall: {

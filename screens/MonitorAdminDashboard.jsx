@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import MetricCard from "../components/common/Card/MetricCard";
+import ButtonCreateEvent from "../components/common/Buttons/ButtonCreateEvent";
+import Title from "../components/common/Titles/Title";
 import { Colors, Typography } from "../constants/theme";
 import DataCardEvent from "../mock/DataCardEvent.json";
 import RolSwitchBar from "../views/Bars/RolSwitchBar";
@@ -9,15 +10,6 @@ import CarrouselViewMainCard from "../views/Sliders/CarrouselViewMainCard";
 const GREEN_900 = Colors.principal.green[900];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const WHITE = "#FFFFFF";
-
-const kpiData = [
-  {
-    label: "Eventos Totales",
-    value: "24",
-    icon: "calendar-outline",
-    route : "/metricas/eventos"
-  }
-];
 
 export default function MonitorAdminDashboard({ userRole, updateRole }) {
   const mockEventData = DataCardEvent;
@@ -31,21 +23,10 @@ export default function MonitorAdminDashboard({ userRole, updateRole }) {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Eventos Creados</Text>
+          <Title>Eventos Creados</Title>
           <CarrouselViewMainCard data={mockEventData} />
         </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Métricas del Sistema</Text>
-          <View style={styles.metricGrid}>
-            {kpiData.map((kpi, index) => (
-              <MetricCard key={index} {...kpi} />
-            ))}
-          </View>
-        </View>
-
+        
         <View style={styles.divider} />
 
         <View style={[styles.section, {marginBottom : 100}]}>
@@ -53,6 +34,7 @@ export default function MonitorAdminDashboard({ userRole, updateRole }) {
           <TimelinePrincipalEvents/>
         </View>
       </ScrollView>
+      <ButtonCreateEvent/>
     </View>
   );
 }
@@ -81,7 +63,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.bold,
     color: GREEN_900,
-    marginBottom: 15,
+
   },
 
   metricGrid: {

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors } from '../../constants/theme';
 import HeaderBackNav from '../common/Navigations/HeaderBackNav';
 
@@ -10,6 +10,7 @@ const FAB_BACKGROUND_COLOR = '#F2B705';
 const FAB_ICON_COLOR = GREEN_900; 
 
 export default function TabAdminLayout() {
+  const router = useRouter();
   return (
     <Tabs
       screenOptions={{
@@ -25,16 +26,19 @@ export default function TabAdminLayout() {
         name="index"
         options={{
           tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={26} color={color} />,
-          tabBarLabel : ()=>{return null}
-
+          tabBarLabel : ()=>{return null},
+          href : null
         }}
+        
       />
       
       <Tabs.Screen
         name="crear" 
         options={{
           tabBarIcon: ({ focused }) => (
-            <View style={[
+            <TouchableOpacity
+            onPress={()=>router.push("event/create")}  
+            style={[
               styles.fabButton, 
               { backgroundColor: FAB_BACKGROUND_COLOR },
               focused && styles.fabButtonFocused 
@@ -44,18 +48,19 @@ export default function TabAdminLayout() {
                 size={32} 
                 color={FAB_ICON_COLOR} 
               />
-            </View>
+            </TouchableOpacity>
           ),
           tabBarLabel: () => { return null },
           header : ()=> <HeaderBackNav title='Crear' />
         }}
       />
-
+  
       <Tabs.Screen
         name="mis-eventos" 
         options={{
           tabBarIcon: ({ color }) => <Ionicons name="calendar-outline" size={26} color={color} />,
-          tabBarLabel : ()=>{return null}
+          tabBarLabel: () => { return null },
+          href : null
         }}
       />  
       <Tabs.Screen name='comprador/mis-tickets' options={{ href : null }}/>

@@ -16,12 +16,6 @@ export default function RootLayout() {
           header: () => <HeaderBackNav title="Metrica de eventos" />,
         }}
       />
-      <Stack.Screen
-        name="vendedor"
-        options={{
-          headerShown : false
-        }}
-      />
     </Stack>
   );
 }

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import {
   Image,
   StyleSheet,
@@ -18,7 +19,6 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_100 = Colors.principal.neutral[100];
 const URL_IMAGEN_MASCOTA = "https://res.cloudinary.com/dabyqnijl/image/upload/v1764234644/COSAI_LOGOS_1_1_dbzabh.png"
 
-
 export default function DrawerAdministradorContent(props) {
   const { navigation } = props;
   const { userRole } = useRaffleContext();  
@@ -28,6 +28,8 @@ export default function DrawerAdministradorContent(props) {
   const handleProfilePress = () => {
     navigation.navigate("profile");
   };
+
+  const router = useRouter();
 
   return (
     <View style={styles.drawerContainer}>
@@ -50,7 +52,17 @@ export default function DrawerAdministradorContent(props) {
         
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate("monitor/eventos")}
+          onPress={() => router.push("/")}
+        >
+            <View style={styles.navIconContainer}>
+              <Ionicons name="home-outline" size={22} color={GREEN_900} />
+            </View>
+            <Text style={styles.navLabel}>Inicio</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push("(drawer)/mis-eventos")}
         >
           <View style={styles.navIconContainer}>
             <Ionicons name="calendar-outline" size={22} color={GREEN_900} />
@@ -58,10 +70,9 @@ export default function DrawerAdministradorContent(props) {
           <Text style={styles.navLabel}>Mis Eventos</Text>
         </TouchableOpacity>
       
-        
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate("monitor/vendedores")}
+          onPress={() => router.push("vendedores")}
         >
           <View style={styles.navIconContainer}>
             <Ionicons name="people-outline" size={22} color={GREEN_900} />
@@ -71,16 +82,16 @@ export default function DrawerAdministradorContent(props) {
         
         <View style={styles.divider} />
 
-        <Text style={styles.sectionTitle}>PERSONAL Y CATÁLOGO</Text>
+        <Text style={styles.sectionTitle}>MONITOREO</Text>
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate("comprador/mis-tickets")}
+          onPress={() => router.push("metricas/eventos")}
         >
           <View style={styles.navIconContainer}>
             <Ionicons name="ticket-outline" size={22} color={GREEN_900} />
           </View>
-          <Text style={styles.navLabel}>Mis Tickets</Text>
+          <Text style={styles.navLabel}>Metrica de Eventos</Text>
         </TouchableOpacity>
         
       </View>

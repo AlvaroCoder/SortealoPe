@@ -2,7 +2,6 @@ import { Link } from "expo-router";
 import { Image, Text, View } from "react-native";
 import StyleCardEventMain from "../../../assets/styles/components/StyleCardEventMain";
 import { Colors } from "../../../constants/theme";
-import { useDateFormatter } from "../../../lib/dateFormatter";
 import Title from "../Titles/Title";
 import Title2 from "../Titles/Title2";
 
@@ -42,8 +41,7 @@ export default function CardEventMain({
   status = "Iniciado",
   urlImagen = "https://res.cloudinary.com/dabyqnijl/image/upload/v1764608015/WhatsApp_Image_2025-11-26_at_16.47.57_gjgygx.jpg",
 }) {
-  const { formatDateToSpanish } = useDateFormatter();
-  // Nota: Deberías obtener el tema (light/dark) de tu contexto de aplicación si lo usas.
+
   const theme = 'light'; 
 
   return (
@@ -68,10 +66,10 @@ export default function CardEventMain({
                 params : {id}
               }}
             >
-              <Title style={styles.title}>{title}</Title>
+              <Title >{title}</Title>
             </Link>
           </View>
-          <View style={{backgroundColor : Colors.principal.yellow[100], borderRadius: 6, paddingHorizontal : 8, paddingVertical : 4}}>
+          <View style={{backgroundColor : Colors.principal.blue[100], borderRadius: 6, paddingHorizontal : 8, paddingVertical : 4}}>
             <Title2>S/{ ticketPrice }</Title2>
           </View>
         </View>

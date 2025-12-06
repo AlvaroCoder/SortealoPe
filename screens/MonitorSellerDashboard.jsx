@@ -1,5 +1,4 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import MetricCard from "../components/common/Card/MetricCard";
 import { Colors, Typography } from "../constants/theme";
 import { useRaffleContext } from "../context/RaffleContext";
 import RolSwitchBar from "../views/Bars/RolSwitchBar";
@@ -8,21 +7,6 @@ import CarrouselViewMainCard from "../views/Sliders/CarrouselViewMainCard";
 const GREEN_900 = Colors.principal.green[900];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const WHITE = "#FFFFFF";
-
-const kpiDataSeller = [
-  {
-    label: "Tickets Vendidos",
-    value: "85",
-    icon: "checkmark-circle-outline",
-    route : "/metricas/vendedor/tickets-vendidos"
-  },
-  {
-    label: "Tickets Faltantes",
-    value: "115",
-    icon: "close-circle-outline",
-    route : "/metricas/vendedor/tickets-faltantes"
-  }
-];
 
 const mockEventData = [];
 
@@ -50,15 +34,6 @@ export default function MonitorSellerDashboard() {
                 mockEventData.length ? mockEventData : mockEventDataPlaceholder
               }
             />
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, {marginBottom : 20}]}>Mi Rendimiento</Text>
-            <View style={styles.metricGrid}>
-              {kpiDataSeller.map((kpi, index) => (
-                <MetricCard key={index} {...kpi} />
-              ))}
-            </View>
           </View>
         </View>
       </ScrollView>

@@ -7,12 +7,11 @@ import {
   View
 } from 'react-native';
 import CardEventMain from '../../components/common/Card/CardEventMain';
-// 🟢 Importamos Colors para usar la paleta central
 import { Colors } from '../../constants/theme';
 
 const { width: screenWidth } = Dimensions.get('window');
 const CARD_WIDTH = screenWidth * 0.8;
-const CARD_MARGIN = 10; 
+const CARD_MARGIN = 5; 
 const CARD_TOTAL_WIDTH = CARD_WIDTH + (CARD_MARGIN * 2);
 
 export default function CarrouselViewMainCard({

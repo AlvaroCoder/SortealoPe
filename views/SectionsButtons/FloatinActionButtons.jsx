@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import ButtonGradiend from '../../components/common/Buttons/ButtonGradiendt';
 import { Colors, Typography } from '../../constants/theme';
 
 const WHITE = '#FFFFFF';
 const GREEN_900 = Colors.principal.green[900];
-const GREEN_500 = Colors.principal.green[500];
 const BLACK = '#000000';
+const BLUE_500 = Colors.principal.blue[500];
 
 export default function FloatinActionButtons() {
     const handleStartRaffle = () => {
@@ -18,13 +19,13 @@ export default function FloatinActionButtons() {
   return (
     <View style={styles.floatingButtonsWrapper}>
         <View style={styles.floatingButtonsContainer}>
-              <TouchableOpacity
+              <ButtonGradiend
                   style={styles.startRaffleButton}
                   onPress={handleStartRaffle}
               >
                   <Ionicons name='play-circle-outline' size={20} color={WHITE} style={{ marginRight: 8 }} />
                   <Text style={styles.startRaffleButtonText}>Iniciar Rifa</Text>
-              </TouchableOpacity>      
+              </ButtonGradiend>      
 
               <TouchableOpacity
                     style={styles.addSellerButton} 
@@ -63,12 +64,6 @@ const styles = StyleSheet.create({
     },
     startRaffleButton: {
         flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: GREEN_900, 
-        paddingVertical: 15,
-        borderRadius: 12,
         marginRight: 10,
     },
     startRaffleButtonText: {
@@ -81,9 +76,9 @@ const styles = StyleSheet.create({
         height: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: Colors.principal.green[100], 
+        backgroundColor: Colors.principal.blue[100], 
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: GREEN_500,
+        borderColor: BLUE_500,
     }    
 })

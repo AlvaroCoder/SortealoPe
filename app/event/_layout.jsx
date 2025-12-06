@@ -11,18 +11,6 @@ export default function RootLayout() {
         }}
       />
       <Stack.Screen
-        name="payment"
-        options={{
-          header : () => <HeaderBackNav title="Pago" />
-        }}
-      />
-      <Stack.Screen
-        name="uploadImage"
-        options={{
-          header : () => <HeaderBackNav title="Subir Image" />
-        }}
-      />
-      <Stack.Screen
         name="[id]"
         options={{
           header : ()=><HeaderBackNav title="Evento" />

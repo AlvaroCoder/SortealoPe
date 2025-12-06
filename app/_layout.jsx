@@ -19,6 +19,7 @@ export default function RootLayout() {
           <Stack.Screen name='event' options={{ headerShown: false }} />
           <Stack.Screen name='raffle' options={{ headerShown: false }} />
           <Stack.Screen name='metricas' options={{ headerShown : false}} />
+          <Stack.Screen name='vendedores' options={{headerShown : false}}/>
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

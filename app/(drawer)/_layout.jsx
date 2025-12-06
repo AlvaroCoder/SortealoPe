@@ -25,39 +25,8 @@ const getDrawerContent = (role, props) => {
   }
 };
 
-const getConditionalScreens = (isSeller, isBuyer, isAdmin) => {
-  const screens = [];
-
-  if (isAdmin) {
-    screens.push(
-      <Drawer.Screen key="monitor/eventos" name="monitor/eventos" options={{ drawerLabel: "Eventos Creados", title: "Gestión de Eventos" }} />,
-      <Drawer.Screen key="monitor/colecciones" name="monitor/colecciones" options={{ drawerLabel: "Colecciones y Tickets", title: "Inventario Global" }} />,
-      <Drawer.Screen key="monitor/vendedores" name="monitor/vendedores" options={{ drawerLabel: "Gestión de Vendedores", title: "Equipos de Venta" }} />
-    );
-  }
-
-  
-  if (isAdmin || isSeller) {
-    screens.push(
-      <Drawer.Screen key="vendedor/crear-evento" name="vendedor/crear-evento" options={{ drawerLabel: "Crear Evento / Colección", title: "Creación" }} />
-    );
-  }
-
-  if (isAdmin || isSeller || isBuyer) {
-      screens.push(
-        <Drawer.Screen key="comprador/mis-tickets" name="comprador/mis-tickets" options={{ drawerLabel: "Mis Tickets Comprados", title: "Mis Compras" }} />
-      );
-  }
-
-  return screens;
-};
-
 export default function DrawerLayout() {
   const { userRole } = useRaffleContext();
-  
-  const isAdmin = userRole === USER_ROLES.ADMIN;
-  const isBuyer = userRole === USER_ROLES.BUYER;
-  const isSeller = userRole === USER_ROLES.SELLER;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -94,24 +63,13 @@ export default function DrawerLayout() {
           drawerItemStyle: { display: 'none' } 
         }}
       >
-        <Drawer.Screen 
-          name="(tabs)" 
-          options={{ 
-            title: 'Inicio Principal',
-          }} 
-        />
 
         <Drawer.Screen
-          name="(tabs)/crear"
+          name="index"
           options={{
-            headerShown : false
+            title : "SORTEALOPE"
           }}
-        />  
-        {getConditionalScreens(isSeller, isBuyer, isAdmin)}
-        
-        <Drawer.Screen 
-          name="index" 
-          options={{ title: "Buscar Eventos" }} 
+
         />
         <Drawer.Screen 
           name="profile" 
@@ -128,7 +86,13 @@ export default function DrawerLayout() {
           }}
           
         />
-        
+
+        <Drawer.Screen
+          name="mis-eventos"
+          options={{
+            title : 'Mis Eventos'
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );

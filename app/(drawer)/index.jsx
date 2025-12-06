@@ -1,10 +1,10 @@
 
 import { useRouter } from 'expo-router';
-import { USER_ROLES, useRaffleContext } from '../../../context/RaffleContext';
-import DataCardEvent from "../../../mock/DataCardEvent.json";
-import MonitorAdminDashboard from '../../../screens/MonitorAdminDashboard';
-import MonitorBuyerDashboard from '../../../screens/MonitorBuyerDashboard';
-import MonitorSellerDashboard from '../../../screens/MonitorSellerDashboard';
+import { USER_ROLES, useRaffleContext } from '../../context/RaffleContext';
+import DataCardEvent from "../../mock/DataCardEvent.json";
+import MonitorAdminDashboard from '../../screens/MonitorAdminDashboard';
+import MonitorBuyerDashboard from '../../screens/MonitorBuyerDashboard';
+import MonitorSellerDashboard from '../../screens/MonitorSellerDashboard';
 
 export default function Index() {
   const router = useRouter();

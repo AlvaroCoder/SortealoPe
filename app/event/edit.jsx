@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import ButtonGradiend from '../../components/common/Buttons/ButtonGradiendt';
 import ButtonUploadImage from '../../components/common/Buttons/ButtonUploadImage';
+import Title from '../../components/common/Titles/Title';
 import { Colors, Typography } from '../../constants/theme';
 import DataCardEvent from "../../mock/DataCardEvent.json";
 
@@ -65,7 +66,6 @@ export default function EditEventPage() {
             return;
         }
 
-        // Simulación de la llamada a la API
         Alert.alert(
             "Evento Actualizado", 
             `El evento "${formData.title}" ha sido guardado exitosamente.`
@@ -83,9 +83,8 @@ export default function EditEventPage() {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-            <Text style={styles.mainTitle}>Editar Evento: {formData.title}</Text>
+            <Title>Editar Evento: {formData.title}</Title>
             
-            {/* 1. INFORMACIÓN BÁSICA */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Información Básica</Text>
                 

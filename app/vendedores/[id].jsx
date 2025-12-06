@@ -1,10 +1,9 @@
 import { Text, View } from 'react-native'
 
-export default function Inventario() {
+export default function PageIdVendedor() {
   return (
     <View>
-      <Text>Inventario</Text>
+      <Text>PageIdVendedor</Text>
     </View>
   )
 };
-

@@ -1,27 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import ProfileAvatar from "../../components/cards/ProfileAvatar";
 import ProgressBar from "../../components/cards/ProgressBar";
 import VendorRankingRow from "../../components/cards/VendorRankingRow";
+import Title from "../../components/common/Titles/Title";
 import { Colors, Typography } from "../../constants/theme";
 import { useDateFormatter } from "../../lib/dateFormatter";
 import DataCardEvent from "../../mock/DataCardEvent.json";
 import FloatinActionButtons from "../../views/SectionsButtons/FloatinActionButtons";
 
 const GREEN_900 = Colors.principal.green[900];
-const GREEN_500 = Colors.principal.green[500];
 const RED_500 = Colors.principal.red[500];
 const WHITE = "#FFFFFF";
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_100 = Colors.principal.neutral[100];
+const BLUE_500 = Colors.principal.blue[500];
 
 const mockAssignedSellers = [
   {
@@ -48,35 +48,6 @@ const mockVendorRanking = [
   { id: 4, name: "Javier V.", sales: 8100, ticketsSold: 231 },
   { id: 5, name: "Elena G.", sales: 5500, ticketsSold: 157 },
 ];
-
-const mockRecentBuyers = [
-  {
-    id: 10,
-    name: "Juan M.",
-    avatarUrl: "https://placehold.co/50x50/F2B705/FFFFFF?text=JM",
-  },
-  {
-    id: 11,
-    name: "Luisa C.",
-    avatarUrl: "https://placehold.co/50x50/14B8A6/FFFFFF?text=LC",
-  },
-  {
-    id: 12,
-    name: "Pedro G.",
-    avatarUrl: "https://placehold.co/50x50/F2B705/FFFFFF?text=PG",
-  },
-  {
-    id: 13,
-    name: "Elena F.",
-    avatarUrl: "https://placehold.co/50x50/14B8A6/FFFFFF?text=EF",
-  },
-  {
-    id: 14,
-    name: "Roberto B.",
-    avatarUrl: "https://placehold.co/50x50/F2B705/FFFFFF?text=RB",
-  },
-];
-
 export default function EventDetailPage() {
   const { formatDateToSpanish } = useDateFormatter();
     const router = useRouter();
@@ -101,8 +72,6 @@ export default function EventDetailPage() {
     );
   }
   const assignedSellers = event.assignedSellers || mockAssignedSellers;
-  const recentBuyers = event.recentBuyers || mockRecentBuyers;
-  const hasBuyers = recentBuyers && recentBuyers.length > 0;
 
   return (
     <View style={styles.container}>
@@ -119,13 +88,13 @@ export default function EventDetailPage() {
 
         <View style={styles.contentSection}>
           <View style={styles.headerContent}>
-            <Text style={styles.eventTitle}>{event.title}</Text>
+            <Title>{event.title}</Title>
             <TouchableOpacity style={styles.buttonEdit} onPress={()=>router.push("event/edit")}>
               <Ionicons name="create-outline" size={20} />
             </TouchableOpacity>
           </View>
           <View style={styles.infoRow}>
-            <Ionicons name="calendar-outline" size={18} color={GREEN_500} />
+            <Ionicons name="calendar-outline" size={18} color={BLUE_500} />
             <Text style={styles.infoText}>
               Fecha de Sorteo: {formatDateToSpanish(event?.createdAt)}
             </Text>
@@ -172,28 +141,6 @@ export default function EventDetailPage() {
               />
             ))}
           </View>
-
-          <View style={styles.divider} />
-
-          <Text style={styles.sectionTitle}>
-            Compradores Recientes ({recentBuyers.length})
-          </Text>
-
-          {hasBuyers ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.profileList}
-            >
-              {recentBuyers.map((buyer) => (
-                <ProfileAvatar key={buyer.id} user={buyer} />
-              ))}
-            </ScrollView>
-          ) : (
-            <Text style={styles.noSellerText}>
-              No hay compradores registrados aún.
-            </Text>
-          )}
         </View>
       </ScrollView>
     </View>
@@ -267,7 +214,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: GREEN_900,
     marginBottom: 10,
   },
   descriptionText: {

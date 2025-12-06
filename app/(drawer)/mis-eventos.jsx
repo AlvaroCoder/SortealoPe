@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Colors, Typography } from '../../../constants/theme';
-import DataCardEvent from "../../../mock/DataCardEvent.json";
+import { Colors, Typography } from '../../constants/theme';
+import DataCardEvent from "../../mock/DataCardEvent.json";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];

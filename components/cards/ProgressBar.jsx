@@ -2,8 +2,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 
 const NEUTRAL_200 = Colors.principal.neutral[200];
-const GREEN_900 = Colors.principal.green[900];
 const RED_500 = Colors.principal.red[500];
+const BLUE_500 = Colors.principal.blue[700];
 
 export default function ProgressBar({
     available,
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     },
     progressText: {
         fontSize: Typography.sizes.sm,
-        color: GREEN_900,
+        color: BLUE_500,
         marginTop: 5,
         textAlign: 'right',
     },

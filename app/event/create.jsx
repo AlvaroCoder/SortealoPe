@@ -1,93 +1,144 @@
-import { useRouter } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import OutlineTextField from '../../components/common/TextFields/OutlineTextField';
-import { Colors } from '../../constants/theme';
-import FormInitial from '../../views/Form/FormInitial';
+import { useState } from 'react';
+import { Alert, LayoutAnimation, ScrollView, StyleSheet, View } from 'react-native';
 
-export default function Create() {
-  const router = useRouter();
+import Step1Content from '../../components/steps/Step1Content';
+import Step2Content from '../../components/steps/Step2Content';
+import Step3Content from '../../components/steps/Step3Content';
+import StepperHeader from '../../components/steps/StepperHeader';
+import { Colors, Typography } from '../../constants/theme';
 
-  return (
-    <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-      >
-        <FormInitial
-          title='Nuevo evento'
-          buttonText='Continuar'
-          textPosition='left'
-          onSubmit={()=>router.push("/event/uploadImage")}
-        >
-          <OutlineTextField
-            title='Nombre del evento'
-            placeholder='Nombre del evento'
-            required={true}
-          />
+const GREEN_900 = Colors.principal.green[900];
+const GREEN_500 = Colors.principal.green[500];
+const RED_500 = Colors.principal.red[500];
+const WHITE = '#FFFFFF';
+const NEUTRAL_700 = Colors.principal.neutral[700];
+const NEUTRAL_200 = Colors.principal.neutral[200];
+const GREEN_100 = Colors.principal.green[100];
 
-          <View style={{ height: 16 }} />
-          
-          <View style={styles.styleRow}>
-            <OutlineTextField
-              title='Precio'
-              placeholder='ej. S/.50.00'
-              required={true}
-              styleContainer={{ flex : 1 }}
-            />
-            <OutlineTextField
-              title='Nro de Talonarios'
-              placeholder='100'
-              required={true}
-              styleContainer={{ flex : 1}}
-            />
-          </View>
+const STEPS = [
+    { id: 1, title: 'Paquete de Tickets', icon: 'pricetags-outline' },
+    { id: 2, title: 'Detalles del Premio', icon: 'gift-outline' },
+    { id: 3, title: 'Diseño y Archivos', icon: 'image-outline' },
+];
 
-          <View style={{ height: 16 }} />
+export default function CreateEventStepper() {
+    const [currentStep, setCurrentStep] = useState(1);
+    const [formData, setFormData] = useState({
+        ticketCount: '100',
+        unitPrice: '10.00',
+        totalRevenue: '1000.00',
+    });
+    
+    const handleNext = (data = {}) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setFormData(prev => ({ ...prev, ...data }));
+        setCurrentStep(prev => prev < STEPS.length ? prev + 1 : prev);
+    };
 
-          <OutlineTextField
-            title='Tickets por talonario'
-            required={true}
-            placeholder='100'
-          />
+    const handleBack = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setCurrentStep(prev => prev > 1 ? prev - 1 : prev);
+    };
 
-          <View style={{ height: 16 }} />
+    const handleSubmit = () => {
+        Alert.alert("Evento Creado", `El evento ha sido creado con los datos del formulario. Recaudación Potencial: S/ ${formData.totalRevenue}`);
+    };
 
-          <OutlineTextField
-            title='Lugar de la rifa'
-            required={true}
-            placeholder='Urb. Los Jardines Mz. A Lt. 12'
-          />
+    const renderContent = () => {
+        switch (currentStep) {
+            case 1:
+                return <Step1Content form={formData} setForm={setFormData} onNext={handleNext} />;
+            case 2:
+                return <Step2Content form={formData} setForm={setFormData} onNext={handleNext} onBack={handleBack} />;
+            case 3:
+                return <Step3Content form={formData} setForm={setFormData} onSubmit={handleSubmit} onBack={handleBack} />;
+            default:
+                return <Step1Content form={formData} setForm={setFormData} onNext={handleNext} />;
+        }
+    };
 
-          <View style={{ height: 16 }} />
-
-          <OutlineTextField
-            title='Fecha del sorteo'
-            placeholder='Ej. 12/12/2024'
-            required={true}
-          />
-        </FormInitial>
-        <View style={{flex : 1, marginHorizontal : 30, marginTop : 10, alignItems : 'center'}}>
-          <Text>Al continuar estas aceptando los <Text style={{color : Colors.principal.red[900]}}>terminos y condiciones</Text> </Text>
-         
-        </View>
-      </ScrollView>
-    </View>
-  )
-};
+    return (
+        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+            <StepperHeader currentStep={currentStep} />
+            <View style={styles.contentWrapper}>
+                {renderContent()}
+            </View>
+        </ScrollView>
+    );
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor : 'white'
-  },
-  scrollContainer: {
-    flexGrow: 1,
+    container: {
+        flex: 1,
+        backgroundColor: WHITE,
+    },
+    scrollContent: {
+        paddingBottom: 40,
+    },
+    contentWrapper: {
+        paddingHorizontal: 24,
+        paddingTop: 20,
+    },
+    inputLabel: {
+        fontSize: Typography.sizes.md,
+        fontWeight: Typography.weights.medium,
+        color: GREEN_900,
+        marginTop: 15,
+        marginBottom: 8,
+    },
+    textInput: {
+        borderWidth: 1,
+        borderColor: NEUTRAL_200,
+        borderRadius: 12,
+        padding: 15,
+        fontSize: Typography.sizes.lg,
+        color: GREEN_900,
+        backgroundColor: WHITE,
+    },
+    metricBox: {
+        backgroundColor: GREEN_100,
+        borderRadius: 12,
+        padding: 20,
+        marginTop: 25,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: GREEN_500,
+    },
+    metricValue: {
+        fontSize: Typography.sizes['3xl'],
+        fontWeight: Typography.weights.extrabold,
+        color: RED_500,
+    },
+    metricIcon: {
+        position: 'absolute',
+        right: 15,
+        top: 15,
+        opacity: 0.1,
+    },
     
-  },
-  styleRow: {
-    display : 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-    width: '100%'
-  }
-})
+    // --- BOTONES DE ACCIÓN ---
+    actionRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 30,
+    },
+    nextButton: {
+        flex: 1,
+        marginLeft: 10,
+    },
+    backButton: {
+        flex: 1,
+        marginRight: 10,
+    },
+    placeholderText: {
+        textAlign: 'center',
+        paddingVertical: 50,
+        backgroundColor: NEUTRAL_200,
+        borderRadius: 12,
+        marginTop: 20,
+        color: NEUTRAL_700,
+        fontStyle: 'italic',
+    }
+});

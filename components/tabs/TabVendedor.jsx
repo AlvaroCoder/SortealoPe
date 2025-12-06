@@ -13,9 +13,13 @@ export default function TabVendedorLayout() {
       screenOptions={{
         headerShown: false,
         tabBarLabelStyle: styles.tabBarLabel,
-        tabBarStyle: styles.floatingTabBar,
+        tabBarStyle: {
+          display: 'none',
+          height : 0
+        },
         tabBarActiveTintColor: WHITE, 
         tabBarInactiveTintColor: Colors.principal.green[200], 
+        
       }}
     >
       <Tabs.Screen
@@ -43,7 +47,7 @@ export default function TabVendedorLayout() {
         options={{
           title: 'Mis Eventos',
           tabBarIcon: ({ color }) => <Ionicons name="calendar-outline" size={24} color={color} />,
-          href: 'vendedor/mis-eventos',
+          href: null,
         }}
       />
 

@@ -87,8 +87,9 @@ interface FontFamilies {
 interface PrincipalColors {
   red: ColorScale;
   yellow: ColorScale;
-  green: ColorScale; 
+  green: ColorScale;
   neutral: ColorScale;
+  blue: ColorScale;
 }
 
 interface ColorsStructure {
@@ -149,16 +150,15 @@ const PRIMARY_COLORS: PrincipalColors = {
     800: '#92400E',
     900: '#78350F',
   },
-  // 🟢 Nueva escala de color 'green' incluyendo los colores solicitados
   green: {
     50: '#F0FFF4',
     100: '#C6F6D5',
     200: '#9AE6B4',
     300: '#68D391',
     400: '#48BB78',
-    500: '#16CD91', // Color solicitado
+    500: '#16CD91', 
     600: '#069F78',
-    700: '#038B5E', // Color solicitado
+    700: '#038B5E', 
     800: '#00624C',
     900: '#004739',
   },
@@ -173,6 +173,18 @@ const PRIMARY_COLORS: PrincipalColors = {
     700: '#334155',
     800: '#1E293B',
     900: '#0F172A',
+  },
+  blue: {
+    50: '#E6F3FC',
+    100: '#C0DFF5',
+    200: '#94C7EB',
+    300: '#68AFE0',
+    400: '#3D96D5',
+    500: '#1E82D9', 
+    600: '#1867AE',
+    700: '#124E82',
+    800: '#0C3457',
+    900: '#06192C',
   }
 };
 
@@ -194,11 +206,11 @@ const COLOR_TOKENS: { light: ColorTokens; dark: ColorTokens } = {
     border: PRIMARY_COLORS.neutral[200],
     borderFocus: PRIMARY_COLORS.red[500],
 
-    success: PRIMARY_COLORS.green[500], // 🟢 Usando el nuevo color #16CD91
+    success: PRIMARY_COLORS.green[500], 
     warning: '#F59E0B',
     error: '#EF4444',
-    info: '#3B82F6',
-
+    info: PRIMARY_COLORS.blue[500], 
+    
     tabIconDefault: PRIMARY_COLORS.neutral[400],
     tabIconSelected: PRIMARY_COLORS.red[500],
     icon: PRIMARY_COLORS.neutral[500],
@@ -220,10 +232,10 @@ const COLOR_TOKENS: { light: ColorTokens; dark: ColorTokens } = {
     border: PRIMARY_COLORS.neutral[700],
     borderFocus: PRIMARY_COLORS.red[400],
 
-    success: PRIMARY_COLORS.green[400], // 🟢 Usando un tono de verde adecuado para fondo oscuro (e.g., #48BB78)
+    success: PRIMARY_COLORS.green[400], 
     warning: '#FBBF24',
     error: '#F87171',
-    info: '#60A5FA',
+    info: PRIMARY_COLORS.blue[400], 
 
     tabIconDefault: PRIMARY_COLORS.neutral[400],
     tabIconSelected: PRIMARY_COLORS.red[400],
@@ -273,7 +285,7 @@ const LINE_HEIGHTS: LineHeights = {
   relaxed: 1.75,
 };
 
-const tintColorLight = '#0a7ea4';
+const tintColorLight = PRIMARY_COLORS.blue[500]; 
 const tintColorDark = '#fff';
 
 export const Colors: ColorsStructure = {
@@ -298,8 +310,9 @@ export const Colors: ColorsStructure = {
   principal: {
     red: PRIMARY_COLORS.red,
     yellow: PRIMARY_COLORS.yellow,
-    green: PRIMARY_COLORS.green, // 🟢 Añadido 'green'
+    green: PRIMARY_COLORS.green, 
     neutral: PRIMARY_COLORS.neutral,
+    blue: PRIMARY_COLORS.blue, 
   },
   raffle: RAFFLE_COLORS
 };

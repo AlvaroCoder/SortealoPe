@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
 import CollectionOption from '../common/Card/ColletionOption';
+import Title from '../common/Titles/Title';
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
@@ -54,7 +54,7 @@ export default function Step1Content({ form, setForm, onNext }) {
 
     return (
         <View style={styles.stepContent}>
-            <Text style={styles.stepTitleText}>1. Define el Paquete de Tickets</Text>
+            <Title>1. Define el Paquete de Tickets</Title>
             <Text style={styles.stepSubtitleText}>Selecciona un paquete predefinido o usa la opción personalizada abajo.</Text>
             
             <View style={styles.collectionListContainer}>
@@ -68,46 +68,22 @@ export default function Step1Content({ form, setForm, onNext }) {
                 ))}
             </View>
             
-            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>— Haz un cálculo aproximado —</Text>
+            <Text style={[styles.sectionTitle]}>Define los vendedores</Text>
 
-            <Text style={styles.inputLabel}>Cantidad de Vendedores </Text>
-            <TextInput
-                style={[styles.textInput, isCustom && styles.textInputActive]}
-                keyboardType="numeric"
-                placeholder="Ej: 100, 200, 500"
-                value={form.ticketCount}
-                onFocus={() => setForm(prev => ({ ...prev, customMode: true }))}
-                onChangeText={(text) => setForm(prev => ({ ...prev, ticketCount: text.replace(/[^0-9]/g, ''), customMode: true }))}
-                placeholderTextColor={NEUTRAL_200}
-            />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -200}
+            >
+                <Text style={styles.inputLabel}>Cantidad de Vendedores </Text>
+                <TextInput
+                    style={[styles.textInput, isCustom && styles.textInputActive]}
+                    keyboardType="numeric"
 
-            <Text style={styles.inputLabel}>Tickets por Vendedor</Text>
-            <TextInput
-                style={[styles.textInput, isCustom && styles.textInputActive]}
-                keyboardType="numeric"
-                placeholder="Ej: 10.00, 25.50"
-                value={form.unitPrice}
-                onFocus={() => setForm(prev => ({ ...prev, customMode: true }))}
-                onChangeText={(text) => setForm(prev => ({ ...prev, unitPrice: text.replace(/[^0-9.]/g, ''), customMode: true }))}
-                placeholderTextColor={NEUTRAL_200}
-            />
-
-            <Text style={styles.inputLabel}>Precio Unitario</Text>
-            <TextInput
-                style={[styles.textInput, isCustom && styles.textInputActive]}
-                keyboardType="numeric"
-                placeholder="Ej: 10.00, 25.50"
-                value={form.unitPrice}
-                onFocus={() => setForm(prev => ({ ...prev, customMode: true }))}
-                onChangeText={(text) => setForm(prev => ({ ...prev, unitPrice: text.replace(/[^0-9.]/g, ''), customMode: true }))}
-                placeholderTextColor={NEUTRAL_200}
-            />
-
-            <View style={styles.metricBox}>
-                <Text style={styles.metricLabel}>Recaudación Potencial Estimada:</Text>
-                <Text style={styles.metricValue}>S/ {totalRevenue}</Text>
-                <Ionicons name="cash-outline" size={30} color={GREEN_900} style={styles.metricIcon} />
-            </View>
+                    onFocus={() => setForm(prev => ({ ...prev, customMode: true }))}
+                    onChangeText={(text) => setForm(prev => ({ ...prev, ticketCount: text.replace(/[^0-9]/g, ''), customMode: true }))}
+                    placeholderTextColor={NEUTRAL_200}
+                />
+            </KeyboardAvoidingView>
 
             <View style={styles.buttonContainer}>
                 <ButtonGradiend onPress={handleNext} style={styles.nextButton}>
@@ -137,8 +113,6 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: Typography.sizes.base,
         fontWeight: Typography.weights.bold,
-        color: NEUTRAL_700,
-        textAlign: 'center',
         marginVertical: 10,
     },
     inputLabel: {

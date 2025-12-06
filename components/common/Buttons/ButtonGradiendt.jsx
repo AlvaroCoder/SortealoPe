@@ -9,7 +9,6 @@ export default function ButtonGradiend({
 }) {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.container, style]}>
-      {/* 🟢 Cambiando los colores del gradiente a la nueva paleta 'green' */}
       <LinearGradient
         colors={[Colors.principal.green[500], Colors.principal.green[700]]}
         start={{ x: 0, y: 0 }}
@@ -26,14 +25,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 10,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+
   },
   gradient: {
     paddingVertical: 15,

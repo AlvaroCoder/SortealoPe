@@ -13,8 +13,6 @@ const GREEN_500 = Colors.principal.green[500];
 const WHITE = '#FFFFFF';
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
-const GREEN_100 = Colors.principal.green[100];
-
 export default function StepperHeader({ currentStep }) {
   return (
     <View style={styles.headerContainer}>
@@ -63,9 +61,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 15,
         paddingVertical: 20,
-        backgroundColor: GREEN_100,
+
         borderBottomWidth: 1,
-        borderBottomColor: GREEN_500,
+        borderBottomColor: Colors.principal.blue[900],
     },
     stepWrapper: {
         flex: 1,
