@@ -36,7 +36,6 @@ const StatusTag = ({ status, theme = 'light' }) => {
 export default function CardEventMain({
   id="",
   title = "Sorteo PRO-Fondos COSAI",
-  date = "05 de Noviembre del 2025",
   ticketPrice =20,
   status = "Iniciado",
   urlImagen = "https://res.cloudinary.com/dabyqnijl/image/upload/v1764608015/WhatsApp_Image_2025-11-26_at_16.47.57_gjgygx.jpg",

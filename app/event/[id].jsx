@@ -12,9 +12,11 @@ import ProgressBar from "../../components/cards/ProgressBar";
 import VendorRankingRow from "../../components/cards/VendorRankingRow";
 import Title from "../../components/common/Titles/Title";
 import { Colors, Typography } from "../../constants/theme";
+import { useRaffleContext } from "../../context/RaffleContext";
 import { useDateFormatter } from "../../lib/dateFormatter";
 import DataCardEvent from "../../mock/DataCardEvent.json";
 import FloatinActionButtons from "../../views/SectionsButtons/FloatinActionButtons";
+import FloatingSellingButton from "../../views/SectionsButtons/FloatingSellingButton";
 
 const GREEN_900 = Colors.principal.green[900];
 const RED_500 = Colors.principal.red[500];
@@ -50,12 +52,14 @@ const mockVendorRanking = [
 ];
 export default function EventDetailPage() {
   const { formatDateToSpanish } = useDateFormatter();
-    const router = useRouter();
+  const router = useRouter();
   const params = useLocalSearchParams();
+
   const eventId = params.id;
 
   const data = DataCardEvent;
   const event = data?.filter((item) => parseInt(eventId) === item.id)[0];
+  const { isSeller } = useRaffleContext();
 
   if (!event) {
     return (
@@ -75,8 +79,8 @@ export default function EventDetailPage() {
 
   return (
     <View style={styles.container}>
-      <FloatinActionButtons />
-
+      {!isSeller &&  <FloatinActionButtons />}
+      {isSeller && <FloatingSellingButton/>}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.imageContainer}>
           <Image
@@ -88,8 +92,11 @@ export default function EventDetailPage() {
 
         <View style={styles.contentSection}>
           <View style={styles.headerContent}>
-            <Title>{event.title}</Title>
-            <TouchableOpacity style={styles.buttonEdit} onPress={()=>router.push("event/edit")}>
+            <Title styleTitle={{maxWidth : 300}}>{event.title}</Title>
+            <TouchableOpacity
+              style={styles.buttonEdit}
+              onPress={() => router.push("event/edit")}
+            >
               <Ionicons name="create-outline" size={20} />
             </TouchableOpacity>
           </View>
@@ -105,13 +112,17 @@ export default function EventDetailPage() {
           <Text style={styles.sectionTitle}>Detalles del Evento</Text>
           <Text style={styles.descriptionText}>{event.description}</Text>
 
-          <View style={styles.divider} />
+          {!isSeller && (
+            <>
+              <View style={styles.divider} />
 
-          <Text style={styles.sectionTitle}>Progreso de Tickets</Text>
-          <ProgressBar
-            available={event.availableTickets}
-            total={event.totalTickets}
-          />
+              <Text style={styles.sectionTitle}>Progreso de Tickets</Text>
+              <ProgressBar
+                available={event.availableTickets}
+                total={event.totalTickets}
+              />
+            </>
+          )}
 
           <View style={styles.divider} />
 
@@ -124,23 +135,27 @@ export default function EventDetailPage() {
             </View>
           </View>
 
-          <View style={styles.divider} />
+          {!isSeller && (
+            <>
+              <View style={styles.divider} />
 
-          <Text style={styles.sectionTitle}>
-            Ranking de Vendedores ({assignedSellers.length})
-          </Text>
+              <Text style={styles.sectionTitle}>
+                Ranking de Vendedores ({assignedSellers.length})
+              </Text>
 
-          <View>
-            {mockVendorRanking?.map((vendor, index) => (
-              <VendorRankingRow
-                key={vendor.id}
-                rank={index + 1}
-                name={vendor.name}
-                sales={vendor.sales}
-                ticketsSold={vendor.ticketsSold}
-              />
-            ))}
-          </View>
+              <View>
+                {mockVendorRanking?.map((vendor, index) => (
+                  <VendorRankingRow
+                    key={vendor.id}
+                    rank={index + 1}
+                    name={vendor.name}
+                    sales={vendor.sales}
+                    ticketsSold={vendor.ticketsSold}
+                  />
+                ))}
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -158,6 +173,7 @@ const styles = StyleSheet.create({
   buttonEdit: {
     padding: 10,
     borderRadius: 10,
+    height : 50,
     backgroundColor: Colors.principal.yellow[300],
     display: "flex",
     justifyContent: "center",
@@ -169,6 +185,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
+    gap : 5
   },
   imageContainer: {
     width: "100%",

@@ -1,6 +1,8 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import Title from "../components/common/Titles/Title";
 import { Colors, Typography } from "../constants/theme";
 import { useRaffleContext } from "../context/RaffleContext";
+import DataCardEvent from "../mock/DataCardEvent.json";
 import RolSwitchBar from "../views/Bars/RolSwitchBar";
 import CarrouselViewMainCard from "../views/Sliders/CarrouselViewMainCard";
 
@@ -12,10 +14,7 @@ const mockEventData = [];
 
 export default function MonitorSellerDashboard() {
   const { userRole, updateRole } = useRaffleContext();
-  const mockEventDataPlaceholder = [
-    { title: "Rifa Principal", date: "10-Dic", price: 50, status: "Activo" },
-    { title: "Colección C", date: "20-Dic", price: 20, status: "Activo" },
-  ];
+  const mockEventDataPlaceholder = DataCardEvent;
 
   return (
     <View style={styles.monitorContainer}>
@@ -28,7 +27,7 @@ export default function MonitorSellerDashboard() {
       >
         <View style={styles.contentPadding}>
           <View style={[styles.section]}>
-            <Text style={styles.sectionTitle}>Mis Eventos Asignados</Text>
+            <Title>Mis Eventos Asignados</Title>
             <CarrouselViewMainCard
               data={
                 mockEventData.length ? mockEventData : mockEventDataPlaceholder
