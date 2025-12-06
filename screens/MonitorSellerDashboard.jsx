@@ -10,8 +10,18 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const WHITE = "#FFFFFF";
 
 const kpiDataSeller = [
-  { label: "Tickets Vendidos", value: "85", icon: "checkmark-circle-outline" },
-  { label: "Tickets Faltantes", value: "115", icon: "close-circle-outline" },
+  {
+    label: "Tickets Vendidos",
+    value: "85",
+    icon: "checkmark-circle-outline",
+    route : "/metricas/vendedor/tickets-vendidos"
+  },
+  {
+    label: "Tickets Faltantes",
+    value: "115",
+    icon: "close-circle-outline",
+    route : "/metricas/vendedor/tickets-faltantes"
+  }
 ];
 
 const mockEventData = [];

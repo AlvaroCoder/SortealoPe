@@ -1,18 +1,11 @@
 import { useState } from 'react';
-import { Alert, LayoutAnimation, Platform, ScrollView, StyleSheet, UIManager, View } from 'react-native';
+import { Alert, LayoutAnimation, ScrollView, StyleSheet, View } from 'react-native';
 
 import Step1Content from '../../../components/steps/Step1Content';
 import Step2Content from '../../../components/steps/Step2Content';
 import Step3Content from '../../../components/steps/Step3Content';
 import StepperHeader from '../../../components/steps/StepperHeader';
 import { Colors, Typography } from '../../../constants/theme';
-
-if (
-    Platform.OS === 'android' &&
-    UIManager.setLayoutAnimationEnabledExperimental
-) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];

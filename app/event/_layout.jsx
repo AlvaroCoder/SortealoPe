@@ -28,6 +28,12 @@ export default function RootLayout() {
           header : ()=><HeaderBackNav title="Evento" />
         }}
       />
+      <Stack.Screen
+        name="edit"
+        options={{
+          header : ()=><HeaderBackNav title="Editar evento"/>
+        }}
+      />
     </Stack>
   );
 }

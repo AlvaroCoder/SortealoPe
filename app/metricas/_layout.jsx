@@ -17,9 +17,9 @@ export default function RootLayout() {
         }}
       />
       <Stack.Screen
-        name="vendedor/index"
+        name="vendedor"
         options={{
-          header: () => <HeaderBackNav title="Metrica de vendedores" />,
+          headerShown : false
         }}
       />
     </Stack>

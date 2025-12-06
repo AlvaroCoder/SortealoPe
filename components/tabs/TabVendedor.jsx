@@ -32,7 +32,7 @@ export default function TabVendedorLayout() {
         options={{
           title: 'Mis Tickets',
           tabBarIcon: ({ color }) => <Ionicons name="pricetags-outline" size={26} color={color} />,
-          href: 'vendedor/inventario',
+          href: null,
           tabBarLabel : ()=>{return null}
 
         }}
