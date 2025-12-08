@@ -1,4 +1,6 @@
+import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
+import ButtonFloatinQRScan from "../components/common/Buttons/ButtonFloatinQRScan";
 import Title from "../components/common/Titles/Title";
 import { Colors, Typography } from "../constants/theme";
 import { useRaffleContext } from "../context/RaffleContext";
@@ -15,9 +17,11 @@ const mockEventData = [];
 export default function MonitorSellerDashboard() {
   const { userRole, updateRole } = useRaffleContext();
   const mockEventDataPlaceholder = DataCardEvent;
+  const router = useRouter();
 
   return (
     <View style={styles.monitorContainer}>
+      <ButtonFloatinQRScan onPress={()=>router.push("vendedores/scan")}/>
       <RolSwitchBar userRole={userRole} updateRole={updateRole} />
 
       <ScrollView
@@ -27,7 +31,7 @@ export default function MonitorSellerDashboard() {
       >
         <View style={styles.contentPadding}>
           <View style={[styles.section]}>
-            <Title>Mis Eventos Asignados</Title>
+            <Title>Eventos Recientes</Title>
             <CarrouselViewMainCard
               data={
                 mockEventData.length ? mockEventData : mockEventDataPlaceholder

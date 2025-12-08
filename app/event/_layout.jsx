@@ -22,6 +22,13 @@ export default function RootLayout() {
           header : ()=><HeaderBackNav title="Editar evento"/>
         }}
       />
+
+      <Stack.Screen
+        name="mis-eventos/vendedor"
+        options={{
+          header : ()=><HeaderBackNav title="Mis Eventos" />
+        }}
+      />
     </Stack>
   );
 }

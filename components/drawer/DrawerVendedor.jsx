@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../constants/theme";
 import { useRaffleContext } from "../../context/RaffleContext";
@@ -17,6 +18,8 @@ export default function DrawerVendedorContent(props) {
   const { navigation } = props;
   const { userRole } =
     useRaffleContext();
+
+  const router = useRouter();
 
   const userName = "Vendedor Estrella";
 
@@ -41,49 +44,20 @@ export default function DrawerVendedorContent(props) {
       </View>
 
       <View style={styles.navigationSection}>
-        <Text style={styles.sectionTitle}>GESTION DE TICKETS</Text>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("vendedor/inventario")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="pricetags-outline" size={22} color={GREEN_900} />
-          </View>
-          <Text style={styles.navLabel}>Tickets por vender</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("vendedor/inventario")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="pricetags-outline" size={22} color={GREEN_900} />
-          </View>
-          <Text style={styles.navLabel}>Tickets vendidos</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("vendedor/inventario")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="pricetags-outline" size={22} color={GREEN_900} />
-          </View>
-          <Text style={styles.navLabel}>Tickets separados</Text>
-        </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>GESTION DE EVENTOS</Text>
         
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate("vendedor/inventario")}
+          onPress={() => router.push("event/")}
         >
           <View style={styles.navIconContainer}>
             <Ionicons name="pricetags-outline" size={22} color={GREEN_900} />
           </View>
           <Text style={styles.navLabel}>Eventos asignados</Text>
         </TouchableOpacity>
+
+        
       </View>
 
       <View style={styles.profileSection}>

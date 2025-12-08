@@ -22,6 +22,12 @@ export default function RootLayout() {
                     headerShown : false
               }}
           />
+          <Stack.Screen
+              name='scan/index'
+              options={{
+                  header : () => <HeaderBackNav title='Escanear QR' />
+              }}
+          />
     </Stack>
   )
 };
