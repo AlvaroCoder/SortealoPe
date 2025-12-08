@@ -50,6 +50,7 @@ const mockVendorRanking = [
   { id: 4, name: "Javier V.", sales: 8100, ticketsSold: 231 },
   { id: 5, name: "Elena G.", sales: 5500, ticketsSold: 157 },
 ];
+
 export default function EventDetailPage() {
   const { formatDateToSpanish } = useDateFormatter();
   const router = useRouter();
@@ -60,6 +61,13 @@ export default function EventDetailPage() {
   const data = DataCardEvent;
   const event = data?.filter((item) => parseInt(eventId) === item.id)[0];
   const { isSeller } = useRaffleContext();
+  
+  const handlePress = () => {
+    router.push({
+      pathname: 'tickets/sell/[id]',
+      params: { id: eventId }
+    });   
+  };
 
   if (!event) {
     return (
@@ -80,7 +88,7 @@ export default function EventDetailPage() {
   return (
     <View style={styles.container}>
       {!isSeller &&  <FloatinActionButtons />}
-      {isSeller && <FloatingSellingButton/>}
+      {isSeller && <FloatingSellingButton handlePress={handlePress} />}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.imageContainer}>
           <Image
@@ -93,12 +101,12 @@ export default function EventDetailPage() {
         <View style={styles.contentSection}>
           <View style={styles.headerContent}>
             <Title styleTitle={{maxWidth : 300}}>{event.title}</Title>
-            <TouchableOpacity
+            {!isSeller && (            <TouchableOpacity
               style={styles.buttonEdit}
               onPress={() => router.push("event/edit")}
             >
               <Ionicons name="create-outline" size={20} />
-            </TouchableOpacity>
+            </TouchableOpacity>)}
           </View>
           <View style={styles.infoRow}>
             <Ionicons name="calendar-outline" size={18} color={BLUE_500} />
@@ -112,8 +120,6 @@ export default function EventDetailPage() {
           <Text style={styles.sectionTitle}>Detalles del Evento</Text>
           <Text style={styles.descriptionText}>{event.description}</Text>
 
-          {!isSeller && (
-            <>
               <View style={styles.divider} />
 
               <Text style={styles.sectionTitle}>Progreso de Tickets</Text>
@@ -121,8 +127,6 @@ export default function EventDetailPage() {
                 available={event.availableTickets}
                 total={event.totalTickets}
               />
-            </>
-          )}
 
           <View style={styles.divider} />
 
@@ -259,20 +263,5 @@ const styles = StyleSheet.create({
     color: NEUTRAL_700,
     textAlign: "center",
     paddingVertical: 10,
-  },
-
-  // --- ESTILOS DE PERFILES HORIZONTALES (VENDEDORES/COMPRADORES) ---
-  profileList: {
-    paddingVertical: 5,
-    marginBottom: 10,
-  },
-  noSellerText: {
-    fontSize: Typography.sizes.base,
-    color: NEUTRAL_700,
-    backgroundColor: Colors.principal.red[50],
-    padding: 10,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: RED_500,
   },
 });

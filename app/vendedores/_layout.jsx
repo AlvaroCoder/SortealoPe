@@ -16,7 +16,12 @@ export default function RootLayout() {
                   header : () => <HeaderBackNav title='Vendedores' />
               }}
           />
-
+          <Stack.Screen
+              name='agregar'
+              options={{
+                    headerShown : false
+              }}
+          />
     </Stack>
   )
 };

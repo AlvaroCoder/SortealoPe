@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ButtonGradiend from '../../components/common/Buttons/ButtonGradiendt';
 import { Colors, Typography } from '../../constants/theme';
@@ -9,12 +10,15 @@ const BLACK = '#000000';
 const BLUE_500 = Colors.principal.blue[500];
 
 export default function FloatinActionButtons() {
+    const router = useRouter();
+
     const handleStartRaffle = () => {
         Alert.alert("Acción de Monitoreo", "La rifa se ha iniciado.");
     };
 
     const handleAddSeller = () => {
-        Alert.alert("Acción de Monitoreo", "Abriendo modal para asignar un nuevo vendedor.");
+        /// Alert.alert("Acción de Monitoreo", "Abriendo modal para asignar un nuevo vendedor.");
+        router.push('/vendedores/agregar');
     };
   return (
     <View style={styles.floatingButtonsWrapper}>
@@ -47,7 +51,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingBottom: 20,
         paddingTop: 10,
-        backgroundColor: WHITE, // Fondo blanco para el área de los botones
+        backgroundColor: WHITE,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         shadowColor: BLACK,

@@ -17,7 +17,7 @@ export default function RootLayout() {
           <Stack.Screen name='(auth)' options={{ headerShown : false }} />
           <Stack.Screen name='(drawer)' options={{ headerShown : false }}  />
           <Stack.Screen name='event' options={{ headerShown: false }} />
-          <Stack.Screen name='raffle' options={{ headerShown: false }} />
+          <Stack.Screen name='tickets' options={{ headerShown: false }} />
           <Stack.Screen name='metricas' options={{ headerShown : false}} />
           <Stack.Screen name='vendedores' options={{headerShown : false}}/>
         </Stack>
