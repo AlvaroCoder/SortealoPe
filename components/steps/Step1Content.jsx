@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
 import CollectionOption from '../common/Card/ColletionOption';
@@ -67,23 +67,6 @@ export default function Step1Content({ form, setForm, onNext }) {
                     />
                 ))}
             </View>
-            
-            <Text style={[styles.sectionTitle]}>Define los vendedores</Text>
-
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -200}
-            >
-                <Text style={styles.inputLabel}>Cantidad de Vendedores </Text>
-                <TextInput
-                    style={[styles.textInput, isCustom && styles.textInputActive]}
-                    keyboardType="numeric"
-
-                    onFocus={() => setForm(prev => ({ ...prev, customMode: true }))}
-                    onChangeText={(text) => setForm(prev => ({ ...prev, ticketCount: text.replace(/[^0-9]/g, ''), customMode: true }))}
-                    placeholderTextColor={NEUTRAL_200}
-                />
-            </KeyboardAvoidingView>
 
             <View style={styles.buttonContainer}>
                 <ButtonGradiend onPress={handleNext} style={styles.nextButton}>

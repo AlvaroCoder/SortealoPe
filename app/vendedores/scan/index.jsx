@@ -22,7 +22,6 @@ const SCAN_STATUS = {
     ERROR: 'QR no válido o ilegible.',
 };
 
-
 export default function PageScanQR() {
     const [scanStatus, setScanStatus] = useState(SCAN_STATUS.WAITING);
     const [scannedData, setScannedData] = useState(null);

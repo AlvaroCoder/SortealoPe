@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, LayoutAnimation, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, LayoutAnimation, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import Step1Content from '../../components/steps/Step1Content';
 import Step2Content from '../../components/steps/Step2Content';
@@ -60,9 +60,14 @@ export default function CreateEventStepper() {
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
             <StepperHeader currentStep={currentStep} />
-            <View style={styles.contentWrapper}>
-                {renderContent()}
-            </View>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                keyboardVerticalOffset={100}>
+                    <View style={styles.contentWrapper}>
+                    {renderContent()}
+                </View>
+            </KeyboardAvoidingView>
         </ScrollView>
     );
 }
