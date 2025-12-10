@@ -4,6 +4,7 @@ import { Alert, KeyboardAvoidingView, LayoutAnimation, Platform, ScrollView, Sty
 import Step1Content from '../../components/steps/Step1Content';
 import Step2Content from '../../components/steps/Step2Content';
 import Step3Content from '../../components/steps/Step3Content';
+import Step3CategoryContent from '../../components/steps/Step3ContentCategory';
 import StepperHeader from '../../components/steps/StepperHeader';
 import { Colors, Typography } from '../../constants/theme';
 
@@ -18,20 +19,18 @@ const GREEN_100 = Colors.principal.green[100];
 const STEPS = [
     { id: 1, title: 'Paquete de Tickets', icon: 'pricetags-outline' },
     { id: 2, title: 'Detalles del Premio', icon: 'gift-outline' },
-    { id: 3, title: 'Diseño y Archivos', icon: 'image-outline' },
+    { id : 3, title : 'Categoría del Evento', icon : 'albums-outline' },
+    { id: 4, title: 'Diseño y Archivos', icon: 'image-outline' },
 ];
 
 export default function CreateEventStepper() {
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
-        ticketCount: '100',
-        unitPrice: '10.00',
-        totalRevenue: '1000.00',
+        collectionsQuantity : 1
     });
     
-    const handleNext = (data = {}) => {
+    const handleNext = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setFormData(prev => ({ ...prev, ...data }));
         setCurrentStep(prev => prev < STEPS.length ? prev + 1 : prev);
     };
 
@@ -51,6 +50,8 @@ export default function CreateEventStepper() {
             case 2:
                 return <Step2Content form={formData} setForm={setFormData} onNext={handleNext} onBack={handleBack} />;
             case 3:
+                return <Step3CategoryContent form={formData} setForm={setFormData} onNext={handleNext} onBack={handleBack}  />
+            case 4:
                 return <Step3Content form={formData} setForm={setFormData} onSubmit={handleSubmit} onBack={handleBack} />;
             default:
                 return <Step1Content form={formData} setForm={setFormData} onNext={handleNext} />;
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
         backgroundColor: WHITE,
     },
     scrollContent: {
-        paddingBottom: 40,
+
     },
     contentWrapper: {
         paddingHorizontal: 24,

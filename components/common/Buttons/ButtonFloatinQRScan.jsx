@@ -1,10 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../../../constants/theme';
 
 const BLUE_500 = Colors.principal.blue[800]; 
 const WHITE = 'white';
-
 
 export default function ButtonFloatinQRScan({ onPress = () => {} }) {
   return (
@@ -12,10 +11,12 @@ export default function ButtonFloatinQRScan({ onPress = () => {} }) {
           <TouchableOpacity 
             style={styles.buttonStyle}
             onPress={onPress}
-              activeOpacity={0.8}
-              
+            activeOpacity={0.8}
           >
-              <Ionicons name='scan-outline' size={30} color={WHITE} />
+            <View style={styles.buttonContent}>
+              <Text style={styles.buttonText}>Escanear QR</Text> 
+              <Ionicons name='scan-outline' size={24} color={WHITE} /> 
+            </View>
         </TouchableOpacity>
     </View>
   )
@@ -25,20 +26,29 @@ const styles = StyleSheet.create({
     containerButton : {
         position: 'absolute',
         right: 20, 
-        bottom: 20,
+        bottom: 40,
         zIndex : 100,
     },
     buttonStyle: {
-        width : 60,
-        height: 60,
+        paddingHorizontal : 15, 
+        paddingVertical : 10,
         borderRadius: 30,
         backgroundColor: BLUE_500, 
-        justifyContent: 'center',
-        alignItems: 'center',
         elevation: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 5,
+    },
+    buttonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    buttonText: {
+        color: WHITE,
+        fontSize: 16,
+        fontWeight: 'bold',
     }
 });

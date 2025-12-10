@@ -3,9 +3,10 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 
 const STEPS = [
-    { id: 1, title: 'Paquete de Tickets', icon: 'pricetags-outline' },
-    { id: 2, title: 'Detalles del Premio', icon: 'gift-outline' },
-    { id: 3, title: 'Diseño y Archivos', icon: 'image-outline' },
+    { id: 1, title: 'Tickets', icon: 'pricetags-outline' },
+    { id: 2, title: 'Detalles', icon: 'gift-outline' },
+    { id : 3, title : 'Categoría', icon : 'albums-outline' },
+    { id: 4, title: 'Diseño', icon: 'image-outline' },
 ];
 
 const GREEN_900 = Colors.principal.green[900];

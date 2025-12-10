@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
@@ -14,43 +13,31 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const GREEN_100 = Colors.principal.green[100];
 
 const COLLECTIONS = [
-    { tickets: 100, price: 10.00, label: "Paquete Bronce" },
-    { tickets: 200, price: 20.00, label: "Paquete Plata" },
-    { tickets: 500, price: 50.00, label: "Paquete Oro" },
-    { tickets: 1000, price: 100.00, label: "Paquete Platino" },
+    { id : 1, tickets: 100, price: 10.00, label: "Paquete Bronce" },
+    { id : 2, tickets: 200, price: 20.00, label: "Paquete Plata" },
+    { id : 3, tickets: 500, price: 50.00, label: "Paquete Oro" },
+    { id : 4, tickets: 1000, price: 100.00, label: "Paquete Platino" },
 ];
 
 export default function Step1Content({ form, setForm, onNext }) {
-    const totalRevenue = useMemo(() => {
-        const count = parseFloat(form.ticketCount) || 0;
-        const price = parseFloat(form.unitPrice) || 0;
-        return (count * price).toFixed(2);
-    }, [form.ticketCount, form.unitPrice]);
 
     const handleNext = () => {
-        if (!form.ticketCount || !form.unitPrice || parseFloat(form.ticketCount) <= 0 || parseFloat(form.unitPrice) <= 0) {
-            Alert.alert("Error", "Por favor, ingresa una cantidad y precio de ticket válidos.");
-            return;
+        if (form?.packId === undefined) {
+            Alert.alert("Error de Validación", "Por favor, selecciona un paquete de tickets para continuar.");
+            return
         }
-        onNext({ totalRevenue });
+        onNext();
     };
 
     const handleCollectionSelect = (item) => {
         setForm(prev => ({ 
             ...prev, 
-            ticketCount: item.tickets.toString(), 
-            unitPrice: item.price.toFixed(2),
-            customMode: false 
+            packId : item?.id
         }));
     };
 
-    const isCustom = form.customMode !== false; 
-    
-    const isSelected = (item) => 
-        !isCustom && 
-        item.tickets.toString() === form.ticketCount && 
-        item.price.toFixed(2) === form.unitPrice;
-
+    const isSelected = (item) =>
+        item?.id === form.packId;
 
     return (
         <View style={styles.stepContent}>

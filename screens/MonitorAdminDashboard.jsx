@@ -1,10 +1,9 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import ButtonCreateEvent from "../components/common/Buttons/ButtonCreateEvent";
 import Title from "../components/common/Titles/Title";
 import { Colors, Typography } from "../constants/theme";
 import DataCardEvent from "../mock/DataCardEvent.json";
 import RolSwitchBar from "../views/Bars/RolSwitchBar";
-import TimelinePrincipalEvents from "../views/Monitor/TimelinePrincipalEvents";
 import CarrouselViewMainCard from "../views/Sliders/CarrouselViewMainCard";
 
 const GREEN_900 = Colors.principal.green[900];
@@ -27,12 +26,6 @@ export default function MonitorAdminDashboard({ userRole, updateRole }) {
           <CarrouselViewMainCard data={mockEventData} />
         </View>
         
-        <View style={styles.divider} />
-
-        <View style={[styles.section, {marginBottom : 100}]}>
-          <Text style={styles.sectionTitle}>Próximos eventos</Text>
-          <TimelinePrincipalEvents/>
-        </View>
       </ScrollView>
       <ButtonCreateEvent/>
     </View>

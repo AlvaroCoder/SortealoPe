@@ -1,252 +1,255 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import ButtonGradiend from '../../components/common/Buttons/ButtonGradiendt';
+import { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
-import { isValidDate } from '../../lib/validate';
-import DataCardEvent from "../../mock/DataCardEvent.json";
+import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
+import Title from '../common/Titles/Title';
 
 const GREEN_900 = Colors.principal.green[900];
-const GREEN_500 = Colors.principal.green[500];
-const RED_500 = Colors.principal.red[500];
 const WHITE = Colors.principal.white;
+const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
+const RED_500 = Colors.principal.red[500]; 
 const RED_600 = Colors.principal.red[600];
 
-const initialMockEvent = {
-    id: 1,
-    title: 'Súper Rifa Anual por Fondos COSAI',
-    description: '¡Participa en nuestra rifa más grande para apoyar la misión!',
-    ticketPrice: 20.00,
-    location: 'Sede Central',
-    date: '20/12/2025',
-    urlImagen: 'https://res.cloudinary.com/dabyqnijl/image/upload/v1764608015/WhatsApp_Image_2025-11-26_at_16.47.57_gjgygx.jpg',
-    prizeValue: '15000',
+const isValidDate = (dateString) => {
+    if (dateString.length !== 10) return false;
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    if (!regex.test(dateString)) return false;
+
+    const [day, month, year] = dateString.split('/').map(Number);
+    const date = new Date(year, month - 1, day);
+    
+    return (
+        date.getFullYear() === year &&
+        date.getMonth() === month - 1 &&
+        date.getDate() === day
+    );
 };
 
-
-
-export default function EditEventPage() {
-    const params = useLocalSearchParams();
-    const eventId = params.id; 
-    
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        ticketPrice: '',
-        location: '',
-        date: '',
-        mainBanner: '', 
-        prizeValue: '', 
-    });
-    const [isLoading, setIsLoading] = useState(true);
-    const [dateError, setDateError] = useState(''); 
-
-    useEffect(() => {
-        const data = DataCardEvent;
-        const loadedEvent = data?.find(item => parseInt(eventId) === item.id) || initialMockEvent;
-
-        setFormData({
-            title: loadedEvent.title || '',
-            description: loadedEvent.description || '',
-            ticketPrice: loadedEvent.ticketPrice ? loadedEvent.ticketPrice.toString() : '0.00',
-            location: loadedEvent.location || '',
-            date: loadedEvent.date || loadedEvent.createdAt || '', 
-            mainBanner: loadedEvent.urlImagen || '',
-            prizeValue: loadedEvent.prizeValue || '10000', 
-        });
-        setIsLoading(false);
-    }, [eventId]);
+export default function Step2Content({ form, setForm, onNext, onBack }) {
+    const [validationErrors, setValidationErrors] = useState({});
 
     const updateForm = (key, value) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
+        setForm(prev => ({ ...prev, [key]: value }));
+    };
+
+    const setError = (key, message) => {
+        setValidationErrors(prev => ({ ...prev, [key]: message }));
     };
 
     const handleDateChange = (text) => {
         let cleanText = text.replace(/[^0-9]/g, '');
-
         let formattedText = '';
-        if (cleanText.length > 0) {
-            formattedText = cleanText.substring(0, 2);
-        }
-        if (cleanText.length >= 3) {
-            formattedText += '/' + cleanText.substring(2, 4);
-        }
-        if (cleanText.length >= 5) {
-            formattedText += '/' + cleanText.substring(4, 8);
-        }
-
+        if (cleanText.length > 0) formattedText = cleanText.substring(0, 2);
+        if (cleanText.length >= 3) formattedText += '/' + cleanText.substring(2, 4);
+        if (cleanText.length >= 5) formattedText += '/' + cleanText.substring(4, 8);
         formattedText = formattedText.substring(0, 10);
 
         updateForm('date', formattedText);
 
         if (formattedText.length === 10) {
             if (!isValidDate(formattedText)) {
-                setDateError('Formato inválido (DD/MM/AAAA) o fecha no existe.');
+                setError('date', 'Formato inválido (DD/MM/AAAA) o fecha no existe.');
             } else {
-                setDateError('');
+                setError('date', ''); 
             }
         } else if (formattedText.length > 0 && formattedText.length < 10) {
-             setDateError(''); 
-        } else {
-             setDateError(''); 
+             setError('date', '');
+        } else if (formattedText.length === 0) {
+            setError('date', ''); 
         }
     };
     
-    const handleSave = () => {
-        if (!formData.title || !formData.ticketPrice || !formData.date) {
-            Alert.alert("Error de Validación", "El título, precio y fecha son campos obligatorios.");
-            return;
+    const handlePriceChange = (text) => {
+        const value = text.replace(/[^0-9.]/g, '');
+        updateForm('ticketPrice', value);
+
+        if (value && parseFloat(value) <= 0) {
+            setError('ticketPrice', 'El precio debe ser mayor a cero.');
+        } else {
+            setError('ticketPrice', '');
         }
-        if (dateError) {
-             Alert.alert("Error de Validación", "Corrige el formato de la fecha antes de guardar.");
+    };
+
+    const handleIntegerChange = (key, text) => {
+        const value = text.replace(/[^0-9]/g, '');
+        updateForm(key, value);
+
+        if (value && parseInt(value) <= 0) {
+            setError(key, 'La cantidad debe ser mayor a cero.');
+        } else {
+            setError(key, '');
+        }
+    };
+
+
+    const handleNext = () => {
+        const errors = {};
+        let hasErrors = false;
+        
+        if (!form.title) errors.title = "El título es obligatorio.";
+        if (!form.description) errors.description = "La descripción es obligatoria.";
+        if (!form.place) errors.place = "El lugar es obligatorio.";
+        
+        if (!form.ticketPrice || parseFloat(form.ticketPrice) <= 0) errors.ticketPrice = "Ingresa un precio válido (> 0).";
+        if (!form.ticketsPerCollection || parseInt(form.ticketsPerCollection) <= 0) errors.ticketsPerCollection = "Ingresa una cantidad válida (> 0).";
+        
+        if (!form.date) {
+            errors.date = "La fecha es obligatoria.";
+        } else if (!isValidDate(form.date)) {
+            errors.date = "Formato de fecha inválido (DD/MM/AAAA).";
+        }
+        
+        setValidationErrors(errors);
+        hasErrors = Object.keys(errors).length > 0;
+
+        if (hasErrors) {
+            Alert.alert("Error de Validación", "Por favor, corrige los errores en el formulario.");
             return;
         }
 
-        Alert.alert(
-            "Evento Actualizado", 
-            `El evento "${formData.title}" ha sido guardado exitosamente.`
+        onNext({});
+    };
+
+    const ErrorMessage = ({ error }) => {
+        if (!error) return null;
+        return (
+            <Text style={styles.errorText}>
+                <Ionicons name="alert-circle-outline" size={14} color={RED_500} /> {error}
+            </Text>
         );
     };
 
-    if (isLoading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Cargando evento...</Text>
-            </View>
-        );
-    }
+    const isInputInvalid = (key) => !!validationErrors[key];
+    const getTextInputStyle = (key) => [styles.textInput, isInputInvalid(key) && styles.textInputError];
 
 
-    return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-            <Text style={styles.mainTitle}>Editar Evento: {formData.title}</Text>
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <View style={styles.stepContent}>
+            <Title styleTitle={styles.stepTitleText}>2. Ingresar datos del evento</Title>
+            <Text style={styles.stepSubtitleText}>
+                Ingresa los detalles clave de tu evento para que los compradores puedan identificarlo.
+            </Text>
+
+            <Text style={styles.sectionTitle}>Información básica</Text>
+
+            <Text style={styles.inputLabel}>Título del evento <Text style={{color : RED_600}}>(*)</Text></Text>
+            <TextInput
+                style={getTextInputStyle('title')}
+                placeholder='Ej: Rifa Viaje a Cancún'
+                value={ form.title }
+                onChangeText={(text) => updateForm('title', text)}
+                placeholderTextColor={NEUTRAL_200}
+            />
+            <ErrorMessage error={validationErrors.title} />
+
+            <Text style={styles.inputLabel}>Descripción del evento <Text style={{color : RED_600}}>(*)</Text></Text>
+            <TextInput
+                style={[getTextInputStyle('description'), styles.textArea]}
+                placeholder='Ingresa la descripción y el premio principal'
+                value={ form.description }
+                onChangeText={(text) => updateForm('description', text)}
+                placeholderTextColor={NEUTRAL_200}
+                multiline
+                numberOfLines={4}
+            />
+            <ErrorMessage error={validationErrors.description} />
+
+
+            <Text style={[styles.sectionTitle, {marginTop: 20}]}>Detalles y fechas</Text>
             
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Información Básica</Text>
-                
-                <Text style={styles.inputLabel}>Título del Evento (*)</Text>
-                <TextInput
-                    style={styles.textInput}
-                    value={formData.title}
-                    onChangeText={(text) => updateForm('title', text)}
-                    placeholderTextColor={NEUTRAL_200}
-                />
+            <Text style={styles.inputLabel}>Precio Unitario del Ticket (S/.) <Text style={{color : RED_600}}>(*)</Text></Text>
+            <TextInput
+                style={getTextInputStyle('ticketPrice')}
+                keyboardType='numeric'
+                placeholder='00.00'
+                value={ form.ticketPrice}
+                onChangeText={handlePriceChange} 
+                placeholderTextColor={NEUTRAL_200}
+            />
+            <ErrorMessage error={validationErrors.ticketPrice} />
 
-                <Text style={styles.inputLabel}>Descripción del Evento</Text>
-                <TextInput
-                    style={[styles.textInput, styles.textArea]}
-                    value={formData.description}
-                    onChangeText={(text) => updateForm('description', text)}
-                    placeholderTextColor={NEUTRAL_200}
-                    multiline
-                    numberOfLines={4}
-                />
-            </View>
+            <Text style={styles.inputLabel}>Cantidad de Tickets por Vendedor <Text style={{color : RED_600}}>(*)</Text></Text>
+            <TextInput
+                style={getTextInputStyle('ticketsPerCollection')}
+                keyboardType='numeric'
+                placeholder='Total de tickets a generar'
+                value={form?.ticketsPerCollection}
+                onChangeText={(text) => handleIntegerChange('ticketsPerCollection', text)} 
+                placeholderTextColor={NEUTRAL_200}
+            />
+            <ErrorMessage error={validationErrors.ticketsPerCollection} />
 
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Detalles y Fechas</Text>
 
-                <Text style={styles.inputLabel}>Precio Unitario del Ticket (S/)</Text>
-                <TextInput
-                    style={styles.textInput}
-                    keyboardType="numeric"
-                    value={formData.ticketPrice}
-                    onChangeText={(text) => updateForm('ticketPrice', text.replace(/[^0-9.]/g, ''))}
-                    placeholderTextColor={NEUTRAL_200}
-                />
-                
-                <Text style={styles.inputLabel}>Valor Estimado del Premio (S/)</Text>
-                <TextInput
-                    style={styles.textInput}
-                    keyboardType="numeric"
-                    value={formData.prizeValue}
-                    onChangeText={(text) => updateForm('prizeValue', text.replace(/[^0-9.]/g, ''))}
-                    placeholderTextColor={NEUTRAL_200}
-                />
+            <Text style={styles.inputLabel}>Lugar del evento <Text style={{color : RED_600}}>(*)</Text></Text>
+            <TextInput
+                style={getTextInputStyle('place')}
+                placeholder='Ej: Sede Central / Zoom'
+                value={form?.place}
+                onChangeText={(text) => updateForm('place', text)}
+                placeholderTextColor={NEUTRAL_200}
+            />
+            <ErrorMessage error={validationErrors.place} />
+            
+            <Text style={styles.inputLabel}>Fecha de Cierre del Sorteo (DD/MM/AAAA) <Text style={{color : RED_600}}>(*)</Text></Text>
+            <TextInput
+                style={getTextInputStyle('date')}
+                placeholder='DD/MM/AAAA'
+                value={form?.date}
+                onChangeText={handleDateChange}
+                keyboardType='numeric'
+                maxLength={10}
+                placeholderTextColor={NEUTRAL_200}
+            />
+            <ErrorMessage error={validationErrors.date} />
 
-                <Text style={styles.inputLabel}>Fecha de Cierre y Sorteo (DD/MM/AAAA) <Text style={{color : RED_600}}>(*)</Text> </Text>
-                <TextInput
-                    style={[styles.textInput, dateError && styles.textInputError]}
-                    placeholder="Ej: 20/12/2025"
-                    value={formData.date}
-                    onChangeText={handleDateChange} 
-                    keyboardType='numeric'
-                    maxLength={10} 
-                    placeholderTextColor={NEUTRAL_200}
-                />
-                {dateError ? (
-                    <Text style={styles.errorText}>
-                        <Ionicons name="alert-circle-outline" size={14} color={RED_500} /> {dateError}
-                    </Text>
-                ) : null}
-
-                <Text style={styles.inputLabel}>Lugar del Sorteo o Evento</Text>
-                <TextInput
-                    style={styles.textInput}
-                    placeholder="Ej: Online (Zoom), Parque Central"
-                    value={formData.location}
-                    onChangeText={(text) => updateForm('location', text)}
-                    placeholderTextColor={NEUTRAL_200}
-                />
-            </View>
-
-            <View style={styles.buttonContainer}>
-                <ButtonGradiend onPress={handleSave}>
-                    Guardar Cambios
+              <View style={styles.actionRow}>
+                   <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                       <Ionicons name="arrow-back-outline" style={{color : GREEN_900}} size={24} />
+                   </TouchableOpacity>
+                <ButtonGradiend onPress={handleNext} style={styles.nextButton}>
+                    Continuar
                 </ButtonGradiend>
             </View>
-            
-        </ScrollView>
-    );
-}
+        </View>
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: WHITE,
     },
     scrollContent: {
         paddingBottom: 40,
-    
     },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: WHITE,
+    stepContent: {
+        width: "100%",
     },
-    loadingText: {
-        fontSize: Typography.sizes.lg,
-        color: GREEN_500,
-    },
-    mainTitle: {
-        fontSize: Typography.sizes['3xl'],
+    stepTitleText: {
+        fontSize: Typography.sizes['2xl'],
         fontWeight: Typography.weights.extrabold,
         color: GREEN_900,
-        marginTop: 20,
-        marginBottom: 30,
+        marginBottom: 8,
     },
-    
-    section: {
+    stepSubtitleText: {
+        fontSize: Typography.sizes.base,
+        color: NEUTRAL_700,
         marginBottom: 20,
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: NEUTRAL_200,
     },
     sectionTitle: {
-        fontSize: Typography.sizes.xl,
+        fontSize: Typography.sizes.lg,
         fontWeight: Typography.weights.bold,
-        color: RED_500, 
-        marginBottom: 15,
+        marginBottom: 10,
+        color : Colors.principal.blue[800]
     },
     
     inputLabel: {
         fontSize: Typography.sizes.md,
         fontWeight: Typography.weights.medium,
-        color: GREEN_900,
-        marginTop: 10,
+        marginTop: 15,
         marginBottom: 8,
     },
     textInput: {
@@ -255,17 +258,16 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 15,
         fontSize: Typography.sizes.lg,
-        color: GREEN_900,
         backgroundColor: WHITE,
     },
-    textInputError: { 
-        borderColor: RED_500,
-        backgroundColor: Colors.principal.red[50],
+    textInputError: {
+        borderColor: RED_500, 
+        borderWidth: 2,
     },
     errorText: {
         fontSize: Typography.sizes.sm,
         color: RED_500,
-        marginTop: 5,
+        marginTop: 4,
         marginLeft: 5,
     },
     textArea: {
@@ -274,8 +276,24 @@ const styles = StyleSheet.create({
         paddingTop: 15,
     },
     
-    buttonContainer: {
+    actionRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         marginTop: 30,
-        marginBottom: 20,
-    }
+        marginBottom:  40,
+        gap : 8
+    },
+    nextButton: {
+        flex: 1,
+        
+    },
+    backButton: {
+      borderColor: GREEN_900,
+      borderRadius: "100%",
+        width : 50,
+      borderWidth: 2,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems : 'center'
+    },
 });

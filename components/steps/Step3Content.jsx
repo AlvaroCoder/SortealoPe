@@ -142,16 +142,15 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
 
-    // --- BOTONES DE ACCIÓN ---
     actionRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 30,
-        marginBottom: 100,
+        marginBottom: 40,
+        gap : 8
     },
     nextButton: {
         flex: 1,
-        marginLeft: 10,
 
     },
     backButton: {
