@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 
@@ -8,9 +9,13 @@ const RED_500 = Colors.principal.red[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 
-export default function VendorRankingRow({ rank, name, sales, ticketsSold }) {
+export default function VendorRankingRow({ rank, name, sales, ticketsSold, id }) {
+  const router = useRouter();
   return (
-  <TouchableOpacity style={styles.rankingRow}>
+    <TouchableOpacity style={styles.rankingRow} onPress={() => router.push({
+    pathname : 'vendedores/metrics/[id]',
+      params: { id }
+  })}>
     <Text style={[styles.rankText, rank <= 3 && styles.topRankText]}>{rank}</Text>
     
     <Ionicons 
@@ -50,7 +55,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   topRankText: {
-    color: RED_500,
+   
   },
   rankingInfo: {
     flex: 1,
@@ -67,6 +72,6 @@ const styles = StyleSheet.create({
   rankingSales: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
-    color: RED_500, 
+    color: Colors.principal.blue[700], 
   },
 })

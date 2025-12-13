@@ -17,6 +17,12 @@ export default function RootLayout() {
               }}
           />
           <Stack.Screen
+              name='metrics/[id]'
+              options={{
+                  header : () => <HeaderBackNav title='Metricas de Vendedor' />
+              }}
+          />
+          <Stack.Screen
               name='agregar'
               options={{
                     headerShown : false

@@ -45,7 +45,7 @@ export default function Step3CategoryContent({ form, setForm, onNext, onBack }) 
     };
 
     const handleNext = () => {
-        if (!form.categoryId) {
+        if (!form.eventCategoryId) {
             Alert.alert("Error de Validación", "Por favor, selecciona una categoría para el evento.");
             return;
         }

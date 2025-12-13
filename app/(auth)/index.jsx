@@ -2,19 +2,38 @@ import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import AnimationHome from "../../components/cards/AnimationHome";
 import Button from "../../components/common/Buttons/Button";
 import { Colors, Typography } from "../../constants/theme";
 
 const URL_IMAGEN =
-  "https://res.cloudinary.com/dabyqnijl/image/upload/v1762043981/sortealope/Mobile-bro_zdw1nq.png";
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1764234644/COSAI_LOGOS_1_1_dbzabh.png";
+
+const GREEN_900 = Colors.principal.green[900];
+const GREEN_500 = Colors.principal.green[500];
+const RED_500 = Colors.principal.red[500];
+const WHITE = Colors.principal.white;
+const NEUTRAL_700 = Colors.principal.neutral[700];
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+  if (loading) {
+    return <AnimationHome />;
+  }
 
   return (
     <LinearGradient
-      colors={["#D52941", "#E86855", "#FCD581"]}
+      colors={[GREEN_900, GREEN_500, Colors.principal.green[300]]}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
       style={styles.gradient}
@@ -75,7 +94,7 @@ const styles = StyleSheet.create({
     height: 300,
   },
   content: {
-    backgroundColor: Colors.light.background,
+    backgroundColor: "white",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 32,
@@ -91,7 +110,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Typography.sizes["3xl"],
     fontWeight: Typography.weights.bold,
-    color: Colors.principal.red[900],
+    color: GREEN_900,
     textAlign: "center",
     marginBottom: 10,
     fontFamily: Typography.fonts.display,
@@ -99,7 +118,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.normal,
-    color: Colors.light.textSecondary,
+    color: NEUTRAL_700,
     textAlign: "center",
     marginBottom: 45,
     minHeight: 20,
@@ -109,10 +128,12 @@ const styles = StyleSheet.create({
   },
   buttonLogin: {
     width: "100%",
+    backgroundColor: RED_500,
+    borderColor: RED_500,
   },
   buttonRegister: {
-    backgroundColor: "white",
-    borderColor: Colors.principal.red[500],
+    backgroundColor: WHITE,
+    borderColor: GREEN_900,
     borderWidth: 2,
     borderRadius: 10,
     width: "100%",
@@ -121,11 +142,13 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   buttonText: {
-    color: Colors.light.background,
+    color: "white",
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.semibold,
   },
   buttonTextRegister: {
-    color: Colors.principal.red[500],
+    color: GREEN_900,
+    fontSize: Typography.sizes.lg,
+    fontWeight: Typography.weights.semibold,
   },
 });

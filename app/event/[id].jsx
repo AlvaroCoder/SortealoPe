@@ -151,6 +151,7 @@ export default function EventDetailPage() {
                 {mockVendorRanking?.map((vendor, index) => (
                   <VendorRankingRow
                     key={vendor.id}
+                    id={vendor.id}
                     rank={index + 1}
                     name={vendor.name}
                     sales={vendor.sales}
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
   priceValue: {
     fontSize: Typography.sizes["2xl"],
     fontWeight: Typography.weights.extrabold,
-    color: RED_500,
+    color: Colors.principal.blue[700],
     marginTop: 4,
   },
   debugText: {
