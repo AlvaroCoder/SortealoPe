@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Image,
-    StyleSheet,
-    View,
+  Animated,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import Title from '../../components/common/Titles/Title';
@@ -169,13 +170,15 @@ useEffect(() => {
           },
         ]}
       >
-              <View style={{ alignItems: 'center' }}>
+        <View style={{ alignItems: 'center' }}>
+          <Text style={styles.poweredBy}>Powered By Cosai</Text>
           <Image
             source={{ uri: LOGO_URL }}
             style={styles.logo}
             resizeMode="contain"
           />
           <Title styleTitle={styles.titleText}>SORTEALO PE</Title>
+          
         </View>
       </Animated.View>
 
@@ -257,5 +260,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: height / 2 - WHEEL_SIZE / 2 - 25, 
     zIndex: 10,
+  },
+  poweredBy: {
+    color: WHITE,
+    marginTop: 4,
+    fontSize: 12,
   },
 });

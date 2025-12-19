@@ -11,7 +11,6 @@ const RED_500 = Colors.principal.red[500];
 const WHITE = Colors.principal.white;
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
-const GREEN_100 = Colors.principal.green[100];
 
 const mockVendorData = {
     '1': { name: "Ana Torres", assignedTickets: 10, soldTickets: 5, totalRevenue: 150.00, email: "ana.t@email.com" },
@@ -138,13 +137,12 @@ const styles = StyleSheet.create({
     },
     metricCard: {
         width: '48%',
-        backgroundColor: GREEN_100,
         borderRadius: 12,
         padding: 15,
         marginBottom: 15,
         alignItems: 'flex-start',
         borderWidth: 1,
-        borderColor: Colors.principal.green[200],
+        borderColor: Colors.principal.green[800],
     },
     metricIconContainer: {
         width: 48,

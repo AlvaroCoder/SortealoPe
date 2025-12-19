@@ -28,14 +28,14 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     progressBarBackground: {
-        height: 10,
+        height: 20,
         borderRadius: 5,
         backgroundColor: NEUTRAL_200,
         overflow: 'hidden',
     },
     progressBarFill: {
         height: '100%',
-        backgroundColor: Colors.principal.blue[800], 
+        backgroundColor: Colors.principal.blue[500], 
         borderRadius: 5,
     },
     progressText: {

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
+import DatePickerInput from '../common/Buttons/ButtonDatePicker';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
 import Title from '../common/Titles/Title';
 
@@ -12,20 +13,6 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const RED_500 = Colors.principal.red[500]; 
 const RED_600 = Colors.principal.red[600];
 
-const isValidDate = (dateString) => {
-    if (dateString.length !== 10) return false;
-    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-    if (!regex.test(dateString)) return false;
-
-    const [day, month, year] = dateString.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    
-    return (
-        date.getFullYear() === year &&
-        date.getMonth() === month - 1 &&
-        date.getDate() === day
-    );
-};
 
 export default function Step2Content({ form, setForm, onNext, onBack }) {
     const [validationErrors, setValidationErrors] = useState({});
@@ -36,29 +23,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
 
     const setError = (key, message) => {
         setValidationErrors(prev => ({ ...prev, [key]: message }));
-    };
-
-    const handleDateChange = (text) => {
-        let cleanText = text.replace(/[^0-9]/g, '');
-        let formattedText = '';
-        if (cleanText.length > 0) formattedText = cleanText.substring(0, 2);
-        if (cleanText.length >= 3) formattedText += '/' + cleanText.substring(2, 4);
-        if (cleanText.length >= 5) formattedText += '/' + cleanText.substring(4, 8);
-        formattedText = formattedText.substring(0, 10);
-
-        updateForm('date', formattedText);
-
-        if (formattedText.length === 10) {
-            if (!isValidDate(formattedText)) {
-                setError('date', 'Formato inválido (DD/MM/AAAA) o fecha no existe.');
-            } else {
-                setError('date', ''); 
-            }
-        } else if (formattedText.length > 0 && formattedText.length < 10) {
-             setError('date', '');
-        } else if (formattedText.length === 0) {
-            setError('date', ''); 
-        }
     };
     
     const handlePriceChange = (text) => {
@@ -94,12 +58,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
         
         if (!form.ticketPrice || parseFloat(form.ticketPrice) <= 0) errors.ticketPrice = "Ingresa un precio válido (> 0).";
         if (!form.ticketsPerCollection || parseInt(form.ticketsPerCollection) <= 0) errors.ticketsPerCollection = "Ingresa una cantidad válida (> 0).";
-        
-        if (!form.date) {
-            errors.date = "La fecha es obligatoria.";
-        } else if (!isValidDate(form.date)) {
-            errors.date = "Formato de fecha inválido (DD/MM/AAAA).";
-        }
         
         setValidationErrors(errors);
         hasErrors = Object.keys(errors).length > 0;
@@ -193,17 +151,13 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
             />
             <ErrorMessage error={validationErrors.place} />
             
-            <Text style={styles.inputLabel}>Fecha de Cierre del Sorteo (DD/MM/AAAA) <Text style={{color : RED_600}}>(*)</Text></Text>
-            <TextInput
-                style={getTextInputStyle('date')}
-                placeholder='DD/MM/AAAA'
-                value={form?.date}
-                onChangeText={handleDateChange}
-                keyboardType='numeric'
-                maxLength={10}
-                placeholderTextColor={NEUTRAL_200}
-            />
-            <ErrorMessage error={validationErrors.date} />
+            <DatePickerInput
+                label="Fecha de Cierre del Sorteo (DD/MM/AAAA)"
+                required={true}
+                value={form?.date} 
+                onChange={(selectedDate) => setForm({ ...form, date: selectedDate })}
+              />
+              
 
               <View style={styles.actionRow}>
                    <TouchableOpacity onPress={onBack} style={styles.backButton}>

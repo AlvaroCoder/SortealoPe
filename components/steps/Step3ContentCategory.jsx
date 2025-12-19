@@ -12,7 +12,7 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 
 const CATEGORIES = [
-    { id: 'benefica', name: 'Rifa Benefica', icon: 'hand-left-outline', eventCategoryId : 1 },
+    { id: 'benefica', name: 'Rifa Benefica', icon: 'heart-outline', eventCategoryId : 1 },
     { id: 'institucional', name: 'Rifa Institucional', icon: 'business-outline', eventCategoryId : 2 },
     { id: 'empresarial', name: 'Rifa Empresarial', icon: 'briefcase-outline', eventCategoryId : 3 },
     { id: 'personal', name: 'Rifa Personal', icon: 'happy-outline', eventCategoryId : 4 },

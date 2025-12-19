@@ -1,165 +1,197 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import {
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
 import ButtonUploadImage from '../common/Buttons/ButtonUploadImage';
 import Title from '../common/Titles/Title';
 
-const GREEN_900 = Colors.principal.green[900];
-const NEUTRAL_700 = Colors.principal.neutral[700];
-const NEUTRAL_200 = Colors.principal.neutral[200];
-
-const MOCK_IMAGE_URL = 'https://placehold.co/400x200/16CD91/FFFFFF?text=Dise%C3%B1o+del+Ticket'; 
-
-export default function Step3Content({ form, setForm, onSubmit, onBack }) {
+export function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
     
-    const pickImage = (imageType) => {
-        
-        const imageUrl = MOCK_IMAGE_URL + `+${imageType}`;
-        
-        Alert.alert("Simulación de Carga", `Imagen para ${imageType} seleccionada.`);
-        
-        setForm(prev => ({ ...prev, [imageType]: imageUrl }));
-    };
-
-    const getPreview = (imageType) => {
-        const source = form[imageType] ? { uri: form[imageType] } : null;
-        
-        return (
-            <View style={styles.imagePreviewContainer}>
-                {source ? (
-                    <Image source={source} style={styles.imagePreview} resizeMode="cover" />
-                ) : (
-                    <View style={styles.imagePlaceholder}>
-                        <Ionicons name="image-outline" size={40} color={NEUTRAL_700} />
-                        <Text style={styles.placeholderTextSmall}>Haz clic para seleccionar la imagen</Text>
-                    </View>
-                )}
-            </View>
-        );
+    const handleImageSelected = (imageType, uri) => {
+        setForm(prev => ({ ...prev, [imageType]: uri }));
     };
 
     const handleFinalSubmit = () => {
         if (!form.ticketDesign) {
-             Alert.alert("Error", "Debes subir al menos el Diseño del Ticket antes de publicar.");
+             Alert.alert(
+                "Campo Requerido", 
+                "Es obligatorio subir el Diseño del Ticket con las dimensiones exactas (1080x1620 px)."
+             );
              return;
         }
-        onSubmit();
+        if (onSubmit) onSubmit();
     };
 
-
     return (
-        <View style={styles.stepContent}>
-            <Title>
-                3. Diseño y Archivos Promocionales
-            </Title>
+        <ScrollView style={styles.stepContent} showsVerticalScrollIndicator={false}>
+            <Title>3. Diseño y Archivos Promocionales</Title>
+            
             <Text style={styles.stepSubtitleText}>
-                Sube la imagen de la rifa (Banner principal) y el diseño visual que tendrán los tickets.
+                Sube las piezas gráficas de tu evento. Recuerda que deben cumplir con el tamaño de 1080x1620 px para asegurar la calidad.
             </Text>
             
             <Text style={styles.inputLabel}>Diseño Visual del Ticket (*)</Text>
-            <TouchableOpacity 
-                onPress={() => pickImage('ticketDesign')}
-                style={styles.imageUploadWrapper}
-            >
-                {getPreview('ticketDesign')}
-            </TouchableOpacity>
+            <ButtonUploadImage 
+                title="Subir Diseño de Ticket"
+                subtitle="Requerido: 1080 x 1620 px"
+                requiredWidth={1080}
+                requiredHeight={1620}
+                image={form.ticketDesign}
+                onImageSelected={(uri) => handleImageSelected('ticketDesign', uri)}
+            />
 
             <Text style={styles.inputLabel}>Imagen Principal de la Rifa (Banner)</Text>
-            <ButtonUploadImage />
+            <ButtonUploadImage 
+                title="Subir Banner Promocional"
+                subtitle="Requerido: 1080 x 1620 px"
+                requiredWidth={1080}
+                requiredHeight={1620}
+                image={form.mainBanner}
+                onImageSelected={(uri) => handleImageSelected('mainBanner', uri)}
+            />
             
-            <Text style={styles.hintText}>Formato recomendado: JPG/PNG. Máx. 2MB</Text>
+            <View style={styles.infoBox}>
+                <Ionicons name="information-circle-outline" size={18} color={Colors.principal.neutral[700]} />
+                <Text style={styles.hintText}>
+                    Las imágenes que no cumplan con las dimensiones exactas serán rechazadas por el sistema.
+                </Text>
+            </View>
 
             <View style={styles.actionRow}>
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <Ionicons name="arrow-back-outline" style={{color : GREEN_900}} size={24} />
+                    <Ionicons name="arrow-back-outline" style={{ color: Colors.principal.green[900] }} size={24} />
                 </TouchableOpacity>
-                <ButtonGradiend onPress={handleFinalSubmit} style={styles.nextButton}>
+                
+                <ButtonGradiend style={{flex : 1}} onPress={handleFinalSubmit}>
                     Finalizar
                 </ButtonGradiend>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
+export default function App() {
+  const [form, setForm] = useState({ ticketDesign: null, mainBanner: null });
+  
+  return (
+    <View style={styles.appContainer}>
+      <Step3Content 
+        form={form} 
+        setForm={setForm} 
+        onBack={() => Alert.alert("Atrás", "Volviendo al paso anterior...")}
+        onSubmit={() => Alert.alert("Éxito", "Evento creado correctamente.")}
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-    stepContent: {
-        width: '100%',
+    appContainer: {
+      flex: 1,
+      backgroundColor: Colors.principal.white,
     },
-    stepTitleText: {
-        fontSize: Typography.sizes['2xl'],
-        fontWeight: Typography.weights.extrabold,
-        color: GREEN_900,
-        marginBottom: 8,
+    stepContent: {
+        flex: 1,
+    },
+    simulatedTitle: {
+      fontSize: Typography.sizes.xl,
+      fontWeight: Typography.weights.extrabold,
+      color: Colors.principal.green[900],
+      marginBottom: 10,
     },
     stepSubtitleText: {
         fontSize: Typography.sizes.base,
-        color: NEUTRAL_700,
-        marginBottom: 20,
+        color: Colors.principal.neutral[700],
+        marginBottom: 15,
+        lineHeight: 22,
     },
     inputLabel: {
         fontSize: Typography.sizes.md,
-        fontWeight: Typography.weights.medium,
-        marginTop: 15,
+        fontWeight: 'bold',
+        marginTop: 10,
         marginBottom: 8,
+        color: Colors.principal.green[900],
+    },
+    uploadContainer: {
+      width: '100%',
+      height: 200,
+      backgroundColor: Colors.principal.green[50],
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: Colors.principal.green[200],
+      borderStyle: 'dashed',
+      justifyContent: 'center',
+      alignItems: 'center',
+      overflow: 'hidden',
+    },
+    uploadPlaceholder: {
+      alignItems: 'center',
+    },
+    uploadTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: Colors.principal.green[900],
+      marginTop: 8,
+    },
+    uploadSubtitle: {
+      fontSize: 12,
+      color: Colors.principal.green[900],
+      opacity: 0.7,
+    },
+    uploadedImage: {
+      width: '100%',
+      height: '100%',
+    },
+    infoBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.principal.neutral[50],
+        padding: 10,
+        borderRadius: 8,
+        marginTop: 15,
     },
     hintText: {
-        fontSize: Typography.sizes.sm,
-        color: NEUTRAL_700,
-        textAlign: 'right',
-        marginTop: 5,
+        fontSize: Typography.sizes.xs,
+        color: Colors.principal.neutral[700],
+        marginLeft: 8,
+        flex: 1,
     },
-    
-    imageUploadWrapper: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        borderWidth: 2,
-        borderColor: NEUTRAL_200,
-        
-        marginBottom: 10,
-    },
-    imagePreviewContainer: {
-        height: 150,
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imagePreview: {
-        width: '100%',
-        height: '100%',
-    },
-    imagePlaceholder: {
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-      
-        padding: 20,
-    },
-    placeholderTextSmall: {
-        fontSize: Typography.sizes.sm,
-        color: NEUTRAL_700,
-        marginTop: 5,
-    },
-
     actionRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 30,
+        gap : 5,
+        marginTop: 40,
         marginBottom: 40,
-        gap : 8
+        width : '100%'
     },
-    nextButton: {
-        flex: 1,
-
+    simulatedGradientButton: {
+      flex: 1,
+      backgroundColor: Colors.principal.green[900],
+      borderRadius: 12,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: 10,
+    },
+    simulatedGradientButtonText: {
+      color: 'white',
+      fontWeight: 'bold',
+      fontSize: 16,
     },
     backButton: {
-      borderColor: GREEN_900,
-      borderRadius: "100%",
-        width : 50,
-      borderWidth: 2,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems : 'center'
+        borderColor: Colors.principal.green[900],
+        borderRadius: 25,
+        width: 50,
+        height: 50,
+        borderWidth: 2,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

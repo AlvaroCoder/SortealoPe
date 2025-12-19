@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import AnimationHome from "../../components/cards/AnimationHome";
 import Button from "../../components/common/Buttons/Button";
+import Title from "../../components/common/Titles/Title";
 import { Colors, Typography } from "../../constants/theme";
 
 const URL_IMAGEN =
@@ -13,7 +14,6 @@ const URL_IMAGEN =
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
-const RED_500 = Colors.principal.red[500];
 const WHITE = Colors.principal.white;
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
@@ -49,7 +49,7 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>Gestiona tus rifas</Text>
+          <Title styleTitle={styles.title}>Gestiona tus rifas</Title>
 
           <Text style={styles.subtitle}>
             Crea tus rifas y contrólalas a tan solo {"\n"} un click de distancia
@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Typography.sizes["3xl"],
     fontWeight: Typography.weights.bold,
-    color: GREEN_900,
     textAlign: "center",
     marginBottom: 10,
     fontFamily: Typography.fonts.display,
@@ -128,8 +127,8 @@ const styles = StyleSheet.create({
   },
   buttonLogin: {
     width: "100%",
-    backgroundColor: RED_500,
-    borderColor: RED_500,
+    backgroundColor: Colors.principal.blue[500],
+    borderColor: Colors.principal.blue[700],
   },
   buttonRegister: {
     backgroundColor: WHITE,

@@ -20,8 +20,10 @@ const WHITE = Colors.principal.white;
 export default function ButtonUploadImage({
   onImageSelected = () => {},
   image = null,
-  title = "Subir imagen del ticket",
-  subtitle = "Formatos: JPG, PNG (Max. 5MB)"
+  title = "Subir imagen",
+  subtitle = "Requerido: 1080 x 1620 px",
+  requiredWidth = 1080,
+  requiredHeight = 1620
 }) {
   const [selectedImage, setSelectedImage] = useState(image)
 
@@ -35,16 +37,23 @@ export default function ButtonUploadImage({
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-      base64: true,
+      allowsEditing: false, 
+      quality: 1,
     })
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      const imageAsset = result.assets[0]
-      setSelectedImage(imageAsset.uri)
-      onImageSelected(imageAsset.uri)
+      const { uri, width, height } = result.assets[0];
+
+      if (width !== requiredWidth || height !== requiredHeight) {
+        Alert.alert(
+          "Tamaño Incorrecto", 
+          `La imagen debe tener exactamente ${requiredWidth}x${requiredHeight} píxeles.\n\nDetectado: ${width}x${height} px.`
+        );
+        return;
+      }
+
+      setSelectedImage(uri)
+      onImageSelected(uri)
     }
   }
 
@@ -60,7 +69,7 @@ export default function ButtonUploadImage({
           <Image 
             source={{ uri: selectedImage }} 
             style={styles.image}
-            resizeMode="cover"
+            resizeMode="contain"
           />
           <TouchableOpacity 
             style={styles.changeButton}
@@ -94,37 +103,35 @@ export default function ButtonUploadImage({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 16,
+    marginVertical: 10,
   },
   uploadButton: {
     borderWidth: 2,
     borderColor: GREEN_200,
     borderStyle: 'dashed',
     borderRadius: 12,
-    padding: 32,
+    padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: GREEN_100,
   },
   uploadIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: GREEN_200,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  
   uploadTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: GREEN_900,
-    marginBottom: 4,
+    marginBottom: 2,
     textAlign: 'center',
   },
   uploadSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: GREEN_900,
     textAlign: 'center',
   },
@@ -134,16 +141,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: GREEN_500,
+    backgroundColor: GREEN_100,
   },
   image: {
     width: '100%',
-    height: 200,
+    height: 250,
   },
   changeButton: {
     position: 'absolute',
     bottom: 12,
     left: 12,
-    backgroundColor: 'rgba(22, 101, 52, 0.9)', 
+    backgroundColor: 'rgba(0, 71, 57, 0.9)', 
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -151,7 +159,7 @@ const styles = StyleSheet.create({
   changeButtonText: {
     color: WHITE,
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 13,
   },
   removeButton: {
     position: 'absolute',

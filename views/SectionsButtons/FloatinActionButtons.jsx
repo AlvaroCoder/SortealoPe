@@ -5,7 +5,6 @@ import ButtonGradiend from '../../components/common/Buttons/ButtonGradiendt';
 import { Colors, Typography } from '../../constants/theme';
 
 const WHITE = '#FFFFFF';
-const GREEN_900 = Colors.principal.green[900];
 const BLACK = '#000000';
 const BLUE_500 = Colors.principal.blue[500];
 
@@ -35,7 +34,7 @@ export default function FloatinActionButtons() {
                     style={styles.addSellerButton} 
                     onPress={handleAddSeller}
                 >
-                  <Ionicons name='person-add-outline' size={24} color={GREEN_900} />
+                  <Ionicons name='person-add-outline' size={24} color={Colors.principal.blue[900]} />
               </TouchableOpacity>
         </View>
     </View>

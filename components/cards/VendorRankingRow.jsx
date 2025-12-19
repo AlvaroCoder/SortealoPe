@@ -3,9 +3,7 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 
-const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
-const RED_500 = Colors.principal.red[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 
@@ -21,7 +19,7 @@ export default function VendorRankingRow({ rank, name, sales, ticketsSold, id })
     <Ionicons 
       name={rank === 1 ? 'trophy' : rank === 2 ? 'medal' : rank === 3 ? 'ribbon' : 'person-circle-outline'} 
       size={20} 
-      color={rank <= 3 ? RED_500 : GREEN_500}
+      color={rank <= 3 ? Colors.principal.yellow[500] : GREEN_500}
       style={{ marginRight: 10 }}
     />
     
@@ -63,7 +61,6 @@ const styles = StyleSheet.create({
   rankingName: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.medium,
-    color: GREEN_900,
   },
   rankingDetail: {
     fontSize: Typography.sizes.sm,
@@ -71,7 +68,6 @@ const styles = StyleSheet.create({
   },
   rankingSales: {
     fontSize: Typography.sizes.lg,
-    fontWeight: Typography.weights.bold,
-    color: Colors.principal.blue[700], 
+  
   },
 })

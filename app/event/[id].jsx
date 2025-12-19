@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   priceValue: {
     fontSize: Typography.sizes["2xl"],
     fontWeight: Typography.weights.extrabold,
-    color: Colors.principal.blue[700],
+    color: Colors.principal.blue[500],
     marginTop: 4,
   },
   debugText: {
