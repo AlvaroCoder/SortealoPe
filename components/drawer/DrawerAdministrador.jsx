@@ -69,18 +69,6 @@ export default function DrawerAdministradorContent(props) {
           </View>
           <Text style={styles.navLabel}>Mis Eventos</Text>
         </TouchableOpacity>
-      
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push("vendedores")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="people-outline" size={22} color={GREEN_900} />
-          </View>
-          <Text style={styles.navLabel}>Mis Vendedores</Text>
-        </TouchableOpacity>
-        
-        <View style={styles.divider} />
 
         <Text style={styles.sectionTitle}>MONITOREO</Text>
 

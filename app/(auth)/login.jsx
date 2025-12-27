@@ -1,12 +1,12 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from 'react-native';
-import ButtonLoginGoogle from "../../components/common/Buttons/ButtonLoginGoogle";
-import DividerO from "../../components/common/Dividers/DividerO";
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import OutlineTextField from "../../components/common/TextFields/OutlineTextField";
 import TextPrevAccount from "../../components/common/Texts/TextPrevAccount";
 import FormInitial from "../../views/Form/FormInitial";
+
+const URL_LOGO_IMAGE = "https://res.cloudinary.com/dabyqnijl/image/upload/v1730493843/laztvzw7ytanqrdj161e.png";
 
 export default function Login() {
   const router = useRouter();
@@ -60,13 +60,19 @@ export default function Login() {
             required={true}
           />
         </FormInitial>
-        <DividerO/>
-        <View style={styles.additionalComponents}>
-          <ButtonLoginGoogle/>
-        </View>
+
         <TextPrevAccount
           type="login"
         />
+
+        <View style={styles.containerBottom}>
+          <Text>Powered By </Text>
+          <Image
+            source={{ uri: URL_LOGO_IMAGE }}
+            style={styles.image}
+            contentFit="contain"
+          />
+        </View>
       </ScrollView>
     </View>
   );
@@ -92,5 +98,19 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     paddingHorizontal : 28
   },
-
+  image: {
+    width: 200,
+    height: 80,
+    marginTop: 10,
+    alignSelf: 'center',
+  },
+  containerBottom: {
+    marginTop: Dimensions.get('window').height * 0.1,
+    opacity : 0.5,
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
 })

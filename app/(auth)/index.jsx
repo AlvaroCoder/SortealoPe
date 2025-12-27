@@ -1,9 +1,15 @@
-import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import AnimationHome from "../../components/cards/AnimationHome";
 import Button from "../../components/common/Buttons/Button";
 import Title from "../../components/common/Titles/Title";
@@ -14,22 +20,23 @@ const URL_IMAGEN =
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
-const WHITE = Colors.principal.white;
+const WHITE = 'white';
 const NEUTRAL_700 = Colors.principal.neutral[700];
+
+const { height } = Dimensions.get("window");
+const IMAGE_HEIGHT = height * 0.30; 
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 3000);
     return () => clearTimeout(timer);
   }, []);
-  if (loading) {
-    return <AnimationHome />;
-  }
+
+  if (loading) return <AnimationHome />;
 
   return (
     <LinearGradient
@@ -38,17 +45,29 @@ export default function WelcomeScreen() {
       end={{ x: 0, y: 1 }}
       style={styles.gradient}
     >
-      <View style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+
         <View style={styles.header}>
+          <View style={{ alignItems: "center", marginBottom: 40 }}>
+            <Text style={{color : WHITE}}>Powered by</Text>
+            <Title styleTitle={{ color: WHITE }}>COSAI</Title>
+          </View>
           <Image
             source={{ uri: URL_IMAGEN }}
-            style={styles.image}
+            style={[styles.image, { height: IMAGE_HEIGHT }]}
             contentFit="contain"
-            transition={1000}
+            transition={800}
           />
         </View>
 
-        <View style={styles.content}>
+        <View
+          style={[
+            styles.content,
+            {
+              paddingBottom: insets.bottom + 30, 
+            },
+          ]}
+        >
           <Title styleTitle={styles.title}>Gestiona tus rifas</Title>
 
           <Text style={styles.subtitle}>
@@ -70,18 +89,15 @@ export default function WelcomeScreen() {
             />
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: {
+  gradient: { flex: 1 },
+  safeArea: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
-    marginTop: Constants.statusBarHeight,
   },
   header: {
     flex: 1,
@@ -91,39 +107,32 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 300,
   },
   content: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    backgroundColor: WHITE,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     paddingHorizontal: 32,
-    paddingTop: 40,
-    paddingBottom: 60,
-    minHeight: 400,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    paddingTop: 34,
+    minHeight: height * 0.45,
+    elevation: 6,
   },
   title: {
     fontSize: Typography.sizes["3xl"],
     fontWeight: Typography.weights.bold,
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 12,
     fontFamily: Typography.fonts.display,
   },
   subtitle: {
-    fontSize: Typography.sizes.lg,
-    fontWeight: Typography.weights.normal,
+    fontSize: Typography.sizes.md,
     color: NEUTRAL_700,
     textAlign: "center",
-    marginBottom: 45,
-    minHeight: 20,
+    marginBottom: 32,
   },
   buttonContainer: {
-    alignItems: "center",
+    width: "100%",
+    gap: 14,
   },
   buttonLogin: {
     width: "100%",
@@ -131,17 +140,15 @@ const styles = StyleSheet.create({
     borderColor: Colors.principal.blue[700],
   },
   buttonRegister: {
+    width: "100%",
     backgroundColor: WHITE,
     borderColor: GREEN_900,
     borderWidth: 2,
     borderRadius: 10,
-    width: "100%",
-    paddingHorizontal: 48,
-    paddingVertical: 16,
-    marginTop: 16,
+    paddingVertical: 14,
   },
   buttonText: {
-    color: "white",
+    color: WHITE,
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.semibold,
   },

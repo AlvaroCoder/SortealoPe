@@ -12,7 +12,7 @@ export default function Title2({
 
 const styles = StyleSheet.create({
     title: {
-        fontSize: Typography.sizes['xl'],
+        fontSize: Typography.sizes['lg'],
         fontWeight: Typography.weights.bold,
     }
 })

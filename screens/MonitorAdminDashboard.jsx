@@ -1,7 +1,6 @@
 
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
-import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import ButtonCreateEvent from "../components/common/Buttons/ButtonCreateEvent";
 import EventListItem from "../components/common/Card/EventListItem";
 import Title from "../components/common/Titles/Title";
@@ -17,18 +16,8 @@ const WHITE = "#FFFFFF";
 const GREEN_100 = Colors.principal.green[100];
 
 export default function MonitorAdminDashboard() {
-  const [searchTerm, setSearchTerm] = useState('');
   const mockEventData = DataCardEvent;
 
-  const filteredEvents = useMemo(() => {
-    if (!searchTerm) {
-      return mockEventData;
-    }
-    const lowerCaseSearch = searchTerm.toLowerCase();
-    return mockEventData.filter(event => 
-      event.title.toLowerCase().includes(lowerCaseSearch)
-    );
-  }, [searchTerm, mockEventData]);
 
   const { userRole, updateRole } = useRaffleContext();
   return (
@@ -36,23 +25,11 @@ export default function MonitorAdminDashboard() {
       <RolSwitchBar userRole={userRole} updateRole={updateRole} />
 
       <View style={styles.headerContent}>
-          <Title styleTitle={{marginBottom : 15}}>Eventos Recientes (2)</Title>
-          
-            <View style={styles.searchContainer}>
-                <Ionicons name="search-outline" size={20} color={NEUTRAL_700} />
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Buscar evento por título..."
-                    placeholderTextColor={NEUTRAL_700}
-                    value={searchTerm}
-                    onChangeText={setSearchTerm}
-                />
-            </View>
-
+          <Title styleTitle={{}}>Eventos Creados Recientes (2)</Title>
+          <Text>Eventos creados este mes</Text>
       </View>
-      
       <FlatList
-          data={filteredEvents}
+          data={mockEventData}
           renderItem={({ item }) => <EventListItem event={item} />}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
@@ -122,3 +99,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   }
 });
+
+/**
+ *             <View style={styles.searchContainer}>
+                <Ionicons name="search-outline" size={20} color={NEUTRAL_700} />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Buscar evento por título..."
+                    placeholderTextColor={NEUTRAL_700}
+                    value={searchTerm}
+                    onChangeText={setSearchTerm}
+                />
+            </View>
+ */

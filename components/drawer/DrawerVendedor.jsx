@@ -49,7 +49,7 @@ export default function DrawerVendedorContent(props) {
         
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => router.push("event/")}
+          onPress={() => router.push("event/mis-eventos/vendedor")}
         >
           <View style={styles.navIconContainer}>
             <Ionicons name="pricetags-outline" size={22} color={GREEN_900} />

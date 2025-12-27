@@ -8,9 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import ProgressBar from "../../components/cards/ProgressBar";
 import VendorRankingRow from "../../components/cards/VendorRankingRow";
 import Title from "../../components/common/Titles/Title";
+import Title2 from "../../components/common/Titles/Title2";
 import { Colors, Typography } from "../../constants/theme";
 import { useRaffleContext } from "../../context/RaffleContext";
 import { useDateFormatter } from "../../lib/dateFormatter";
@@ -23,7 +25,6 @@ const RED_500 = Colors.principal.red[500];
 const WHITE = "#FFFFFF";
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_100 = Colors.principal.neutral[100];
-const BLUE_500 = Colors.principal.blue[500];
 
 const mockAssignedSellers = [
   {
@@ -47,9 +48,32 @@ const mockVendorRanking = [
   { id: 1, name: "Ana Torres", sales: 15500, ticketsSold: 442 },
   { id: 2, name: "Carlos Ruiz", sales: 12800, ticketsSold: 365 },
   { id: 3, name: "María López", sales: 9950, ticketsSold: 284 },
-  { id: 4, name: "Javier V.", sales: 8100, ticketsSold: 231 },
-  { id: 5, name: "Elena G.", sales: 5500, ticketsSold: 157 },
 ];
+
+const MetricChip = ({ label, value, icon, color = Colors.principal.green[900] }) => (
+  <View style={styles.metricChip}>
+    <View
+      style={[
+        styles.metricIconCircle,
+        { backgroundColor: Colors.principal.green[50] }
+      ]}
+    >
+      <Ionicons name={icon} size={20} color={color} />
+    </View>
+
+    {/* Contenedor de texto flexible */}
+    <View style={styles.metricTextContainer}>
+      <Text
+        style={styles.metricLabel}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        {label}
+      </Text>
+      <Text style={styles.metricValue}>{value}</Text>
+    </View>
+  </View>
+);
 
 export default function EventDetailPage() {
   const { formatDateToSpanish } = useDateFormatter();
@@ -60,7 +84,7 @@ export default function EventDetailPage() {
 
   const data = DataCardEvent;
   const event = data?.filter((item) => parseInt(eventId) === item.id)[0];
-  const { isSeller } = useRaffleContext();
+  const { isSeller, isAdmin } = useRaffleContext();
   
   const handlePress = () => {
     router.push({
@@ -86,8 +110,8 @@ export default function EventDetailPage() {
   const assignedSellers = event.assignedSellers || mockAssignedSellers;
 
   return (
-    <View style={styles.container}>
-      {!isSeller &&  <FloatinActionButtons />}
+    <SafeAreaView style={styles.container} edges={['bottom']}>
+      {isAdmin &&  <FloatinActionButtons />}
       {isSeller && <FloatingSellingButton handlePress={handlePress} />}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.imageContainer}>
@@ -101,7 +125,8 @@ export default function EventDetailPage() {
         <View style={styles.contentSection}>
           <View style={styles.headerContent}>
             <Title styleTitle={{maxWidth : 300}}>{event.title}</Title>
-            {!isSeller && (            <TouchableOpacity
+            {isAdmin && (
+              <TouchableOpacity
               style={styles.buttonEdit}
               onPress={() => router.push("event/edit")}
             >
@@ -109,20 +134,43 @@ export default function EventDetailPage() {
             </TouchableOpacity>)}
           </View>
           <View style={styles.infoRow}>
-            <Ionicons name="calendar-outline" size={18} color={BLUE_500} />
+            <Ionicons name="calendar-outline" size={18} color={Colors.principal.blue[500]} />
             <Text style={styles.infoText}>
-              Fecha de Sorteo: {formatDateToSpanish(event?.createdAt)}
+              Sorteo: {formatDateToSpanish(event?.createdAt)}
             </Text>
           </View>
 
+            {isSeller && (
+            <View style={styles.sellerMetricsSection}>
+              <Title2>Métricas del evento</Title2>
+              <View style={styles.metricsGrid}>
+                <MetricChip 
+                  label="Tickets Vendidos" 
+                  value="10" 
+                  icon="wallet-outline" 
+                />
+                <MetricChip 
+                  label="Tickets Reservados" 
+                  value={`${event.totalTickets - event.availableTickets}`} 
+                  icon="ticket-outline" 
+                />
+                <MetricChip 
+                  label="Total Tickets" 
+                  value={event.totalTickets} 
+                  icon="gift-outline" 
+                  color={Colors.principal.blue[500]}
+                />
+              </View>
+            </View>
+          )}
           <View style={styles.divider} />
 
-          <Text style={styles.sectionTitle}>Detalles del Evento</Text>
+          <Title2>Detalles del Evento</Title2>
           <Text style={styles.descriptionText}>{event.description}</Text>
 
               <View style={styles.divider} />
 
-              <Text style={styles.sectionTitle}>Progreso de Tickets</Text>
+              <Title2>Progreso de Tickets</Title2>
               <ProgressBar
                 available={event.availableTickets}
                 total={event.totalTickets}
@@ -132,7 +180,7 @@ export default function EventDetailPage() {
 
           <View style={styles.purchaseSummary}>
             <View>
-              <Text style={styles.priceLabel}>Precio por Ticket:</Text>
+              <Title2>Precio por Ticket:</Title2>
               <Text style={styles.priceValue}>
                 S/ {event.ticketPrice.toFixed(2)}
               </Text>
@@ -143,9 +191,7 @@ export default function EventDetailPage() {
             <>
               <View style={styles.divider} />
 
-              <Text style={styles.sectionTitle}>
-                Ranking de Vendedores ({assignedSellers.length})
-              </Text>
+              <Title2>Ranking de Vendedores ({assignedSellers.length})</Title2>
 
               <View>
                 {mockVendorRanking?.map((vendor, index) => (
@@ -163,7 +209,7 @@ export default function EventDetailPage() {
           )}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -264,5 +310,44 @@ const styles = StyleSheet.create({
     color: NEUTRAL_700,
     textAlign: "center",
     paddingVertical: 10,
+  },
+  metricLabel: {
+    fontSize: 12,
+    color: "#555",
+    fontWeight: "500",
+  },
+  metricValue: {
+    fontSize: Typography.sizes.xl,
+    fontWeight: '800',
+    color: '#14532d',
+  },
+    metricChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    padding: 10,
+    borderRadius: 12,
+    width: '48%',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+      metricIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+      
+  metricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop : 10
   },
 });

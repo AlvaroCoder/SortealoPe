@@ -45,14 +45,14 @@ export default function PageIdVendedor() {
                 color: GREEN_500 
             },
             { 
-                label: "Tickets por Vender", 
+                label: "Tickets Reservados", 
                 value: remainingTickets.toLocaleString(), 
                 icon: 'close-circle-outline', 
                 color: RED_500 
             },
             { 
-                label: "Total Recaudado", 
-                value: `S/ ${vendor.totalRevenue.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`, 
+                label: "Total Disponibles", 
+                value: `15`, 
                 icon: 'cash-outline', 
                 color: Colors.principal.yellow[600]
             },
@@ -91,7 +91,7 @@ export default function PageIdVendedor() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: WHITE,
+        backgroundColor: 'white',
     },
     scrollContent: {
         paddingVertical: 20,

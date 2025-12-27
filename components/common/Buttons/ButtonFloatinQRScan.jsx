@@ -29,10 +29,14 @@ const styles = StyleSheet.create({
         bottom: 40,
         zIndex : 100,
     },
-    buttonStyle: {
-        paddingHorizontal : 15, 
-        paddingVertical : 10,
-        borderRadius: 30,
+  buttonStyle: {
+      flexDirection : 'row',
+    alignItems: 'center',
+      justifyContent : 'center',
+        paddingHorizontal : 20, 
+      borderRadius: 30,
+      height: 60,
+        
         backgroundColor: BLUE_500, 
         elevation: 8,
         shadowColor: '#000',

@@ -7,7 +7,7 @@ export default function Title({ children, styleTitle }) {
 
 const styles = StyleSheet.create({
   styleTitle: {
-    fontSize: Typography.sizes["3xl"],
+    fontSize: Typography.sizes["2xl"],
     fontWeight: Typography.weights.bold,
   },
 });

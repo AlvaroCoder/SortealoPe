@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Title from '../components/common/Titles/Title';
+import Title2 from '../components/common/Titles/Title2';
 import { Colors, Typography } from '../constants/theme';
 import { useRaffleContext } from '../context/RaffleContext';
 import RolSwitchBar from '../views/Bars/RolSwitchBar';
@@ -45,28 +46,19 @@ const TicketListItem = ({ ticket }) => {
   return (
     <TouchableOpacity style={styles.ticketCard} activeOpacity={0.8}>
       <View style={styles.ticketImageContainer}>
-        <Image 
-          source={{ uri: ticket.urlImagen }} 
-          style={styles.ticketImage} 
-          resizeMode="cover"
-        />
         <View style={[styles.statusBadge, { backgroundColor: isActive ? GREEN_500 : RED_500 }]}>
           <Text style={styles.statusBadgeText}>{ticket.status}</Text>
         </View>
       </View>
 
       <View style={styles.ticketDetails}>
-        <Text style={styles.ticketTitle}>{ticket.title}</Text>
+        <Title2>{ticket.title}</Title2>
         
         <View style={styles.infoRow}>
           <Ionicons name="calendar-outline" size={14} color={NEUTRAL_700} />
           <Text style={styles.infoText}>{ticket.date}</Text>
         </View>
 
-        <View style={styles.infoRow}>
-          <Ionicons name="gift-outline" size={14} color={NEUTRAL_700} />
-          <Text style={styles.infoText}>{ticket.location}</Text>
-        </View>
 
         <TouchableOpacity style={styles.viewDetailsButton}>
           <Text style={styles.viewDetailsText}>Ver detalles</Text>
@@ -134,8 +126,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent : 'flex-start',
     marginBottom: 20,
   },
   sectionTitle: {
@@ -149,7 +141,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 2,
     borderRadius: 12,
-    marginLeft : 7
+    marginLeft: 7,
+    width : 40,
   },
 
   listWrapper: {
@@ -169,8 +162,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   ticketImageContainer: {
-    width: 100,
-    height: 110,
     borderRadius: 12,
     overflow: 'hidden',
     position: 'relative',

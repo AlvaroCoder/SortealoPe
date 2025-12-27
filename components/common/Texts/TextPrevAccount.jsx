@@ -18,7 +18,7 @@ export default function TextPrevAccount({
                   router.push('/(auth)/register');
               }
           }}>
-            <Text style={{ color: Colors.principal.red[800], fontWeight: 'bold' }}>
+            <Text style={{ color: Colors.principal.blue[600], fontWeight: 'bold' }}>
                 {type === "register" ? " Inicia sesión" : " Regístrate"}
             </Text>
         </TouchableOpacity>
