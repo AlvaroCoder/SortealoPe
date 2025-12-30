@@ -44,6 +44,7 @@ export default function Login() {
             placeholder="Ingresa tu correo electrónico"
             value={formData.email}
             type='email'
+            
             onChangeText={(text) => updateFields('email', text)}
             required={true}
             returnKeyType="next"

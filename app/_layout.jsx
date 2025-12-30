@@ -1,28 +1,32 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
-import 'react-native-reanimated';
+import "react-native-reanimated";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { RaffleProvider } from '../context/RaffleContext';
-
+import { AuthProvider } from "@/context/AuthContext";
+import { RaffleProvider } from "@/context/RaffleContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
     <RaffleProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name='(auth)' options={{ headerShown : false }} />
-          <Stack.Screen name='(drawer)' options={{ headerShown : false }}  />
-          <Stack.Screen name='event' options={{ headerShown: false }} />
-          <Stack.Screen name='tickets' options={{ headerShown: false }} />
-          <Stack.Screen name='metricas' options={{ headerShown : false}} />
-          <Stack.Screen name='vendedores' options={{ headerShown : false }}/>
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack>
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(app)" options={{ headerShown: false }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </AuthProvider>
     </RaffleProvider>
   );
 }

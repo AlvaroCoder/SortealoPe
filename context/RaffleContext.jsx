@@ -64,12 +64,3 @@ export const RaffleProvider = ({ children }) => {
   );
 };
 
-export const RoleBasedView = ({ allowedRoles = [], children, fallback = null }) => {
-    const { userRole } = useRaffleContext();
-    
-    if (allowedRoles.length === 0 || allowedRoles.includes(userRole)) {
-        return children;
-    }
-    
-    return fallback;
-};
