@@ -8,7 +8,7 @@ export async function CreateUser(data) {
         headers: {
             'Content-type' : 'application/json'
         },
-        mode: 'cors',
+
         body : JSON.stringify(data)
     })
 };
@@ -16,7 +16,6 @@ export async function CreateUser(data) {
 export async function GetAllUsers() {
     return await fetch(URL_GET_ALL_USERS, {
         method: 'GET',
-        mode : 'cors'
     })
 };
 
@@ -26,7 +25,6 @@ export async function UpdateUser(data) {
         headers: {
             'Content-type' : 'application/json'
         },
-        mode: 'cors',
         body : data
     })
 };

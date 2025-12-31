@@ -7,7 +7,9 @@ export default function AuthLayout() {
               title : 'Bienvenido'
           }} />
           <Stack.Screen name="login" />
-          <Stack.Screen name="register" /> 
+      <Stack.Screen name="register" /> 
+      <Stack.Screen name="validateCode" />
+      <Stack.Screen name="forgot-password" />
     </Stack>
   );
 }

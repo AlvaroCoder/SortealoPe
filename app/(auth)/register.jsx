@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   Dimensions,
   Image,
   ScrollView,
@@ -12,12 +13,15 @@ import {
 import OutlineTextField from "../../components/common/TextFields/OutlineTextField";
 import TextPrevAccount from "../../components/common/Texts/TextPrevAccount";
 import { Colors } from "../../constants/theme";
+import { useAuthContext } from "../../context/AuthContext";
+import LoadingScreen from "../../screens/LoadingScreen";
 import FormInitial from "../../views/Form/FormInitial";
 
 const URL_LOGO_IMAGE = "https://res.cloudinary.com/dabyqnijl/image/upload/v1730493843/laztvzw7ytanqrdj161e.png";
 
 export default function Register() {
   const router = useRouter();
+  const { signUp, loading  } = useAuthContext();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -25,9 +29,35 @@ export default function Register() {
     password: "",
   });
 
-  const handleSubmit = () => {
-    console.log("Datos del formulario:", formData);
-    router.push('/(drawer)');
+  const handleSubmit = async () => {
+    if (formData.email === "" || formData.password === "" || formData.username === "") {
+      return Alert.alert("Información incompleta", "Ingresa tus datos para continuar");
+    }
+
+    if (!formData.email.includes("@")) {
+      return Alert.alert(
+        "Correo no válido",
+        "Ingresa un correo electrónico válido"
+      );
+    }
+
+    if (formData.password.length < 6) {
+      return Alert.alert(
+        "Contraseña débil",
+        "La contraseña debe tener mínimo 6 caracteres"
+      );
+    }
+    console.log(formData);
+    
+    const response = await signUp(formData);
+    console.log(response);
+    
+    if (response?.error) {
+      
+      return Alert.alert("Error al registrar", response.error);
+    }
+
+    router.push("(auth)/validateCode")
   };
 
   const handleChange = (field, value) => {
@@ -39,6 +69,7 @@ export default function Register() {
 
   return (
     <View style={[styles.container, { paddingTop: Constants.statusBarHeight }]}>
+      {loading && <LoadingScreen/>}
       <ScrollView>
         <FormInitial
           title="Registro"
@@ -46,7 +77,7 @@ export default function Register() {
           onSubmit={handleSubmit}
         >
           <OutlineTextField
-            title="Nombre de usuarios"
+            title="Nombre de usuario"
             placeholder="Ingresa tu nombre de usuario"
             value={formData.username}
             type="text"
@@ -77,6 +108,7 @@ export default function Register() {
             onChangeText={(text) => handleChange('password', text)}
             required={true}
             returnKeyType="next"
+            secureTextEntry={true}
           />
         </FormInitial>
 

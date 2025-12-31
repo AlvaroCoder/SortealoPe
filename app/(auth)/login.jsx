@@ -54,6 +54,7 @@ export default function Login() {
 
           <OutlineTextField
             title="Contraseña"
+            type="password"
             value={formData.password}
             onChangeText={(text) => updateFields('password', text)}
             placeholder="Crea una contraseña segura"

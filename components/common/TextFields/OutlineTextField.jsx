@@ -1,105 +1,77 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function OutlineTextField({
-    title = "Nombre",
-    value,
-    onChangeText,
-    placeholder = "",
-    secureTextEntry = false,
-    required = false,
-    type = "text",
-    keyboardType = "default",
-    maxLength,
-    error = "",
-    editable = true,
+  title = "Nombre",
+  value = "",
+  onChangeText = () => {},
+  placeholder = "",
+  secureTextEntry = false,
+  required = false,
+  type = "text",
+  keyboardType = "default",
+  maxLength,
+  error = "",
+  editable = true,
   returnKeyType = "next",
-    styleContainer=""
+  styleContainer
 }) {
-  const [isFocused, setIsFocused] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [internalValue, setInternalValue] = useState(value || "");
+  const [isFocused, setIsFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [internalValue, setInternalValue] = useState(value);
+
+  useEffect(() => {
+    setInternalValue(value);
+  }, [value]);
 
   const getKeyboardType = () => {
-    if (keyboardType !== "default") return keyboardType
-    
+    if (keyboardType !== "default") return keyboardType;
     switch (type) {
-      case "number":
-        return "numeric"
-      case "email":
-        return "email-address"
-      case "phone":
-        return "phone-pad"
-      default:
-        return "default"
+      case "number": return "numeric";
+      case "email": return "email-address";
+      case "phone": return "phone-pad";
+      default: return "default";
     }
-  }
+  };
 
   const handleTextChange = (text) => {
-    let processedText = text
-    
+    let processed = text;
+
     switch (type) {
       case "number":
-        processedText = text.replace(/[^0-9.]/g, '')
-        const decimalCount = (processedText.match(/\./g) || []).length
-        if (decimalCount > 1) {
-          processedText = processedText.slice(0, -1)
-        }
-        break
-      
-      case "email":
-        break
-      
+        processed = text.replace(/[^0-9.]/g, '');
+        const decimals = (processed.match(/\./g) || []).length;
+        if (decimals > 1) processed = processed.slice(0, -1);
+        break;
       case "phone":
-        processedText = text.replace(/[^0-9\s\-\(\)]/g, '')
-        break
-      
-      default:
-        break
+        processed = text.replace(/[^0-9\s\-\(\)]/g, '');
+        break;
     }
-    
-    setInternalValue(processedText)
 
-    if (onChangeText) {
-      console.log(processedText);
-      
-      onChangeText(processedText)
-    }
-  }
+    setInternalValue(processed);
+    onChangeText(processed);
+  };
 
-  React.useEffect(() => {
-    setInternalValue(value || '')
-  }, [value]);
-  
-  const shouldShowPasswordToggle = secureTextEntry && value && value.length > 0
+  const showPasswordToggle = secureTextEntry && internalValue.length > 0;
 
   return (
     <View style={[styles.container, styleContainer]}>
       <View style={styles.titleContainer}>
-        <Text style={[
-          styles.title,
-          error ? styles.titleError : {}
-        ]}>
-          {title}
-          {required && <Text style={styles.required}> *</Text>}
+        <Text style={[styles.title, error && styles.titleError]}>
+          {title}{required && <Text style={styles.required}> *</Text>}
         </Text>
-        {error ? (
-          <Text style={styles.errorText}>{error}</Text>
-        ) : null}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
       </View>
 
       <View style={[
         styles.inputContainer,
-        isFocused ? styles.inputContainerFocused : {},
-        error ? styles.inputContainerError : {},
-        !editable ? styles.inputContainerDisabled : {}
+        isFocused && styles.inputContainerFocused,
+        error && styles.inputContainerError,
+        !editable && styles.inputContainerDisabled
       ]}>
         <TextInput
-          style={[
-            styles.textInput,
-            !editable ? styles.textInputDisabled : {}
-          ]}
+          style={[styles.textInput, !editable && styles.textInputDisabled]}
           value={internalValue}
           onChangeText={handleTextChange}
           placeholder={placeholder}
@@ -108,26 +80,29 @@ export default function OutlineTextField({
           keyboardType={getKeyboardType()}
           maxLength={maxLength}
           editable={editable}
-          onFocus={() => setIsFocused(true)}
           
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           autoCapitalize={type === "email" ? "none" : "sentences"}
           autoCorrect={type !== "email"}
-          returnKeyType='next'
+          returnKeyType={returnKeyType}
         />
-        
-        {shouldShowPasswordToggle && (
+
+        {showPasswordToggle && (
           <TouchableOpacity
             style={styles.toggleButton}
-            onPress={() => setShowPassword(!showPassword)}
+            onPress={() => setShowPassword(prev => !prev)}
           >
-            <Text style={styles.toggleText}>
-              {showPassword ? <Ionicons name="eye-outline" /> :  <Ionicons name='eye-off-outline' />}
-            </Text>
+            <Ionicons
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              size={22}
+              color="#555"
+            />
           </TouchableOpacity>
         )}
       </View>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -138,12 +113,11 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 4,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '500',
     color: '#333',
   },
   titleError: {
@@ -155,35 +129,26 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     color: '#D52941',
-    fontWeight: '500',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#DDD',
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#CCC',
+    borderRadius: 10,
     backgroundColor: '#FFF',
     paddingHorizontal: 12,
     minHeight: 50,
   },
   inputContainerFocused: {
     borderColor: '#FCD581',
-    shadowColor: '#FCD581',
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
   },
   inputContainerError: {
     borderColor: '#D52941',
   },
   inputContainerDisabled: {
-    backgroundColor: '#F5F5F5',
-    borderColor: '#EEE',
+    backgroundColor: '#F2F2F2',
+    borderColor: '#E0E0E0',
   },
   textInput: {
     flex: 1,
@@ -192,13 +157,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   textInputDisabled: {
-    color: '#999',
+    color: '#888',
   },
   toggleButton: {
-    padding: 4,
-    marginLeft: 8,
+    padding: 6,
   },
-  toggleText: {
-    fontSize: 16,
-  },
-})
+});

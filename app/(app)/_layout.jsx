@@ -6,12 +6,12 @@ export default function RootLayout() {
         return <Redirect href={"/(auth)/login"} />
     }
   return (
-      <Stack>
-          <Stack.Screen name='(drawer)' options={{headerShown : false}}/>
-          <Stack.Screen name='event' options={{headerShown : false}}/> 
-          <Stack.Screen name='metricas' options={{headerShown : false}} />
-          <Stack.Screen name='tickets' options={{headerShown : false}} />
-          <Stack.Screen name='vendedores' options={{headerShown : false}} />
+    <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name='(drawer)' />
+          <Stack.Screen name='event' /> 
+          <Stack.Screen name='metricas'  />
+          <Stack.Screen name='tickets'  />
+          <Stack.Screen name='vendedores'  />
     </Stack>
   )
 };
