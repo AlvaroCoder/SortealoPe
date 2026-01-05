@@ -35,7 +35,7 @@ export async function ResendNotification(email) {
     })
 };
 
-export async function RefreshToken(token) {
+export async function RefreshToken() {
     return await fetch(URL_REFRESH_TOKEN, {
         method: 'POST',
     })

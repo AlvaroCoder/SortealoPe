@@ -1,9 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import ProfileRow from '../../../components/cards/ProfileRow';
-import ButtonGradiend from '../../../components/common/Buttons/ButtonGradiendt'; // 🧩 Asumo que existe
+import ButtonGradiend from '../../../components/common/Buttons/ButtonGradiendt';
 import { Colors, Typography } from '../../../constants/theme';
-import { USER_ROLES, useRaffleContext } from '../../../context/RaffleContext';
+import { useAuthContext } from '../../../context/AuthContext';
+import { useRaffleContext } from '../../../context/RaffleContext';
+import LoadingScreen from '../../../screens/LoadingScreen';
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
@@ -19,33 +22,19 @@ const mockUserData = {
 };
 
 export default function Perfil() {
-  const { userRole, updateRole } = useRaffleContext();
+  const { userRole } = useRaffleContext();
+  const { signout, loading } = useAuthContext();
   const userData = mockUserData;
+  const router = useRouter();
   
-  const handleLogout = () => {
-    Alert.alert(
-      "Cerrar Sesión",
-      "¿Estás seguro de que quieres cerrar tu sesión?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel"
-        },
-        { 
-          text: "Cerrar Sesión", 
-          onPress: () => {
-             updateRole(USER_ROLES.BUYER, null); 
-             Alert.alert("Sesión Cerrada", "Has cerrado sesión con éxito.");
-          },
-          style: "destructive"
-        }
-      ]
-    );
+  const handleLogout =async () => {
+    await signout();
+    router.push("/(app)")
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      
+      {loading && <LoadingScreen/>}
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <Ionicons name="person-circle-outline" size={80} color={WHITE} />

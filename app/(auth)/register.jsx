@@ -49,11 +49,8 @@ export default function Register() {
     }
     console.log(formData);
     
-    const response = await signUp(formData);
-    console.log(response);
-    
+    const response = await signUp(formData);    
     if (response?.error) {
-      
       return Alert.alert("Error al registrar", response.error);
     }
 

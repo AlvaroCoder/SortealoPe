@@ -22,7 +22,7 @@ const URL_IMAGEN_MASCOTA = "https://res.cloudinary.com/dabyqnijl/image/upload/v1
 export default function DrawerAdministradorContent(props) {
   const { navigation } = props;
   const { userRole } = useRaffleContext();  
-
+  
   const userName = "Admin Principal";
 
   const handleProfilePress = () => {

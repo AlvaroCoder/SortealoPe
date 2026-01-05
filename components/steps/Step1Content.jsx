@@ -1,5 +1,8 @@
 import { Alert, StyleSheet, Text, View } from 'react-native';
+import { ENDPOINTS_EVENTS } from '../../Connections/APIURLS';
 import { Colors, Typography } from '../../constants/theme';
+import { useFetch } from '../../lib/useFetch';
+import LoadingScreen from '../../screens/LoadingScreen';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
 import CollectionOption from '../common/Card/ColletionOption';
 import Title from '../common/Titles/Title';
@@ -19,8 +22,12 @@ const COLLECTIONS = [
     { id : 4, tickets: 1000, price: 100.00, label: "Paquete Platino" },
 ];
 
-export default function Step1Content({ form, setForm, onNext }) {
+const URL_PACKS_EVENTS = ENDPOINTS_EVENTS.GET_PACKS_EVENT;
 
+export default function Step1Content({ form, setForm, onNext }) {
+    const { data, loading } = useFetch(URL_PACKS_EVENTS);
+    console.log(data);
+    
     const handleNext = () => {
         if (form?.packId === undefined) {
             Alert.alert("Error de Validación", "Por favor, selecciona un paquete de tickets para continuar.");
@@ -40,27 +47,35 @@ export default function Step1Content({ form, setForm, onNext }) {
         item?.id === form.packId;
 
     return (
-        <View style={styles.stepContent}>
-            <Title>1. Define el Paquete de Tickets</Title>
-            <Text style={styles.stepSubtitleText}>Selecciona un paquete predefinido o usa la opción personalizada abajo.</Text>
-            
-            <View style={styles.collectionListContainer}>
-                {COLLECTIONS.map((item) => (
-                    <CollectionOption
-                        key={item.tickets}
-                        item={item}
-                        isSelected={isSelected(item)}
-                        onPress={handleCollectionSelect}
-                    />
-                ))}
-            </View>
+      <View style={styles.stepContent}>
+        {loading && <LoadingScreen />}
+        <Title>1. Define el Paquete de Tickets</Title>
+        <Text style={styles.stepSubtitleText}>
+          Selecciona un paquete predefinido o usa la opción personalizada abajo.
+        </Text>
 
-            <View style={styles.buttonContainer}>
-                <ButtonGradiend onPress={handleNext} style={styles.nextButton}>
-                    Continuar
-                </ButtonGradiend>
-            </View>
+        <View style={styles.collectionListContainer}>
+          {data &&
+                    data.map((item, key) => {
+                if ([1, 3, 6, 9].includes(parseInt(item?.id))) {
+                  return (
+                    <CollectionOption
+                      key={key}
+                      item={item}
+                      isSelected={isSelected(item)}
+                      onPress={handleCollectionSelect}
+                    />
+                  );
+                }
+            })}
         </View>
+
+        <View style={styles.buttonContainer}>
+          <ButtonGradiend onPress={handleNext} style={styles.nextButton}>
+            Continuar
+          </ButtonGradiend>
+        </View>
+      </View>
     );
 }
 

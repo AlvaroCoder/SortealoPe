@@ -1,24 +1,42 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import OutlineTextField from "../../components/common/TextFields/OutlineTextField";
 import TextPrevAccount from "../../components/common/Texts/TextPrevAccount";
+import { useAuthContext } from "../../context/AuthContext";
+import LoadingScreen from "../../screens/LoadingScreen";
 import FormInitial from "../../views/Form/FormInitial";
 
 const URL_LOGO_IMAGE = "https://res.cloudinary.com/dabyqnijl/image/upload/v1730493843/laztvzw7ytanqrdj161e.png";
 
 export default function Login() {
   const router = useRouter();
-
+  const { signin, loading } = useAuthContext();
   const [formData, setFormData] = useState({
     email : '',
     password: ''
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (formData.email === "" || formData.password === "") {
+      return Alert.alert("Información incompleta", "Ingresa tus datos para continuar");
+    };
+
+    if (!formData.email.includes("@")) {
+      return Alert.alert(
+        "Correo no válido",
+        "Ingresa un correo electrónico válido"
+      )
+    };
+
+    const response = await signin(formData);
+    if (response?.error) {
+      return Alert.alert("Error", response.error);
+    };
+
+    router.push('/(app)/(drawer)');
     console.log("Datos del formulario:", formData);
-    router.push('/(drawer)');
   };
 
   const updateFields = (field, value) => {
@@ -30,6 +48,7 @@ export default function Login() {
 
   return (
     <View style={[styles.container, { paddingTop: Constants.statusBarHeight }]}>
+      {loading && <LoadingScreen/>}
       <ScrollView 
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}

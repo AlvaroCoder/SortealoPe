@@ -4,39 +4,46 @@ import { FlatList, StyleSheet, Text, View } from "react-native";
 import ButtonCreateEvent from "../components/common/Buttons/ButtonCreateEvent";
 import EventListItem from "../components/common/Card/EventListItem";
 import Title from "../components/common/Titles/Title";
+import { ENDPOINTS_EVENTS } from "../Connections/APIURLS";
 import { Colors, Typography } from "../constants/theme";
+import { useAuthContext } from "../context/AuthContext";
 import { useRaffleContext } from "../context/RaffleContext";
-import DataCardEvent from "../mock/DataCardEvent.json";
+import { useFetch } from "../lib/useFetch";
 import RolSwitchBar from "../views/Bars/RolSwitchBar";
-
+import LoadingScreen from "./LoadingScreen";
 const GREEN_900 = Colors.principal.green[900];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 const GREEN_100 = Colors.principal.green[100];
 
+const URL_GET_EVENTS = ENDPOINTS_EVENTS.GET_EVENTS_BY_ID;
+
 export default function MonitorAdminDashboard() {
-  const mockEventData = DataCardEvent;
-
-
   const { userRole, updateRole } = useRaffleContext();
+  const { userData, loading: loadingAuth } = useAuthContext();
+  const shouldFetch = userData?.userId && !loadingAuth;
+  const { loading, data } = useFetch(
+    shouldFetch ? `${URL_GET_EVENTS}${userData.userId}` : null
+  );
+  
   return (
     <View style={styles.monitorContainer}>
+      {(loading || loadingAuth) && <LoadingScreen/>}
       <RolSwitchBar userRole={userRole} updateRole={updateRole} />
-
       <View style={styles.headerContent}>
-          <Title styleTitle={{}}>Eventos Creados Recientes (2)</Title>
+        <Title styleTitle={{}}>Eventos Creados Recientes ({data?.length})</Title>
           <Text>Eventos creados este mes</Text>
       </View>
       <FlatList
-          data={mockEventData}
+          data={data || []}
           renderItem={({ item }) => <EventListItem event={item} />}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={() => (
               <View style={styles.emptyContainer}>
                   <Ionicons name="alert-circle-outline" size={50} color={NEUTRAL_700} />
-                  <Text style={styles.emptyText}>No se encontraron eventos con ese título.</Text>
+                  <Text style={styles.emptyText}>No hay eventos registrados.</Text>
               </View>
           )}
       />
