@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 import ButtonGradiend from '../common/Buttons/ButtonGradiendt';
@@ -20,6 +20,8 @@ export function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
     };
 
     const handleFinalSubmit = () => {
+          console.log("Formulario" ,form);
+
         if (!form.ticketDesign) {
              Alert.alert(
                 "Campo Requerido", 
@@ -27,6 +29,7 @@ export function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
              );
              return;
         }
+      
         if (onSubmit) onSubmit();
     };
 

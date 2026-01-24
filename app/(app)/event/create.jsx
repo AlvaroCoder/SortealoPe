@@ -1,12 +1,12 @@
 import { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    LayoutAnimation,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  LayoutAnimation,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
 
 import Step1Content from "../../../components/steps/Step1Content";
@@ -47,11 +47,14 @@ export default function CreateEventStepper() {
     setCurrentStep((prev) => (prev > 1 ? prev - 1 : prev));
   };
 
-  const handleSubmit = () => {
+  
+  const handleSubmit = async() => {
     Alert.alert(
       "Evento Creado",
       `El evento ha sido creado con los datos del formulario. Recaudación Potencial: S/ ${formData.totalRevenue}`
     );
+
+    
   };
 
   const renderContent = () => {

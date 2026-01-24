@@ -14,19 +14,10 @@ const WHITE = Colors.principal.white;
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const GREEN_100 = Colors.principal.green[100];
-
-const COLLECTIONS = [
-    { id : 1, tickets: 100, price: 10.00, label: "Paquete Bronce" },
-    { id : 2, tickets: 200, price: 20.00, label: "Paquete Plata" },
-    { id : 3, tickets: 500, price: 50.00, label: "Paquete Oro" },
-    { id : 4, tickets: 1000, price: 100.00, label: "Paquete Platino" },
-];
-
 const URL_PACKS_EVENTS = ENDPOINTS_EVENTS.GET_PACKS_EVENT;
 
 export default function Step1Content({ form, setForm, onNext }) {
     const { data, loading } = useFetch(URL_PACKS_EVENTS);
-    console.log(data);
     
     const handleNext = () => {
         if (form?.packId === undefined) {
@@ -56,7 +47,7 @@ export default function Step1Content({ form, setForm, onNext }) {
 
         <View style={styles.collectionListContainer}>
           {data &&
-                    data.map((item, key) => {
+                data.map((item, key) => {
                 if ([1, 3, 6, 9].includes(parseInt(item?.id))) {
                   return (
                     <CollectionOption

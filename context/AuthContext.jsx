@@ -37,19 +37,19 @@ export function AuthProvider({ children }) {
         atob(token)
           .split("")
           .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      )
+          .join(""),
+      ),
     );
   }
   useEffect(() => {
     async function getCacheUserData() {
       try {
         setLoading(true);
-        const token = await AsyncStorage.getItem("token");        
+        const token = await AsyncStorage.getItem("token");
         if (!token) return;
         setAccessToken(token);
         setIsLogged(true);
-        
+
         const base64Url = token.split(".")[1];
         const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
         const decodedPayload = decodedPayloadToken(base64);
@@ -74,17 +74,18 @@ export function AuthProvider({ children }) {
 
       if (!response.ok) {
         throw new Error(
-          responseJSON?.message || "Ocurrió un error en el inicio de sesión"
+          responseJSON?.message || "Ocurrió un error en el inicio de sesión",
         );
       }
+      console.log(responseJSON?.accessToken);
 
       const token = String(responseJSON?.accessToken);
       await AsyncStorage.setItem("token", token);
-      
+
       setAccessToken(token);
 
       const userToken = decodedPayloadToken(token);
-      setUserData(userToken)
+      setUserData(userToken);
       setIsLogged(true);
     } catch (err) {
       console.log("Error Login:", err);
@@ -102,7 +103,7 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         const responseJSON = await response.json();
         throw new Error(
-          responseJSON?.message || "Ocurrio un error en el registro"
+          responseJSON?.message || "Ocurrio un error en el registro",
         );
       }
       setUserData(user);
@@ -125,7 +126,7 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         const responseJSON = await response.json();
         throw new Error(
-          responseJSON?.message || "Ocurrio un error en la validación"
+          responseJSON?.message || "Ocurrio un error en la validación",
         );
       }
     } catch (err) {
@@ -141,12 +142,12 @@ export function AuthProvider({ children }) {
       await AsyncStorage.removeItem("token");
       setIsLogged(false);
       setUserData(null);
-      setLoading(false);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
-
 
   return (
     <AuthContext.Provider

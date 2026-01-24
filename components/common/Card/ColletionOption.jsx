@@ -12,8 +12,8 @@ export default function CollectionOption({ item, isSelected, onPress }) {
         style={[styles.collectionCard, isSelected && styles.collectionCardSelected]}
         onPress={() => onPress(item)}
     >
-        <Text style={styles.collectionLabel}>{item.label}</Text>
-        <Text style={styles.collectionTickets}>{item.tickets} Tickets</Text>
+        <Text style={styles.collectionLabel}>{item.name}</Text>
+        <Text style={styles.collectionTickets}>{item.maximumCapacity} Tickets</Text>
         <Text style={styles.collectionPrice}>S/ {item.price.toFixed(2)}</Text>
         {isSelected && (
             <Ionicons name="checkmark-circle" size={20} color={GREEN_900} style={styles.collectionCheck} />
