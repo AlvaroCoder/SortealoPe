@@ -4,6 +4,7 @@ import {
   VerifyUser,
 } from "@/Connections/login_register";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
 
@@ -32,20 +33,15 @@ export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(null);
 
   function decodedPayloadToken(token) {
-    return JSON.parse(
-      decodeURIComponent(
-        atob(token)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join(""),
-      ),
-    );
+    return jwtDecode(token);
   }
   useEffect(() => {
     async function getCacheUserData() {
       try {
         setLoading(true);
         const token = await AsyncStorage.getItem("token");
+        console.log(token);
+
         if (!token) return;
         setAccessToken(token);
         setIsLogged(true);
@@ -77,14 +73,12 @@ export function AuthProvider({ children }) {
           responseJSON?.message || "Ocurrió un error en el inicio de sesión",
         );
       }
-      console.log(responseJSON?.accessToken);
-
       const token = String(responseJSON?.accessToken);
       await AsyncStorage.setItem("token", token);
 
       setAccessToken(token);
 
-      const userToken = decodedPayloadToken(token);
+      const userToken = jwtDecode(token);
       setUserData(userToken);
       setIsLogged(true);
     } catch (err) {

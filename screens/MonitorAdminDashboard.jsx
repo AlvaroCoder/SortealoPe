@@ -1,4 +1,3 @@
-
 import { Ionicons } from "@expo/vector-icons";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import ButtonCreateEvent from "../components/common/Buttons/ButtonCreateEvent";
@@ -24,31 +23,37 @@ export default function MonitorAdminDashboard() {
   const { userData, loading: loadingAuth } = useAuthContext();
   const shouldFetch = userData?.userId && !loadingAuth;
   const { loading, data } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}${userData.userId}` : null
+    shouldFetch ? `${URL_GET_EVENTS}${userData.userId}` : null,
   );
-  
+
   return (
     <View style={styles.monitorContainer}>
-      {(loading || loadingAuth) && <LoadingScreen/>}
+      {(loading || loadingAuth) && <LoadingScreen />}
       <RolSwitchBar userRole={userRole} updateRole={updateRole} />
       <View style={styles.headerContent}>
-        <Title styleTitle={{}}>Eventos Creados Recientes ({data?.length})</Title>
-          <Text>Eventos creados este mes</Text>
+        <Title styleTitle={{}}>
+          Eventos Creados Recientes ({data?.length})
+        </Title>
+        <Text>Eventos creados este mes</Text>
       </View>
       <FlatList
-          data={data || []}
-          renderItem={({ item }) => <EventListItem event={item} />}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={() => (
-              <View style={styles.emptyContainer}>
-                  <Ionicons name="alert-circle-outline" size={50} color={NEUTRAL_700} />
-                  <Text style={styles.emptyText}>No hay eventos registrados.</Text>
-              </View>
-          )}
+        data={data || []}
+        renderItem={({ item }) => <EventListItem event={item} />}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Ionicons
+              name="alert-circle-outline"
+              size={50}
+              color={NEUTRAL_700}
+            />
+            <Text style={styles.emptyText}>No hay eventos registrados.</Text>
+          </View>
+        )}
       />
 
-      <ButtonCreateEvent/>
+      <ButtonCreateEvent />
     </View>
   );
 }
@@ -59,22 +64,22 @@ const styles = StyleSheet.create({
     backgroundColor: WHITE,
   },
   headerContent: {
-      paddingHorizontal: 24,
-      paddingTop: 15,
-      paddingBottom: 15,
-      borderBottomWidth: 1,
-      borderBottomColor: NEUTRAL_200,
+    paddingHorizontal: 24,
+    paddingTop: 15,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: NEUTRAL_200,
   },
   sectionTitle: {
-    fontSize: Typography.sizes['2xl'],
+    fontSize: Typography.sizes["2xl"],
     fontWeight: Typography.weights.extrabold,
     color: GREEN_900,
     marginBottom: 15,
   },
-  
+
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -86,15 +91,14 @@ const styles = StyleSheet.create({
     flex: 1,
     color: GREEN_900,
     marginLeft: 10,
-
   },
-  
+
   listContent: {
     paddingHorizontal: 24,
     paddingVertical: 10,
   },
   emptyContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 50,
     backgroundColor: GREEN_100,
     borderRadius: 12,
@@ -104,7 +108,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.lg,
     color: NEUTRAL_700,
     marginTop: 10,
-  }
+  },
 });
 
 /**
