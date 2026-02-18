@@ -27,17 +27,19 @@ export default function Step1Content({ form, setForm, onNext }) {
       );
       return;
     }
+    console.log(form);
+
     onNext();
   };
 
   const handleCollectionSelect = (item) => {
     setForm((prev) => ({
       ...prev,
-      packId: item?.id,
+      packId: parseInt(item?.id),
     }));
   };
 
-  const isSelected = (item) => item?.id === form.packId;
+  const isSelected = (item) => String(item?.id) === String(form.packId);
 
   return (
     <View style={styles.stepContent}>

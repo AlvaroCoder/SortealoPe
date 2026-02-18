@@ -32,23 +32,16 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
 
-  function decodedPayloadToken(token) {
-    return jwtDecode(token);
-  }
   useEffect(() => {
     async function getCacheUserData() {
       try {
         setLoading(true);
         const token = await AsyncStorage.getItem("token");
-        console.log(token);
 
         if (!token) return;
         setAccessToken(token);
         setIsLogged(true);
-
-        const base64Url = token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        const decodedPayload = decodedPayloadToken(base64);
+        const decodedPayload = jwtDecode(token);
 
         setUserData(decodedPayload);
       } catch (err) {

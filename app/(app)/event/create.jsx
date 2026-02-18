@@ -14,7 +14,11 @@ import Step2Content from "../../../components/steps/Step2Content";
 import Step3Content from "../../../components/steps/Step3Content";
 import Step3CategoryContent from "../../../components/steps/Step3ContentCategory";
 import StepperHeader from "../../../components/steps/StepperHeader";
+import { CreateEvent, UploadImage } from "../../../Connections/events";
 import { Colors, Typography } from "../../../constants/theme";
+import { formatterDateToISO } from "../../../lib/dateFormatter";
+import { useUser } from "../../../lib/useUser";
+import LoadingScreen from "../../../screens/LoadingScreen";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
@@ -32,9 +36,22 @@ const STEPS = [
 ];
 
 export default function CreateEventStepper() {
+  const { userData, token } = useUser();
+  const [loading, setLoading] = useState(false);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    date: "",
+    place: "",
     collectionsQuantity: 1,
+    ticketsPerCollection: 0,
+    packId: 1,
+    hostId: 1,
+    image: "",
+    eventCategoryId: "",
+    status: 1,
   });
 
   const handleNext = () => {
@@ -47,14 +64,42 @@ export default function CreateEventStepper() {
     setCurrentStep((prev) => (prev > 1 ? prev - 1 : prev));
   };
 
-  
-  const handleSubmit = async() => {
-    Alert.alert(
-      "Evento Creado",
-      `El evento ha sido creado con los datos del formulario. Recaudación Potencial: S/ ${formData.totalRevenue}`
-    );
+  const handleSubmit = async () => {
+    setLoading(true);
+    const newDataFormData = {
+      ...formData,
+      hostId: userData?.userId || null,
+      date: formData.date ? formatterDateToISO(formData.date) : null,
+    };
 
-    
+    console.log("Formulario de enviar ", newDataFormData);
+    try {
+      // Primero subir la imagen a Cloudinary y obtener la URL
+      if (formData?.image) {
+        const responseUpload = await UploadImage(formData.image, token);
+        if (responseUpload.ok) {
+          const responseJSON = await responseUpload.json();
+          console.log(responseJSON);
+
+          newDataFormData.image = responseJSON?.secure_url || "";
+        }
+      }
+      const response = await CreateEvent(newDataFormData, token);
+
+      if (response.ok) {
+        Alert.alert(
+          "Evento Creado",
+          `El evento ha sido creado con los datos del formulario. `,
+        );
+      } else {
+        Alert.alert("Error ", `El evento no se creo`);
+      }
+    } catch (error) {
+      console.error("Error al crear el evento:", error);
+      Alert.alert("Error", "No se pudo crear el evento. Inténtalo de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderContent = () => {
@@ -111,6 +156,7 @@ export default function CreateEventStepper() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={100}
     >
+      {loading && <LoadingScreen />}
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.scrollContent}

@@ -22,6 +22,7 @@ export default function MonitorAdminDashboard() {
   const { userRole, updateRole } = useRaffleContext();
   const { userData, loading: loadingAuth } = useAuthContext();
   const shouldFetch = userData?.userId && !loadingAuth;
+
   const { loading, data } = useFetch(
     shouldFetch ? `${URL_GET_EVENTS}${userData.userId}` : null,
   );

@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Colors, Typography } from "../../constants/theme";
 import DatePickerInput from "../common/Buttons/ButtonDatePicker";
@@ -32,10 +32,21 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
   };
 
   const handlePriceChange = (text) => {
-    const value = text.replace(/[^0-9.]/g, "");
-    updateForm("ticketPrice", value);
+    // Permitir solo números y punto decimal
+    const filtered = text.replace(/[^0-9.]/g, "");
 
-    if (value && parseFloat(value) <= 0) {
+    // Si el campo está vacío, guardamos 0 o null para la API
+    if (filtered === "") {
+      updateForm("ticketPrice", 0);
+      setError("ticketPrice", "El precio es obligatorio.");
+      return;
+    }
+
+    // Convertimos a número decimal para la API
+    const numericValue = parseFloat(filtered);
+    updateForm("ticketPrice", numericValue);
+
+    if (!isNaN(numericValue) && numericValue <= 0) {
       setError("ticketPrice", "El precio debe ser mayor a cero.");
     } else {
       setError("ticketPrice", "");
@@ -43,10 +54,20 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
   };
 
   const handleIntegerChange = (key, text) => {
-    const value = text.replace(/[^0-9]/g, "");
-    updateForm(key, value);
+    // Permitir solo números enteros
+    const filtered = text.replace(/[^0-9]/g, "");
 
-    if (value && parseInt(value) <= 0) {
+    if (filtered === "") {
+      updateForm(key, 0);
+      setError(key, "La cantidad es obligatoria.");
+      return;
+    }
+
+    // Convertimos a número entero para la API
+    const numericValue = parseInt(filtered, 10);
+    updateForm(key, numericValue);
+
+    if (!isNaN(numericValue) && numericValue <= 0) {
       setError(key, "La cantidad debe ser mayor a cero.");
     } else {
       setError(key, "");
@@ -62,9 +83,14 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
       errors.description = "La descripción es obligatoria.";
     if (!form.place) errors.place = "El lugar es obligatorio.";
 
-    if (!form.ticketPrice || parseFloat(form.ticketPrice) <= 0)
+    // Validamos usando tipos numéricos
+    if (typeof form.ticketPrice !== "number" || form.ticketPrice <= 0)
       errors.ticketPrice = "Ingresa un precio válido (> 0).";
-    if (!form.ticketsPerCollection || parseInt(form.ticketsPerCollection) <= 0)
+
+    if (
+      typeof form.ticketsPerCollection !== "number" ||
+      form.ticketsPerCollection <= 0
+    )
       errors.ticketsPerCollection = "Ingresa una cantidad válida (> 0).";
 
     setValidationErrors(errors);
@@ -73,12 +99,12 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
     if (hasErrors) {
       Alert.alert(
         "Error de Validación",
-        "Por favor, corrige los errores en el formulario."
+        "Por favor, corrige los errores en el formulario.",
       );
       return;
     }
 
-    onNext({});
+    onNext();
   };
 
   const ErrorMessage = ({ error }) => {
@@ -90,7 +116,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
       </Text>
     );
   };
-
 
   return (
     <ScrollView
@@ -113,34 +138,34 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
           title="Titulo del evento"
           placeholder="Ej: Rifa viaje a Cancún"
           value={form.title}
-          type="email"
           onChangeText={(text) => updateForm("title", text)}
           required={true}
         />
         <ErrorMessage error={validationErrors.title} />
 
-
         <OutlineTextField
-            title="Descripción del evento"
-            placeholder="Ingresa la descripción y el premio principal"
-            value={form?.description}
-            onChangeText={(text) => updateForm("description", text)}
-            multiline={true}
-            numberOfLines={4}
-            required={true}
+          title="Descripción del evento"
+          placeholder="Ingresa la descripción y el premio principal"
+          value={form?.description}
+          onChangeText={(text) => updateForm("description", text)}
+          multiline={true}
+          numberOfLines={4}
+          required={true}
         />
         <ErrorMessage error={validationErrors.description} />
 
         <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
           Detalles y fechas
         </Text>
+
         <OutlineTextField
           keyboardType="numeric"
           placeholder="00.00"
-          value={form.ticketPrice}
+          // Convertimos el número a string para el componente visual
+          value={form.ticketPrice ? form.ticketPrice.toString() : ""}
           onChangeText={handlePriceChange}
-        title="Precio Unitario"
-            required={true}          
+          title="Precio Unitario"
+          required={true}
         />
         <ErrorMessage error={validationErrors.ticketPrice} />
 
@@ -148,11 +173,16 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
           title="Cantidad de Tickets por Vendedor"
           keyboardType="numeric"
           placeholder="Total de tickets a generar"
-          value={form?.ticketsPerCollection}
+          // Convertimos el número a string para el componente visual
+          value={
+            form?.ticketsPerCollection
+              ? form.ticketsPerCollection.toString()
+              : ""
+          }
           onChangeText={(text) =>
             handleIntegerChange("ticketsPerCollection", text)
           }
-                  required={true}
+          required={true}
         />
         <ErrorMessage error={validationErrors.ticketsPerCollection} />
 
@@ -160,8 +190,8 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
           title="Lugar del evento"
           placeholder="Ej: Sede Central/Zoom"
           value={form?.place}
-                  onChangeText={(text) => updateForm("place", text)}
-                  required={true}
+          onChangeText={(text) => updateForm("place", text)}
+          required={true}
         />
         <ErrorMessage error={validationErrors.place} />
 
@@ -169,8 +199,12 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
           label="Fecha de Cierre del Sorteo (DD/MM/AAAA)"
           required={true}
           value={form?.date}
-          onChange={(selectedDate) => setForm({ ...form, date: selectedDate })}
-          
+          onChange={(selectedDate) =>
+            setForm({
+              ...form,
+              date: selectedDate,
+            })
+          }
         />
 
         <View style={styles.actionRow}>
@@ -260,8 +294,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     borderColor: GREEN_900,
-    borderRadius: "100%",
+    borderRadius: 50, // Corregido de "100%" a 50 para forma circular
     width: 50,
+    height: 50, // Añadido height para que sea un círculo perfecto
     borderWidth: 2,
     display: "flex",
     justifyContent: "center",
