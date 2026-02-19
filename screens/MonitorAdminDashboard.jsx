@@ -27,7 +27,7 @@ export default function MonitorAdminDashboard() {
     shouldFetch ? `${URL_GET_EVENTS}${userData.userId}` : null,
   );
 
-  console.log(data);
+  console.log("Data : ", data);
 
   return (
     <View style={styles.monitorContainer}>

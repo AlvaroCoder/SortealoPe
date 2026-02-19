@@ -12,4 +12,9 @@ export const ENDPOINTS_EVENTS = {
   GET_EVENTS_BY_ID: `${BASE_URL}/events?userId=`,
   GET_PACKS_EVENT: `${BASE_URL}/events/packs`,
   CREATE_EVENT: `${BASE_URL}/events`,
+  GET_EVENTS_BY_ID_USER: `${BASE_URL}/events?userId=`,
+  GET_EVENT_BY_ID_EVENT: `${BASE_URL}/events/`,
+  GET_EVENTS_CATEGORIES: `${BASE_URL}/events/categories`,
+  ADD_COLLECTIONS_TICKETS: `${BASE_URL}/events/eventTickets/2`,
+  UPDATE_EVENT: `${BASE_URL}/events`,
 };
