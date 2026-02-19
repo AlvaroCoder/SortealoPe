@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { useRouter } from "expo-router";
 import Step1Content from "../../../components/steps/Step1Content";
 import Step2Content from "../../../components/steps/Step2Content";
 import Step3Content from "../../../components/steps/Step3Content";
@@ -37,7 +38,9 @@ const STEPS = [
 
 export default function CreateEventStepper() {
   const { userData, token } = useUser();
+
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -76,21 +79,29 @@ export default function CreateEventStepper() {
     try {
       // Primero subir la imagen a Cloudinary y obtener la URL
       if (formData?.image) {
-        const responseUpload = await UploadImage(formData.image, token);
-        if (responseUpload.ok) {
-          const responseJSON = await responseUpload.json();
-          console.log(responseJSON);
+        console.log(formData?.image);
 
-          newDataFormData.image = responseJSON?.secure_url || "";
-        }
+        const responseUpload = await UploadImage(formData.image, token);
+        const responseJSON = await responseUpload.json();
+
+        const imageUrl = responseJSON?.url;
+        console.log("Imagen ", imageUrl);
+
+        newDataFormData.image = imageUrl || "";
       }
+
+      console.log("Data antes de enviar ", newDataFormData);
+
       const response = await CreateEvent(newDataFormData, token);
+      console.log(response);
 
       if (response.ok) {
         Alert.alert(
           "Evento Creado",
           `El evento ha sido creado con los datos del formulario. `,
         );
+
+        router.push("/(app)/(drawer)");
       } else {
         Alert.alert("Error ", `El evento no se creo`);
       }

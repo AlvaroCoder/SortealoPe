@@ -1,4 +1,4 @@
-const URL_CREATE_EVENT = "http://192.168.1.102:8087/api/v1/users";
+const URL_CREATE_EVENT = "http://192.168.1.102:8087/api/v1/events";
 const URL_GET_EVENT_BY_ID_USER = "http://192.168.1.102:8087/api/v1/events";
 const URL_GET_EVENT_BY_ID_EVENT = "http://192.168.1.102:8087/api/v1/events";
 const URL_GET_EVENTS_CATEGORIES =
@@ -14,7 +14,7 @@ export async function CreateEvent(data, token) {
     method: "POST",
     headers: {
       "Content-type": "application/json",
-      Authentication: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     mode: "cors",
     body: JSON.stringify(data),

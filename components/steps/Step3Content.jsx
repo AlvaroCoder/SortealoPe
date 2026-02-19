@@ -28,7 +28,7 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
 
       <Text style={styles.stepSubtitleText}>
         Sube las piezas gráficas de tu evento. Recuerda que deben cumplir con el
-        tamaño de 1080x1620 px para asegurar la calidad.
+        tamaño de 1620 x 1080 px para asegurar la calidad.
       </Text>
 
       <Text style={styles.inputLabel}>Diseño Visual del Ticket (*)</Text>
