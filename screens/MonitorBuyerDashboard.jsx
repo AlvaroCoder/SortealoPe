@@ -1,42 +1,47 @@
-import { Ionicons } from '@expo/vector-icons';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Title from '../components/common/Titles/Title';
-import Title2 from '../components/common/Titles/Title2';
-import { Colors, Typography } from '../constants/theme';
-import { useRaffleContext } from '../context/RaffleContext';
-import RolSwitchBar from '../views/Bars/RolSwitchBar';
+import { Ionicons } from "@expo/vector-icons";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Title from "../components/common/Titles/Title";
+import Title2 from "../components/common/Titles/Title2";
+import { Colors, Typography } from "../constants/theme";
+import { useRaffleContext } from "../context/RaffleContext";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
-const WHITE = '#FFFFFF';
+const WHITE = "#FFFFFF";
 const RED_500 = Colors.principal.red[500];
 const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
 const mockTicketData = [
-  { 
-    id: '1',
-    title: "Ticket #12345", 
-    date: "Sorteo: 25 Diciembre", 
-    location: "Premio: TV 65'", 
+  {
+    id: "1",
+    title: "Ticket #12345",
+    date: "Sorteo: 25 Diciembre",
+    location: "Premio: TV 65'",
     status: "Activo",
-    urlImagen: "https://placehold.co/150x150/004739/FFFFFF?text=TICKET"
+    urlImagen: "https://placehold.co/150x150/004739/FFFFFF?text=TICKET",
   },
-  { 
-    id: '2',
-    title: "Ticket #67890", 
-    date: "Sorteo: 15 Enero", 
-    location: "Premio: Motocicleta", 
+  {
+    id: "2",
+    title: "Ticket #67890",
+    date: "Sorteo: 15 Enero",
+    location: "Premio: Motocicleta",
     status: "Pendiente",
-    urlImagen: "https://placehold.co/150x150/16CD91/FFFFFF?text=TICKET"
+    urlImagen: "https://placehold.co/150x150/16CD91/FFFFFF?text=TICKET",
   },
-  { 
-    id: '3',
-    title: "Ticket #11223", 
-    date: "Sorteo: 02 Febrero", 
-    location: "Premio: Kit Gamer", 
+  {
+    id: "3",
+    title: "Ticket #11223",
+    date: "Sorteo: 02 Febrero",
+    location: "Premio: Kit Gamer",
     status: "Activo",
-    urlImagen: "https://placehold.co/150x150/004739/FFFFFF?text=TICKET"
+    urlImagen: "https://placehold.co/150x150/004739/FFFFFF?text=TICKET",
   },
 ];
 
@@ -46,19 +51,23 @@ const TicketListItem = ({ ticket }) => {
   return (
     <TouchableOpacity style={styles.ticketCard} activeOpacity={0.8}>
       <View style={styles.ticketImageContainer}>
-        <View style={[styles.statusBadge, { backgroundColor: isActive ? GREEN_500 : RED_500 }]}>
+        <View
+          style={[
+            styles.statusBadge,
+            { backgroundColor: isActive ? GREEN_500 : RED_500 },
+          ]}
+        >
           <Text style={styles.statusBadgeText}>{ticket.status}</Text>
         </View>
       </View>
 
       <View style={styles.ticketDetails}>
         <Title2>{ticket.title}</Title2>
-        
+
         <View style={styles.infoRow}>
           <Ionicons name="calendar-outline" size={14} color={NEUTRAL_700} />
           <Text style={styles.infoText}>{ticket.date}</Text>
         </View>
-
 
         <TouchableOpacity style={styles.viewDetailsButton}>
           <Text style={styles.viewDetailsText}>Ver detalles</Text>
@@ -74,28 +83,26 @@ export default function MonitorBuyerDashboard() {
 
   return (
     <View style={styles.monitorContainer}>
-      <RolSwitchBar userRole={userRole} updateRole={updateRole} />
-
-      <ScrollView 
-        style={styles.mainContentArea} 
+      <ScrollView
+        style={styles.mainContentArea}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.contentPadding}>            
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Title>Mis Tickets Comprados</Title>
-                <View style={styles.countBadge}>
-                  <Title >{mockTicketData.length}</Title>
-                </View>
-              </View>
-              
-              <View style={styles.listWrapper}>
-                {mockTicketData.map((ticket) => (
-                  <TicketListItem key={ticket.id} ticket={ticket} />
-                ))}
+        <View style={styles.contentPadding}>
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Title>Mis Tickets Comprados</Title>
+              <View style={styles.countBadge}>
+                <Title>{mockTicketData.length}</Title>
               </View>
             </View>
+
+            <View style={styles.listWrapper}>
+              {mockTicketData.map((ticket) => (
+                <TicketListItem key={ticket.id} ticket={ticket} />
+              ))}
+            </View>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -106,17 +113,15 @@ const styles = StyleSheet.create({
   monitorContainer: {
     flex: 1,
     backgroundColor: WHITE,
-
   },
   mainContentArea: {
     flex: 1,
-    backgroundColor: WHITE, 
+    backgroundColor: WHITE,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-
   },
   contentPadding: {
-    paddingTop: 10, 
+    paddingTop: 10,
   },
   scrollContent: {
     paddingBottom: 40,
@@ -126,14 +131,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionHeader: {
-    flexDirection: 'column',
-    justifyContent : 'flex-start',
+    flexDirection: "column",
+    justifyContent: "flex-start",
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.bold,
-    color: GREEN_900, 
+    color: GREEN_900,
     marginRight: 10,
   },
   countBadge: {
@@ -142,14 +147,14 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 12,
     marginLeft: 7,
-    width : 40,
+    width: 40,
   },
 
   listWrapper: {
     gap: 15,
   },
   ticketCard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: WHITE,
     borderRadius: 16,
     padding: 12,
@@ -163,15 +168,15 @@ const styles = StyleSheet.create({
   },
   ticketImageContainer: {
     borderRadius: 12,
-    overflow: 'hidden',
-    position: 'relative',
+    overflow: "hidden",
+    position: "relative",
   },
   ticketImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   statusBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 5,
     left: 5,
     paddingHorizontal: 6,
@@ -181,12 +186,12 @@ const styles = StyleSheet.create({
   statusBadgeText: {
     color: WHITE,
     fontSize: 10,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   ticketDetails: {
     flex: 1,
     marginLeft: 15,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   ticketTitle: {
     fontSize: Typography.sizes.lg,
@@ -195,8 +200,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 4,
   },
   infoText: {
@@ -205,14 +210,14 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   viewDetailsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 10,
   },
   viewDetailsText: {
     color: GREEN_900,
     fontSize: 13,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginRight: 4,
   },
   // --- Explorar ---
@@ -221,9 +226,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   exploreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: RED_500,
     padding: 16,
     borderRadius: 12,

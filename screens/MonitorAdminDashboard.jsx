@@ -7,8 +7,8 @@ import { ENDPOINTS_EVENTS } from "../Connections/APIURLS";
 import { Colors, Typography } from "../constants/theme";
 import { useAuthContext } from "../context/AuthContext";
 import { useRaffleContext } from "../context/RaffleContext";
+import { useCategories } from "../lib/useCategories";
 import { useFetch } from "../lib/useFetch";
-import RolSwitchBar from "../views/Bars/RolSwitchBar";
 import LoadingScreen from "./LoadingScreen";
 const GREEN_900 = Colors.principal.green[900];
 const NEUTRAL_200 = Colors.principal.neutral[200];
@@ -24,15 +24,14 @@ export default function MonitorAdminDashboard() {
   const shouldFetch = userData?.userId && !loadingAuth;
 
   const { loading, data } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}${userData.userId}` : null,
+    shouldFetch ? `${URL_GET_EVENTS}${userData.userId}&eventStatus=2` : null,
   );
 
-  console.log("Data : ", data);
+  const { dataCategorie } = useCategories();
 
   return (
     <View style={styles.monitorContainer}>
       {(loading || loadingAuth) && <LoadingScreen />}
-      <RolSwitchBar userRole={userRole} updateRole={updateRole} />
       <View style={styles.headerContent}>
         <Title styleTitle={{}}>
           Eventos Creados Recientes ({data?.length})

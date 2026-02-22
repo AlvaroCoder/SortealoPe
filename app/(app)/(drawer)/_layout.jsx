@@ -33,12 +33,6 @@ export default function DrawerLayout() {
         screenOptions={DrawerHomeStyle}
       >
         <Drawer.Screen
-          name="index"
-          options={{
-            title: "SORTEALOPE",
-          }}
-        />
-        <Drawer.Screen
           name="profile"
           options={{
             title: "Mi Perfil",
@@ -50,6 +44,13 @@ export default function DrawerLayout() {
                 headerTintColor={WHITE}
               />
             ),
+          }}
+        />
+
+        <Drawer.Screen
+          name="home/(tab)"
+          options={{
+            title: "SORTEALOPE",
           }}
         />
 

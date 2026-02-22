@@ -1,55 +1,67 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import OutlineTextField from "../../components/common/TextFields/OutlineTextField";
 import TextPrevAccount from "../../components/common/Texts/TextPrevAccount";
 import { useAuthContext } from "../../context/AuthContext";
 import LoadingScreen from "../../screens/LoadingScreen";
 import FormInitial from "../../views/Form/FormInitial";
 
-const URL_LOGO_IMAGE = "https://res.cloudinary.com/dabyqnijl/image/upload/v1730493843/laztvzw7ytanqrdj161e.png";
+const URL_LOGO_IMAGE =
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1730493843/laztvzw7ytanqrdj161e.png";
 
 export default function Login() {
   const router = useRouter();
   const { signin, loading } = useAuthContext();
   const [formData, setFormData] = useState({
-    email : '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const handleSubmit = async () => {
     if (formData.email === "" || formData.password === "") {
-      return Alert.alert("Información incompleta", "Ingresa tus datos para continuar");
-    };
+      return Alert.alert(
+        "Información incompleta",
+        "Ingresa tus datos para continuar",
+      );
+    }
 
     if (!formData.email.includes("@")) {
       return Alert.alert(
         "Correo no válido",
-        "Ingresa un correo electrónico válido"
-      )
-    };
+        "Ingresa un correo electrónico válido",
+      );
+    }
 
     const response = await signin(formData);
     if (response?.error) {
       return Alert.alert("Error", response.error);
-    };
+    }
 
-    router.push('/(app)/(drawer)');
+    router.push("/(app)/(drawer)/home");
     console.log("Datos del formulario:", formData);
   };
 
   const updateFields = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-  }
+  };
 
   return (
     <View style={[styles.container, { paddingTop: Constants.statusBarHeight }]}>
-      {loading && <LoadingScreen/>}
-      <ScrollView 
+      {loading && <LoadingScreen />}
+      <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
@@ -62,9 +74,8 @@ export default function Login() {
             title="Correo electronico"
             placeholder="Ingresa tu correo electrónico"
             value={formData.email}
-            type='email'
-            
-            onChangeText={(text) => updateFields('email', text)}
+            type="email"
+            onChangeText={(text) => updateFields("email", text)}
             required={true}
             returnKeyType="next"
           />
@@ -75,16 +86,14 @@ export default function Login() {
             title="Contraseña"
             type="password"
             value={formData.password}
-            onChangeText={(text) => updateFields('password', text)}
+            onChangeText={(text) => updateFields("password", text)}
             placeholder="Crea una contraseña segura"
             secureTextEntry={true}
             required={true}
           />
         </FormInitial>
 
-        <TextPrevAccount
-          type="login"
-        />
+        <TextPrevAccount type="login" />
 
         <View style={styles.containerBottom}>
           <Text>Powered By </Text>
@@ -102,7 +111,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white'
+    backgroundColor: "white",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -111,27 +120,27 @@ const styles = StyleSheet.create({
   additionalComponents: {
     paddingHorizontal: 24,
     paddingBottom: 20,
-    backgroundColor: 'white'
+    backgroundColor: "white",
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 25,
-    paddingHorizontal : 28
+    paddingHorizontal: 28,
   },
   image: {
     width: 200,
     height: 80,
     marginTop: 10,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   containerBottom: {
-    marginTop: Dimensions.get('window').height * 0.1,
-    opacity : 0.5,
-    backgroundColor: 'white',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
-})
+    marginTop: Dimensions.get("window").height * 0.1,
+    opacity: 0.5,
+    backgroundColor: "white",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
