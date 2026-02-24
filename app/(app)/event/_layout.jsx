@@ -7,26 +7,33 @@ export default function RootLayout() {
       <Stack.Screen
         name="create"
         options={{
-          header : () => <HeaderBackNav title="Registrar Evento" />,
+          header: () => <HeaderBackNav title="Registrar Evento" />,
         }}
       />
       <Stack.Screen
         name="[id]"
         options={{
-          header : ()=><HeaderBackNav title="Evento" />
+          header: () => <HeaderBackNav title="Evento" />,
         }}
       />
       <Stack.Screen
         name="edit"
         options={{
-          header : ()=><HeaderBackNav title="Editar evento"/>
+          header: () => <HeaderBackNav title="Editar evento" />,
         }}
       />
 
       <Stack.Screen
         name="mis-eventos/vendedor"
         options={{
-          header : ()=><HeaderBackNav title="Mis Eventos" />
+          header: () => <HeaderBackNav title="Mis Eventos" />,
+        }}
+      />
+
+      <Stack.Screen
+        name="asignados"
+        options={{
+          header: () => <HeaderBackNav title="Eventos Asignados" />,
         }}
       />
     </Stack>

@@ -1,12 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { StyleSheet, View } from "react-native";
 export default function RootLayout() {
   return (
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
-
-        // Fondo del TabBar
         tabBarStyle: {
           backgroundColor: "#ffffff",
           borderTopWidth: 0,
@@ -14,18 +13,14 @@ export default function RootLayout() {
           height: 65,
           paddingBottom: 8,
         },
-
-        // Texto
         tabBarLabelStyle: {
           fontSize: 14,
           fontWeight: "600",
         },
 
-        // Colores activo/inactivo
-        tabBarActiveTintColor: "#0f3d2e", // Verde oscuro
+        tabBarActiveTintColor: "#0f3d2e",
         tabBarInactiveTintColor: "#9ca3af",
 
-        // Iconos dinámicos
         tabBarIcon: ({ color, size, focused }) => {
           let iconName;
 
@@ -40,17 +35,51 @@ export default function RootLayout() {
       })}
     >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-        }}
-      />
-      <Tabs.Screen
         name="history"
         options={{
           title: "Mis Eventos",
         }}
       />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "",
+          tabBarLabel: () => null,
+          tabBarIcon: () => (
+            <View style={styles.fabButton}>
+              <Ionicons name="add" size={28} color="#fff" />
+            </View>
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="historyTickets"
+        options={{
+          title: "Mis Tickets",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="ticket-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  fabButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#0f3d2e",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 30,
+
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+  },
+});

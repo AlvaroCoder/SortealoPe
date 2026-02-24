@@ -1,11 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors, Typography } from "../../../constants/theme";
 import { useDateFormatter } from "../../../lib/dateFormatter";
 
 const GREEN_900 = Colors.principal.green[900];
-const GREEN_500 = Colors.principal.green[500];
 const RED_500 = Colors.principal.red[500];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_700 = Colors.principal.neutral[700];
@@ -13,8 +12,6 @@ const WHITE = "#FFFFFF";
 const GREEN_100 = Colors.principal.green[100];
 
 const EventListItem = ({ event }) => {
-  const statusColor = event.availableTickets > 0 ? GREEN_500 : RED_500;
-  const statusText = event.availableTickets > 0 ? "Activo" : "Finalizado";
   const { formatDateToSpanish } = useDateFormatter();
   const router = useRouter();
   return (
@@ -27,42 +24,37 @@ const EventListItem = ({ event }) => {
         })
       }
     >
-      <View style={itemStyles.infoContainer}>
-        <Text style={itemStyles.title} numberOfLines={1}>
-          {event.title}
-        </Text>
-        <Text style={itemStyles.price}>
-          S/ {event.ticketPrice.toFixed(2)} c/u
-        </Text>
-        <View style={itemStyles.detailsRow}>
-          <Ionicons
-            name="calendar-outline"
-            size={14}
-            color={NEUTRAL_700}
-            style={{ marginRight: 4 }}
-          />
-          <Text style={itemStyles.detailText}>
-            Sorteo: {formatDateToSpanish(event.createdAt) || "N/A"}
+      <Image
+        source={{ uri: event?.image }}
+        style={itemStyles.image}
+        resizeMode="cover"
+      />
+
+      <View style={itemStyles.content}>
+        <View style={itemStyles.infoContainer}>
+          <Text style={itemStyles.title} numberOfLines={1}>
+            {event.title}
           </Text>
-        </View>
-        <View style={itemStyles.detailsRow}>
-          <Ionicons
-            name="ticket-outline"
-            size={14}
-            color={NEUTRAL_700}
-            style={{ marginRight: 4 }}
-          />
-          <Text style={itemStyles.detailText}>
-            {event.availableTickets}/{event.totalTickets} vendidos
+
+          <Text style={itemStyles.price}>
+            S/ {event.ticketPrice.toFixed(2)} c/u
           </Text>
+
+          <View style={itemStyles.detailsRow}>
+            <Ionicons
+              name="calendar-outline"
+              size={14}
+              color={NEUTRAL_700}
+              style={{ marginRight: 4 }}
+            />
+            <Text style={itemStyles.detailText}>
+              Sorteo: {formatDateToSpanish(event.date) || "N/A"}
+            </Text>
+          </View>
         </View>
+
+        <Ionicons name="chevron-forward-outline" size={24} color={GREEN_900} />
       </View>
-      <View style={itemStyles.statusPill}>
-        <Text style={[itemStyles.statusText, { color: statusColor }]}>
-          {statusText}
-        </Text>
-      </View>
-      <Ionicons name="chevron-forward-outline" size={24} color={GREEN_900} />
     </TouchableOpacity>
   );
 };
@@ -71,29 +63,34 @@ export default EventListItem;
 
 const itemStyles = StyleSheet.create({
   card: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: WHITE,
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 10,
+    borderRadius: 16,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: NEUTRAL_200,
+    overflow: "hidden", // 🔥 importante para bordes redondeados
     elevation: 2,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
+
   image: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 10,
+    width: "100%",
+    height: 150,
     backgroundColor: GREEN_100,
+  },
+
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 14,
   },
   infoContainer: {
     flex: 1,
     marginRight: 10,
+    padding: 5,
   },
   title: {
     fontSize: Typography.sizes.lg,

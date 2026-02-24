@@ -75,25 +75,17 @@ export default function CreateEventStepper() {
       date: formData.date ? formatterDateToISO(formData.date) : null,
     };
 
-    console.log("Formulario de enviar ", newDataFormData);
     try {
-      // Primero subir la imagen a Cloudinary y obtener la URL
       if (formData?.image) {
-        console.log(formData?.image);
-
         const responseUpload = await UploadImage(formData.image, token);
         const responseJSON = await responseUpload.json();
 
         const imageUrl = responseJSON?.url;
-        console.log("Imagen ", imageUrl);
 
         newDataFormData.image = imageUrl || "";
       }
 
-      console.log("Data antes de enviar ", newDataFormData);
-
       const response = await CreateEvent(newDataFormData, token);
-      console.log(response);
 
       if (response.ok) {
         Alert.alert(

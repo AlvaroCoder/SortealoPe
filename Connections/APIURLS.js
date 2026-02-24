@@ -1,4 +1,4 @@
-export const BASE_URL = "http://192.168.0.177:8087/api/v1";
+export const BASE_URL = "http://192.168.1.102:8087/api/v1";
 
 export const ENDPOINTS_LOGIN = {
   LOGIN: `${BASE_URL}/auth/login`,
@@ -21,4 +21,8 @@ export const ENDPOINTS_EVENTS = {
 
 export const ENDPOINTS_TICKETS = {
   GET_TICKETS_STATUS: `${BASE_URL}/tickets/status`,
+};
+
+export const ENDPOINTS_TIKCETS = {
+  GET_EVENTS_COLLECTIONS: `${BASE_URL}/tickets?collectionId=`,
 };

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import EventListItem from "../components/common/Card/EventListItem";
 
@@ -18,7 +18,7 @@ export default function ScreenHistoryTickets({
   const eventStatus = [
     { id: 1, name: "Espera" },
     { id: 2, name: "Creada" },
-    { id: 3, name: "Ganada" },
+    { id: 3, name: "Sorteados" },
   ];
 
   const getCurrentData = () => {
@@ -27,7 +27,7 @@ export default function ScreenHistoryTickets({
         return dataEspera;
       case "Creada":
         return dataCreada;
-      case "Ganada":
+      case "Sorteados":
         return dataGanada;
       default:
         return [];

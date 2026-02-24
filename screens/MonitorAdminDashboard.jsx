@@ -6,8 +6,6 @@ import Title from "../components/common/Titles/Title";
 import { ENDPOINTS_EVENTS } from "../Connections/APIURLS";
 import { Colors, Typography } from "../constants/theme";
 import { useAuthContext } from "../context/AuthContext";
-import { useRaffleContext } from "../context/RaffleContext";
-import { useCategories } from "../lib/useCategories";
 import { useFetch } from "../lib/useFetch";
 import LoadingScreen from "./LoadingScreen";
 const GREEN_900 = Colors.principal.green[900];
@@ -19,15 +17,12 @@ const GREEN_100 = Colors.principal.green[100];
 const URL_GET_EVENTS = ENDPOINTS_EVENTS.GET_EVENTS_BY_ID;
 
 export default function MonitorAdminDashboard() {
-  const { userRole, updateRole } = useRaffleContext();
   const { userData, loading: loadingAuth } = useAuthContext();
   const shouldFetch = userData?.userId && !loadingAuth;
 
   const { loading, data } = useFetch(
     shouldFetch ? `${URL_GET_EVENTS}${userData.userId}&eventStatus=2` : null,
   );
-
-  const { dataCategorie } = useCategories();
 
   return (
     <View style={styles.monitorContainer}>

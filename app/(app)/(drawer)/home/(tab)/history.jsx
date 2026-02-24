@@ -23,7 +23,7 @@ export default function History() {
     shouldFetch ? `${URL_GET_EVENTS}${userData?.userId}&eventStatus=3` : null,
   );
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       {loadingAuth ||
       loadingDataEspera ||
       loadingDataCreada ||
