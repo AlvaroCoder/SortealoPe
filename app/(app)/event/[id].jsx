@@ -133,7 +133,12 @@ export default function EventDetailPage() {
             {isAdmin && (
               <TouchableOpacity
                 style={styles.buttonEdit}
-                onPress={() => router.push("event/edit")}
+                onPress={() =>
+                  router.push({
+                    pathname: "event/edit",
+                    params: { id: eventId },
+                  })
+                }
               >
                 <Ionicons name="create-outline" size={22} color={GREEN_900} />
               </TouchableOpacity>
