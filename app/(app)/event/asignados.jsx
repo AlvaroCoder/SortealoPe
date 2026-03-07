@@ -8,13 +8,13 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { ENDPOINTS_TIKCETS } from "../../../Connections/APIURLS";
+import { ENDPOINTS_TICKETS } from "../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../constants/theme";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useFetch } from "../../../lib/useFetch";
 import LoadingScreen from "../../../screens/LoadingScreen";
 
-const URL_GET_TICKETS = ENDPOINTS_TIKCETS.GET_EVENTS_COLLECTIONS;
+const URL_GET_TICKETS = ENDPOINTS_TICKETS.GET_BY_COLLECTION;
 
 const GREEN_900 = Colors.principal.green[900];
 const WHITE = "#FFFFFF";

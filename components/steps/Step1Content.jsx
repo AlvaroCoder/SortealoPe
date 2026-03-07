@@ -14,7 +14,7 @@ const WHITE = Colors.principal.white;
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const GREEN_100 = Colors.principal.green[100];
-const URL_PACKS_EVENTS = ENDPOINTS_EVENTS.GET_PACKS_EVENT;
+const URL_PACKS_EVENTS = ENDPOINTS_EVENTS.GET_PACKS;
 
 export default function Step1Content({ form, setForm, onNext }) {
   const { data, loading } = useFetch(URL_PACKS_EVENTS);

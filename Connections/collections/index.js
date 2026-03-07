@@ -1,56 +1,32 @@
-const URL_GET_COLLECTIONS_BY_ID_EVENT = process.env.COLLECTIONS_BY_ID_EVENT;
-const URL_GET_COLLECTIONS_BY_ID_COLLECTIONS = process.env.COLLECTION_BY_ID_COLLECTION;
-const URL_UPDATE_SELLER_BY_ID_USER = process.env.UPDATE_SELLER_BY_ID_USER;
-const URL_CREATE_COLLECTIONS = process.env.CREATE_COLLECTIONS;
-const URL_CREATE_COLLECTION_BY_EXCEL = process.env.CREATE_COLLECTION_BY_EXCEL;
+import { fetchWithAuth } from "../../lib/fetchWithAuth";
+import { ENDPOINTS_COLLECTIONS } from "../APIURLS";
 
-export async function GetCollectionsbyIdEvent(idCollection, token) {
-    return await fetch(`${URL_GET_COLLECTIONS_BY_ID_EVENT}?eventId=${idCollection}`, {
-        method: 'GET',
-        headers: {
-            'Authorization' : `Bearer ${token}`
-        },
-        mode: 'cors',
-    })
-};
+const { GET_BY_EVENT, GET_BY_ID, CREATE, CREATE_EXCEL } = ENDPOINTS_COLLECTIONS;
 
-export async function GetCollectionsByIdCollections(idCollection, token) {
-    return await fetch(`${URL_GET_COLLECTIONS_BY_ID_COLLECTIONS}/${idCollection}`, {
-        method: 'GET',
-        headers: {
-            'Authorization' : `Bearer ${token}`
-        },
-        mode : 'cors'
-    })
-};
+// GET /collections?eventId={eventId}
+export async function GetCollectionsByEvent(eventId) {
+  return fetchWithAuth(`${GET_BY_EVENT}?eventId=${eventId}`);
+}
 
-export async function UpdateSellerByUserId(idSeller, collectionCode, data, token) {
-    return await fetch(`${URL_UPDATE_SELLER_BY_ID_USER}?sellerId=${idSeller}&collectionCode=${collectionCode}`, {
-        method: 'GET',
-        headers: {
-            'Authorization' : `Bearer ${token}`
-        },
-        mode : 'cors'
-    })
-};
+// GET /collections/{collectionId}
+export async function GetCollectionById(collectionId) {
+  return fetchWithAuth(`${GET_BY_ID}${collectionId}`);
+}
 
-export async function CreateCollections(data, token) {
-    return await fetch(URL_CREATE_COLLECTIONS, {
-        method: 'POST',
-        headers: {
-            'Content-type': 'application/json',
-            'Authorization' : `Bearer ${token}`
-        },
-        body : JSON.stringify(data)
-    })
-};
+// POST /collections/create
+export async function CreateCollection(data) {
+  return fetchWithAuth(CREATE, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
 
-export async function CreateCollectionByExcel(idEvent, excel, token) {
-    return await fetch(`${URL_CREATE_COLLECTION_BY_EXCEL}?eventId=${idEvent}`, {
-        method: 'POST',
-        headers: { 
-            'Authorization' : `Bearer ${token}`
-        },
-        body : excel
-    })
-};
+// POST /collections/create/excel?eventId={eventId}
+// body: FormData with Excel file
+export async function CreateCollectionsByExcel(eventId, formData) {
+  return fetchWithAuth(`${CREATE_EXCEL}?eventId=${eventId}`, {
+    method: "POST",
+    headers: {},  // omit Content-Type so fetch sets multipart boundary automatically
+    body: formData,
+  });
+}

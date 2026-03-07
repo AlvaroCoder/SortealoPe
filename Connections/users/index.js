@@ -1,30 +1,17 @@
-const URL_CREATE_USER = process.env.CREATE_USER;
-const URL_GET_ALL_USERS = process.env.GET_ALL_USERS;
-const URL_UPDATE_USERS = process.env.UPDATE_USERS;
+import { fetchWithAuth } from "../../lib/fetchWithAuth";
+import { ENDPOINTS_USERS } from "../APIURLS";
 
-export async function CreateUser(data) {
-    return await fetch(URL_CREATE_USER, {
-        method: 'POST',
-        headers: {
-            'Content-type' : 'application/json'
-        },
+const { GET_BY_ID, UPDATE } = ENDPOINTS_USERS;
 
-        body : JSON.stringify(data)
-    })
-};
+// GET /users/{id}
+export async function GetUserById(userId) {
+  return fetchWithAuth(`${GET_BY_ID}${userId}`);
+}
 
-export async function GetAllUsers() {
-    return await fetch(URL_GET_ALL_USERS, {
-        method: 'GET',
-    })
-};
-
-export async function UpdateUser(data) {
-    return await fetch(URL_UPDATE_USERS, {
-        method: 'PATCH',
-        headers: {
-            'Content-type' : 'application/json'
-        },
-        body : data
-    })
-};
+// PATCH /users/{id}
+export async function UpdateUser(userId, data) {
+  return fetchWithAuth(`${UPDATE}${userId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}

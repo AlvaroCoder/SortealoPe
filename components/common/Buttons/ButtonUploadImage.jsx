@@ -15,7 +15,6 @@ const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const GREEN_100 = Colors.principal.green[100];
 const GREEN_200 = Colors.principal.green[200];
-const WHITE = Colors.principal.white;
 
 export default function ButtonUploadImage({
   onImageSelected = () => {},
@@ -159,7 +158,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   changeButtonText: {
-    color: WHITE,
+    color: "white",
     fontWeight: "600",
     fontSize: 13,
   },
@@ -175,7 +174,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   removeButtonText: {
-    color: WHITE,
+    color: "white",
     fontSize: 16,
     fontWeight: "bold",
   },

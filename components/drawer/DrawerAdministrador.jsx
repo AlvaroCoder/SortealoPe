@@ -1,75 +1,59 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../constants/theme";
+import { useAuthContext } from "../../context/AuthContext";
 import { useRaffleContext } from "../../context/RaffleContext";
 import ButtonProfileDrawer from "../common/Buttons/ButtonProfileDrawer";
+import DrawerHeader from "./_DrawerHeader";
 
-const GREEN_500 = Colors.principal.green[500];
 const GREEN_900 = Colors.principal.green[900];
 const WHITE = "#FFFFFF";
-const GREEN_50 = Colors.principal.green[50];
-const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_100 = Colors.principal.neutral[100];
-const URL_IMAGEN_MASCOTA =
-  "https://res.cloudinary.com/dabyqnijl/image/upload/v1764234644/COSAI_LOGOS_1_1_dbzabh.png";
 
-export default function DrawerAdministradorContent(props) {
-  const { navigation } = props;
-  const { userRole } = useRaffleContext();
+const NAV_ITEMS = [
+  { route: "/(app)/(drawer)/home", icon: "home-outline", label: "Inicio" },
+  { route: "/(app)/event/asignados", icon: "calendar-outline", label: "Eventos Asignados" },
+  { route: "/(app)/vendedores", icon: "people-outline", label: "Vendedores" },
+  { route: "/(app)/metricas/eventos", icon: "analytics-outline", label: "Métricas" },
+];
 
-  const userName = "Admin Principal";
-
-  const handleProfilePress = () => {
-    navigation.navigate("profile");
-  };
-
+export default function DrawerAdministradorContent({ navigation }) {
   const router = useRouter();
+  const { userData } = useAuthContext();
+  const { userRole } = useRaffleContext();
+  const userName = userData?.username || userData?.email || "Administrador";
+
+  const navigate = (route) => {
+    router.push(route);
+    navigation.closeDrawer();
+  };
 
   return (
     <View style={styles.drawerContainer}>
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoPlaceholder}>
-            <Image
-              source={{ uri: URL_IMAGEN_MASCOTA }}
-              style={styles.mascotImage}
-              resizeMode="cover"
-            />
-          </View>
-        </View>
-        <Text style={styles.appName}>SORTEALOPE</Text>
-      </View>
+      <DrawerHeader />
 
       <View style={styles.navigationSection}>
         <Text style={styles.sectionTitle}>GESTIÓN TOTAL</Text>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push("/")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="home-outline" size={22} color={GREEN_900} />
-          </View>
-          <Text style={styles.navLabel}>Inicio</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => router.push("event/asignados")}
-        >
-          <View style={styles.navIconContainer}>
-            <Ionicons name="calendar-outline" size={22} color={GREEN_900} />
-          </View>
-          <Text style={styles.navLabel}>Eventos Asignados</Text>
-        </TouchableOpacity>
+        {NAV_ITEMS.map(({ route, icon, label }) => (
+          <TouchableOpacity
+            key={route}
+            style={styles.navItem}
+            onPress={() => navigate(route)}
+          >
+            <View style={styles.navIconContainer}>
+              <Ionicons name={icon} size={22} color={GREEN_900} />
+            </View>
+            <Text style={styles.navLabel}>{label}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <View style={styles.profileSection}>
         <ButtonProfileDrawer
           userName={userName}
           userRole={userRole}
-          onPress={handleProfilePress}
+          onPress={() => navigation.navigate("profile")}
         />
       </View>
     </View>
@@ -77,52 +61,9 @@ export default function DrawerAdministradorContent(props) {
 }
 
 const styles = StyleSheet.create({
-  drawerContainer: {
-    flex: 1,
-    backgroundColor: WHITE,
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 30,
-    backgroundColor: GREEN_50,
-    borderBottomWidth: 1,
-    borderBottomColor: NEUTRAL_100,
-  },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    backgroundColor: GREEN_50,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-    borderWidth: 3,
-    borderColor: NEUTRAL_100,
-    overflow: "hidden",
-  },
-  mascotImage: {
-    width: "100%",
-    height: "100%",
-  },
-  appName: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: GREEN_900,
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  appTagline: {
-    fontSize: 14,
-    color: GREEN_500,
-    textAlign: "center",
-    fontWeight: "500",
-  },
+  drawerContainer: { flex: 1, backgroundColor: WHITE },
   navigationSection: {
+    flex: 1,
     paddingVertical: 20,
     paddingHorizontal: 16,
     backgroundColor: WHITE,
@@ -152,29 +93,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 12,
   },
-  navLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: GREEN_900,
-  },
+  navLabel: { fontSize: 16, fontWeight: "600", color: GREEN_900 },
   profileSection: {
-    marginTop: "auto",
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: NEUTRAL_100,
     backgroundColor: WHITE,
-  },
-  roleSwitchTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: NEUTRAL_700,
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: NEUTRAL_100,
-    marginVertical: 16,
-    marginHorizontal: 16,
   },
 });

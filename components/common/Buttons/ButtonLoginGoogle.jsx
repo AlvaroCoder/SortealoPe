@@ -1,42 +1,66 @@
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
-import React, { useEffect } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Typography } from '../../../constants/theme';
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { Typography } from "../../../constants/theme";
+import { useAuthContext } from "../../../context/AuthContext";
 
 WebBrowser.maybeCompleteAuthSession();
 
-export default function ButtonLoginGoogle({
-  buttonText="Iniciar sesión con Google"
-}) {
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: '258869415345-muaua0e6vfvd34r6j1b261g7kb01igpq.apps.googleusercontent.com',
-    iosClientId: '258869415345-h6ct4c8dsrj15vdm9kr7lktp0f85ks4d.apps.googleusercontent.com',
-    webClientId: '258869415345-j7m21vbdmv4ncv5pcn36cjkghh3uogmi.apps.googleusercontent.com',
-  });
+const GOOGLE_CLIENT_IDS = {
+  androidClientId:
+    "258869415345-muaua0e6vfvd34r6j1b261g7kb01igpq.apps.googleusercontent.com",
+  iosClientId:
+    "258869415345-h6ct4c8dsrj15vdm9kr7lktp0f85ks4d.apps.googleusercontent.com",
+  webClientId:
+    "258869415345-j7m21vbdmv4ncv5pcn36cjkghh3uogmi.apps.googleusercontent.com",
+};
 
-  const [loading, setLoading] = React.useState(false);
+const GOOGLE_ICON_URL =
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1762924676/logo_google_zlsawc.png";
+
+export default function ButtonLoginGoogle({
+  buttonText = "Iniciar sesión con Google",
+  onSuccess,
+}) {
+  const { signInWithGoogle } = useAuthContext();
+  const [request, response, promptAsync] = Google.useAuthRequest(GOOGLE_CLIENT_IDS);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      console.log('✅ Token de acceso:', authentication.accessToken);
-      setLoading(false);
-      // Aquí podrías redirigir o autenticar con tu backend.
-    } else if (response?.type === 'error') {
-      console.log('❌ Error en el inicio de sesión:', response.error);
+    if (response === null) return;
+
+    if (response.type === "success") {
+      handleGoogleToken(response.authentication.accessToken);
+    } else {
+      // cancel, dismiss o error
+      if (response.type === "error") {
+        Alert.alert("Error", "No se pudo iniciar sesión con Google");
+      }
       setLoading(false);
     }
   }, [response]);
 
-  const handleLogin = async () => {
-    try {
-      setLoading(true);
-      await promptAsync();
-    } catch (error) {
-      console.log('Error al iniciar sesión con Google:', error);
-      setLoading(false);
+  const handleGoogleToken = async (accessToken) => {
+    const result = await signInWithGoogle(accessToken);
+    setLoading(false);
+    if (result?.error) {
+      return Alert.alert("Error", result.error);
     }
+    onSuccess?.();
+  };
+
+  const handlePress = async () => {
+    setLoading(true);
+    await promptAsync();
   };
 
   return (
@@ -46,19 +70,14 @@ export default function ButtonLoginGoogle({
         styles.button,
         { opacity: pressed || loading ? 0.8 : 1 },
       ]}
-      onPress={handleLogin}
+      onPress={handlePress}
     >
       {loading ? (
         <ActivityIndicator size="small" color="#000" />
       ) : (
         <View style={styles.content}>
-          <Image
-            source={{
-              uri: 'https://res.cloudinary.com/dabyqnijl/image/upload/v1762924676/logo_google_zlsawc.png',
-            }}
-            style={styles.icon}
-          />
-            <Text style={styles.text}>{ buttonText}</Text>
+          <Image source={{ uri: GOOGLE_ICON_URL }} style={styles.icon} />
+          <Text style={styles.text}>{buttonText}</Text>
         </View>
       )}
     </Pressable>
@@ -67,21 +86,21 @@ export default function ButtonLoginGoogle({
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    width: '100%',
+    width: "100%",
     elevation: 2,
   },
   content: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   icon: {
@@ -91,7 +110,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.semibold,
-    color: '#333',
-    fontFamily: Typography.fonts.display,
+    color: "#333",
   },
 });

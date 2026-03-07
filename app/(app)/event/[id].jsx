@@ -64,7 +64,7 @@ const MetricChip = ({ label, value, icon, color = GREEN_900 }) => (
   </View>
 );
 
-const URL_EVENT_ID = ENDPOINTS_EVENTS.GET_EVENT_BY_ID_EVENT;
+const URL_EVENT_ID = ENDPOINTS_EVENTS.GET_BY_ID;
 
 export default function EventDetailPage() {
   const { formatDateToSpanish } = useDateFormatter();

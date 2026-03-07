@@ -32,17 +32,14 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
   };
 
   const handlePriceChange = (text) => {
-    // Permitir solo números y punto decimal
     const filtered = text.replace(/[^0-9.]/g, "");
 
-    // Si el campo está vacío, guardamos 0 o null para la API
     if (filtered === "") {
       updateForm("ticketPrice", 0);
       setError("ticketPrice", "El precio es obligatorio.");
       return;
     }
 
-    // Convertimos a número decimal para la API
     const numericValue = parseFloat(filtered);
     updateForm("ticketPrice", numericValue);
 
@@ -54,7 +51,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
   };
 
   const handleIntegerChange = (key, text) => {
-    // Permitir solo números enteros
     const filtered = text.replace(/[^0-9]/g, "");
 
     if (filtered === "") {
@@ -62,8 +58,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
       setError(key, "La cantidad es obligatoria.");
       return;
     }
-
-    // Convertimos a número entero para la API
     const numericValue = parseInt(filtered, 10);
     updateForm(key, numericValue);
 
@@ -161,7 +155,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
         <OutlineTextField
           keyboardType="numeric"
           placeholder="00.00"
-          // Convertimos el número a string para el componente visual
           value={form.ticketPrice ? form.ticketPrice.toString() : ""}
           onChangeText={handlePriceChange}
           title="Precio Unitario"
@@ -173,7 +166,6 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
           title="Cantidad de Tickets por Vendedor"
           keyboardType="numeric"
           placeholder="Total de tickets a generar"
-          // Convertimos el número a string para el componente visual
           value={
             form?.ticketsPerCollection
               ? form.ticketsPerCollection.toString()

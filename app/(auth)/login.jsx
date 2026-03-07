@@ -1,62 +1,56 @@
 import Constants from "expo-constants";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
   Dimensions,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import ButtonLoginGoogle from "../../components/common/Buttons/ButtonLoginGoogle";
 import OutlineTextField from "../../components/common/TextFields/OutlineTextField";
 import TextPrevAccount from "../../components/common/Texts/TextPrevAccount";
+import { Colors } from "../../constants/theme";
 import { useAuthContext } from "../../context/AuthContext";
+import { isValidEmail } from "../../lib/validate";
 import LoadingScreen from "../../screens/LoadingScreen";
 import FormInitial from "../../views/Form/FormInitial";
 
 const URL_LOGO_IMAGE =
   "https://res.cloudinary.com/dabyqnijl/image/upload/v1730493843/laztvzw7ytanqrdj161e.png";
 
+const HOME_ROUTE = "/(app)/(drawer)/home";
+
 export default function Login() {
   const router = useRouter();
   const { signin, loading } = useAuthContext();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleSubmit = async () => {
-    if (formData.email === "" || formData.password === "") {
+    if (!formData.email || !formData.password) {
       return Alert.alert(
         "Información incompleta",
-        "Ingresa tus datos para continuar",
+        "Ingresa tus datos para continuar"
       );
     }
-
-    if (!formData.email.includes("@")) {
+    if (!isValidEmail(formData.email)) {
       return Alert.alert(
         "Correo no válido",
-        "Ingresa un correo electrónico válido",
+        "Ingresa un correo electrónico válido"
       );
     }
-
-    const response = await signin(formData);
-    if (response?.error) {
-      return Alert.alert("Error", response.error);
+    const result = await signin(formData);
+    if (result?.error) {
+      return Alert.alert("Error", result.error);
     }
-
-    router.push("/(app)/(drawer)/home");
-    console.log("Datos del formulario:", formData);
+    router.replace(HOME_ROUTE);
   };
 
-  const updateFields = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const updateField = (field, value) =>
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
   return (
     <View style={[styles.container, { paddingTop: Constants.statusBarHeight }]}>
@@ -69,14 +63,15 @@ export default function Login() {
           title="Inicio de Sesión"
           buttonText="Iniciar Sesión"
           onSubmit={handleSubmit}
+          onForgotPassword={() => router.push("/(auth)/forgot-password")}
         >
           <OutlineTextField
-            title="Correo electronico"
+            title="Correo electrónico"
             placeholder="Ingresa tu correo electrónico"
             value={formData.email}
             type="email"
-            onChangeText={(text) => updateFields("email", text)}
-            required={true}
+            onChangeText={(text) => updateField("email", text)}
+            required
             returnKeyType="next"
           />
 
@@ -86,12 +81,22 @@ export default function Login() {
             title="Contraseña"
             type="password"
             value={formData.password}
-            onChangeText={(text) => updateFields("password", text)}
-            placeholder="Crea una contraseña segura"
-            secureTextEntry={true}
-            required={true}
+            onChangeText={(text) => updateField("password", text)}
+            placeholder="Ingresa tu contraseña"
+            secureTextEntry
+            required
           />
         </FormInitial>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.line} />
+          <Text style={styles.dividerText}>o continúa con</Text>
+          <View style={styles.line} />
+        </View>
+
+        <View style={styles.googleContainer}>
+          <ButtonLoginGoogle onSuccess={() => router.replace(HOME_ROUTE)} />
+        </View>
 
         <TextPrevAccount type="login" />
 
@@ -117,16 +122,25 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 20,
   },
-  additionalComponents: {
-    paddingHorizontal: 24,
-    paddingBottom: 20,
-    backgroundColor: "white",
-  },
-  divider: {
+  dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 25,
     paddingHorizontal: 28,
+    marginBottom: 16,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.principal.neutral[200],
+  },
+  dividerText: {
+    marginHorizontal: 12,
+    color: Colors.principal.neutral[500],
+    fontSize: 14,
+  },
+  googleContainer: {
+    paddingHorizontal: 28,
+    marginBottom: 8,
   },
   image: {
     width: 200,
@@ -135,10 +149,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   containerBottom: {
-    marginTop: Dimensions.get("window").height * 0.1,
+    marginTop: Dimensions.get("window").height * 0.05,
     opacity: 0.5,
     backgroundColor: "white",
-    display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",

@@ -5,22 +5,22 @@ import { useFetch } from "../../../../../lib/useFetch";
 import LoadingScreen from "../../../../../screens/LoadingScreen";
 import ScreenHistoryTickets from "../../../../../screens/ScreenHistoryTickets";
 
-const URL_GET_EVENTS = ENDPOINTS_EVENTS.GET_EVENTS_BY_ID;
+const URL_GET_EVENTS = ENDPOINTS_EVENTS.GET_BY_USER;
 
 export default function History() {
   const { userData, loading: loadingAuth } = useAuthContext();
   const shouldFetch = userData?.userId && !loadingAuth;
 
   const { loading: loadingDataEspera, data: dataEspera } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}${userData?.userId}&eventStatus=1` : null,
+    shouldFetch ? `${URL_GET_EVENTS}?userId=${userData?.userId}&eventStatus=1` : null,
   );
 
   const { loading: loadingDataCreada, data: dataCreada } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}${userData?.userId}&eventStatus=2` : null,
+    shouldFetch ? `${URL_GET_EVENTS}?userId=${userData?.userId}&eventStatus=2` : null,
   );
 
   const { loading: loadingDataGanada, data: dataGanada } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}${userData?.userId}&eventStatus=3` : null,
+    shouldFetch ? `${URL_GET_EVENTS}?userId=${userData?.userId}&eventStatus=3` : null,
   );
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>

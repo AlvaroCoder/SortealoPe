@@ -1,28 +1,27 @@
-import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { Colors, Typography } from '../../constants/theme';
-import { useAuthContext } from '../../context/AuthContext';
-import LoadingScreen from '../../screens/LoadingScreen';
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Colors, Typography } from "../../constants/theme";
+import { useAuthContext } from "../../context/AuthContext";
+import LoadingScreen from "../../screens/LoadingScreen";
 
 const DIGITS = 6;
-const INITIAL_TIME = 15 * 60; 
+const INITIAL_TIME = 15 * 60;
 
 export default function ValidateCode() {
-  const { userData, validateCode, signin, loading } = useAuthContext();
-    const router = useRouter();
-const [code, setCode] = useState(Array(DIGITS).fill(''));
+  const { userData, validateCode, resendCode, loading } = useAuthContext();
+  const router = useRouter();
+  const [code, setCode] = useState(Array(DIGITS).fill(""));
   const inputsRef = useRef([]);
-
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
   const [canResend, setCanResend] = useState(false);
 
@@ -31,11 +30,7 @@ const [code, setCode] = useState(Array(DIGITS).fill(''));
       setCanResend(true);
       return;
     }
-
-    const interval = setInterval(() => {
-      setTimeLeft(t => t - 1);
-    }, 1000);
-
+    const interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearInterval(interval);
   }, [timeLeft]);
 
@@ -49,48 +44,40 @@ const [code, setCode] = useState(Array(DIGITS).fill(''));
     const newCode = [...code];
     newCode[index] = value.slice(-1);
     setCode(newCode);
-
     if (value && index < DIGITS - 1) {
       inputsRef.current[index + 1].focus();
     }
   };
 
   const handleKeyPress = ({ nativeEvent }, index) => {
-    if (nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
+    if (nativeEvent.key === "Backspace" && !code[index] && index > 0) {
       inputsRef.current[index - 1].focus();
     }
   };
 
-const handleValidate = async () => {
-  const fullCode = code.join("");
-    
-    console.log(fullCode);
-    console.log(userData);
-    
-  const response = await validateCode(userData.email, fullCode);
+  const handleValidate = async () => {
+    const fullCode = code.join("");
+    const result = await validateCode(userData?.email, fullCode);
+    if (result?.error) {
+      return Alert.alert("Error", result.error);
+    }
+    Alert.alert(
+      "¡Cuenta verificada!",
+      "Tu correo ha sido verificado. Ya puedes iniciar sesión.",
+      [{ text: "Iniciar sesión", onPress: () => router.replace("/(auth)/login") }]
+    );
+  };
 
-  if (response?.error) {
-    return Alert.alert("Error", response.error);
-  }
-
-  const loginResponse = await signin({
-    email: userData.email,
-    password: userData.password,
-  });
-
-  if (loginResponse?.error) {
-    return Alert.alert("Error al iniciar sesión", loginResponse.error);
-  }
-
-  router.push("(app)/(drawer)");
-};
-
-  const handleResend = () => {
-    console.log("📩 Reenviando código...");
+  const handleResend = async () => {
+    const result = await resendCode(userData?.email);
+    if (result?.error) {
+      return Alert.alert("Error", "No se pudo reenviar el código. Intenta de nuevo.");
+    }
     setCode(Array(DIGITS).fill(""));
     setTimeLeft(INITIAL_TIME);
     setCanResend(false);
-    inputsRef.current[0].focus();
+    inputsRef.current[0]?.focus();
+    Alert.alert("Código reenviado", "Revisa tu correo electrónico.");
   };
 
   const isComplete = code.every((digit) => digit !== "");
@@ -99,18 +86,16 @@ const handleValidate = async () => {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        {loading && <LoadingScreen/>}
+    >
+      {loading && <LoadingScreen />}
       <View style={styles.content}>
         <Text style={styles.title}>Validar Código</Text>
-        
+
         <Text style={styles.subTitle}>
           Ingresa el código que enviamos a tu correo 📩
         </Text>
-        
-        <Text style={styles.emailText}>
-          {userData?.email}
-        </Text>
+
+        <Text style={styles.emailText}>{userData?.email}</Text>
 
         <View style={styles.codeContainer}>
           {code.map((digit, index) => (
@@ -148,15 +133,11 @@ const handleValidate = async () => {
           disabled={!canResend}
         >
           <Text
-            style={[
-              styles.resendText,
-              !canResend && styles.resendDisabled
-            ]}
+            style={[styles.resendText, !canResend && styles.resendDisabled]}
           >
             Reenviar código
           </Text>
         </TouchableOpacity>
-
       </View>
     </KeyboardAvoidingView>
   );
@@ -165,32 +146,32 @@ const handleValidate = async () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.principal.white,
-    justifyContent: 'center',
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   content: {
-    alignItems: 'center',
-    width: "100%"
+    alignItems: "center",
+    width: "100%",
   },
   title: {
-    fontSize: Typography.sizes['2xl'],
+    fontSize: Typography.sizes["2xl"],
     fontWeight: Typography.weights.bold,
     color: Colors.principal.green[800],
     marginBottom: 10,
   },
   subTitle: {
-    textAlign: 'center',
-    fontSize: Typography.sizes.md,
+    textAlign: "center",
+    fontSize: Typography.sizes.base,
     color: Colors.principal.neutral[600],
     marginBottom: 8,
   },
   emailText: {
     fontWeight: Typography.weights.bold,
-    marginBottom: 25
+    marginBottom: 25,
   },
   codeContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
     marginBottom: 15,
   },
@@ -199,10 +180,10 @@ const styles = StyleSheet.create({
     height: 55,
     borderWidth: 2,
     borderRadius: 10,
-    fontSize: Typography.sizes['2xl'],
+    fontSize: Typography.sizes["2xl"],
     color: Colors.principal.green[900],
     borderColor: Colors.principal.neutral[300],
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   inputFilled: {
     borderColor: Colors.principal.green[500],
@@ -214,26 +195,26 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   button: {
-    width: '100%',
+    width: "100%",
     backgroundColor: Colors.principal.green[700],
     paddingVertical: 15,
     borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 15
+    alignItems: "center",
+    marginBottom: 15,
   },
   buttonDisabled: {
     opacity: 0.45,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
   },
   resendText: {
-    color: Colors.principal.blue?.[600] || "#0066CC",
+    color: Colors.principal.blue[600],
     textDecorationLine: "underline",
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.medium
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.medium,
   },
   resendDisabled: {
     opacity: 0.4,

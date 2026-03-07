@@ -14,14 +14,14 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 const GREEN_100 = Colors.principal.green[100];
 
-const URL_GET_EVENTS = ENDPOINTS_EVENTS.GET_EVENTS_BY_ID;
+const URL_GET_EVENTS = ENDPOINTS_EVENTS.GET_BY_USER;
 
 export default function MonitorAdminDashboard() {
   const { userData, loading: loadingAuth } = useAuthContext();
   const shouldFetch = userData?.userId && !loadingAuth;
 
   const { loading, data } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}${userData.userId}&eventStatus=2` : null,
+    shouldFetch ? `${URL_GET_EVENTS}?userId=${userData.userId}&eventStatus=2` : null,
   );
 
   return (
