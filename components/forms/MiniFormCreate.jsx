@@ -30,7 +30,17 @@ export default function MiniFormCreate() {
           multiline={true}
           numberOfLines={4}
         />
-        <ButtonGradiend onPress={() => router.push("event/create")}>
+        <ButtonGradiend
+          onPress={() =>
+            router.push({
+              pathname: "event/create",
+              params: {
+                title: formData.title,
+                description: formData.description,
+              },
+            })
+          }
+        >
           Crear Evento
         </ButtonGradiend>
       </View>

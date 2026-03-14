@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
 
         borderBottomWidth: 1,
-        borderBottomColor: Colors.principal.blue[900],
+        borderBottomColor: Colors.principal.neutral[200],
     },
     stepWrapper: {
         flex: 1,

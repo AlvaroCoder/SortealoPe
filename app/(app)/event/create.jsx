@@ -9,13 +9,14 @@ import {
   View,
 } from "react-native";
 
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import Step1Content from "../../../components/steps/Step1Content";
 import Step2Content from "../../../components/steps/Step2Content";
 import Step3Content from "../../../components/steps/Step3Content";
 import Step3CategoryContent from "../../../components/steps/Step3ContentCategory";
 import StepperHeader from "../../../components/steps/StepperHeader";
-import { CreateEvent, UploadImage } from "../../../Connections/events";
+import { CreateEvent } from "../../../Connections/events";
+import { UploadImage } from "../../../Connections/images";
 import { Colors, Typography } from "../../../constants/theme";
 import { formatterDateToISO } from "../../../lib/dateFormatter";
 import { useUser } from "../../../lib/useUser";
@@ -37,15 +38,17 @@ const STEPS = [
 ];
 
 export default function CreateEventStepper() {
-  const { userData, token } = useUser();
+  const { userData } = useUser();
+  const { title: initialTitle = "", description: initialDescription = "" } =
+    useLocalSearchParams();
 
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
+    title: initialTitle,
+    description: initialDescription,
     date: "",
     place: "",
     collectionsQuantity: 1,
@@ -77,15 +80,27 @@ export default function CreateEventStepper() {
 
     try {
       if (formData?.image) {
-        const responseUpload = await UploadImage(formData.image, token);
+        const formDataMultipart = new FormData();
+        formDataMultipart.append("file", formData.image);
+
+        const responseUpload = await UploadImage(formDataMultipart);
         const responseJSON = await responseUpload.json();
+
+        if (responseJSON?.status > 200) {
+          Alert.alert(
+            "Error al subir la imagen",
+            "No se pudo subir la imagen. Inténtalo de nuevo.",
+          );
+          return;
+        }
+        console.log("Imagen >> ", responseJSON);
 
         const imageUrl = responseJSON?.url;
 
         newDataFormData.image = imageUrl || "";
       }
 
-      const response = await CreateEvent(newDataFormData, token);
+      const response = await CreateEvent(newDataFormData);
 
       if (response.ok) {
         Alert.alert(
@@ -184,7 +199,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   inputLabel: {
-    fontSize: Typography.sizes.md,
+    fontSize: Typography.sizes.base,
     fontWeight: Typography.weights.medium,
     color: GREEN_900,
     marginTop: 15,

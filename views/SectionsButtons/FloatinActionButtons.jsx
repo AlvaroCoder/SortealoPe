@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   startRaffleButtonText: {
     color: WHITE,
-    fontSize: Typography.sizes.md,
+    fontSize: Typography.sizes.base,
     fontWeight: Typography.weights.semibold,
   },
   addSellerButton: {

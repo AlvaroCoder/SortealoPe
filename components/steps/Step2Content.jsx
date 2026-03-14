@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
     marginBottom: 10,
-    color: Colors.principal.blue[800],
+    color: Colors.principal.neutral[700],
   },
 
   inputLabel: {

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,15 +10,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ProgressBar from "../../../components/cards/ProgressBar";
-import Title from "../../../components/common/Titles/Title";
-import Title2 from "../../../components/common/Titles/Title2";
 import { ENDPOINTS_EVENTS } from "../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../constants/theme";
 import { useRaffleContext } from "../../../context/RaffleContext";
 import { useDateFormatter } from "../../../lib/dateFormatter";
 import { useFetch } from "../../../lib/useFetch";
 import LoadingScreen from "../../../screens/LoadingScreen";
-import FloatinActionButtons from "../../../views/SectionsButtons/FloatinActionButtons";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
@@ -26,83 +23,63 @@ const GREEN_50 = Colors.principal.green[50];
 const BLUE_500 = Colors.principal.blue[500];
 const RED_500 = Colors.principal.red[500];
 const WHITE = "#FFFFFF";
-const NEUTRAL_700 = Colors.principal.neutral[700];
-const NEUTRAL_500 = Colors.principal.neutral[500];
+const NEUTRAL_50 = Colors.principal.neutral[50];
 const NEUTRAL_100 = Colors.principal.neutral[100];
-
-const InfoBadge = ({ icon, label, value, color = GREEN_900, area = 1 }) => (
-  <View
-    style={[
-      styles.infoBadge,
-      area === 1 && { width: "48%" },
-      area === 2 && { width: "100%" },
-    ]}
-  >
-    <View style={[styles.iconContainer, { backgroundColor: NEUTRAL_100 }]}>
-      <Ionicons name={icon} size={18} color={color} />
-    </View>
-    <View>
-      <Text style={styles.badgeLabel}>{label}</Text>
-      <Text style={styles.badgeValue} numberOfLines={1}>
-        {value}
-      </Text>
-    </View>
-  </View>
-);
-
-const MetricChip = ({ label, value, icon, color = GREEN_900 }) => (
-  <View style={styles.metricChip}>
-    <View style={[styles.metricIconCircle, { backgroundColor: GREEN_50 }]}>
-      <Ionicons name={icon} size={20} color={color} />
-    </View>
-    <View style={styles.metricTextContainer}>
-      <Text style={styles.metricLabel} numberOfLines={1}>
-        {label}
-      </Text>
-      <Text style={styles.metricValue}>{value}</Text>
-    </View>
-  </View>
-);
+const NEUTRAL_200 = Colors.principal.neutral[200];
+const NEUTRAL_500 = Colors.principal.neutral[500];
+const NEUTRAL_700 = Colors.principal.neutral[700];
 
 const URL_EVENT_ID = ENDPOINTS_EVENTS.GET_BY_ID;
 
 export default function EventDetailPage() {
   const { formatDateToSpanish } = useDateFormatter();
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const { id: eventId, eventStatus } = useLocalSearchParams();
+  const { isAdmin, isSeller } = useRaffleContext();
 
-  const eventId = params.id;
-  const { data, loading } = useFetch(`${URL_EVENT_ID}${eventId}`);
+  const { data, loading } = useFetch(
+    `${URL_EVENT_ID}${eventId}?eventStatus=${eventStatus}`,
+  );
   const event = data;
-  const { isAdmin } = useRaffleContext();
-
-  const avalaibleTickets =
-    data?.collections
-      ?.map((collection) => collection.availableTickets)
-      .reduce((a, b) => a + b, 0) || 0;
 
   const totalTickets =
     data?.collections
-      ?.map((collection) => collection.ticketsQuantity)
-      .reduce((a, b) => a + b, 0) || 0;
+      ?.map((c) => c.ticketsQuantity)
+      .reduce((a, b) => a + b, 0) ?? 0;
+
+  const availableTickets =
+    data?.collections
+      ?.map((c) => c.availableTickets)
+      .reduce((a, b) => a + b, 0) ?? 0;
 
   const reservedTickets =
     data?.collections
-      ?.map((collection) => collection.reservedTickets)
-      .reduce((a, b) => a + b, 0) || 0;
+      ?.map((c) => c.reservedTickets)
+      .reduce((a, b) => a + b, 0) ?? 0;
 
   const soldTickets =
-    data?.collections
-      ?.map((collection) => collection.soldTickets)
-      .reduce((a, b) => a + b, 0) || 0;
+    data?.collections?.map((c) => c.soldTickets).reduce((a, b) => a + b, 0) ??
+    0;
+
+  const ticketPrice = event?.ticketPrice ?? 0;
+  const collected = (soldTickets * ticketPrice).toFixed(0);
+
+  // Barra inferior: visible para seller/admin cuando el evento está activo (status 2)
+  const showBottomBar = eventStatus >= 2;
+
+  const statusConfig = eventStatus >= 2;
 
   if (!event && !loading) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={48} color={RED_500} />
-        <Text style={{ color: RED_500, marginTop: 10 }}>
-          Evento ID: {eventId} no encontrado.
-        </Text>
+        <Text style={styles.errorText}>Evento no encontrado.</Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.errorBack}
+        >
+          <Text style={styles.errorBackText}>Volver</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -110,29 +87,51 @@ export default function EventDetailPage() {
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       {loading && <LoadingScreen />}
-      {isAdmin && <FloatinActionButtons />}
+      {/**isAdmin && <FloatinActionButtons /> */}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          // Admin FAB is ~90px; seller CTA is in-flow so no extra padding needed
+        ]}
+        style={{ flex: 1 }}
       >
-        <View style={styles.imageContainer}>
+        {/* ── Hero image ────────────────────────────────────── */}
+        <View style={styles.hero}>
           <Image
-            source={{ uri: event?.image }}
-            style={styles.eventImage}
-            onError={() => console.log("Error loading image")}
+            source={{ uri: event?.imageUrl ?? event?.image }}
+            style={styles.heroImage}
+            contentFit="cover"
+            transition={200}
           />
-          <View style={styles.overlayGradient} />
+          {/* Gradient scrim for readability */}
+          <View style={styles.heroScrim} />
+
+          {/* Status badge */}
+          {event?.status && (
+            <View
+              style={[styles.statusBadge, { backgroundColor: statusConfig.bg }]}
+            >
+              <Text
+                style={[styles.statusBadgeText, { color: statusConfig.color }]}
+              >
+                {statusConfig.label}
+              </Text>
+            </View>
+          )}
         </View>
 
-        <View style={styles.contentSection}>
-          <View style={styles.headerContent}>
-            <Title styleTitle={{ flex: 1, marginRight: 10 }}>
+        {/* ── Content card ──────────────────────────────────── */}
+        <View style={styles.card}>
+          {/* Title row */}
+          <View style={styles.titleRow}>
+            <Text style={styles.title} numberOfLines={2}>
               {event?.title}
-            </Title>
+            </Text>
             {isAdmin && (
               <TouchableOpacity
-                style={styles.buttonEdit}
+                style={styles.editButton}
                 onPress={() =>
                   router.push({
                     pathname: "event/edit",
@@ -140,111 +139,130 @@ export default function EventDetailPage() {
                   })
                 }
               >
-                <Ionicons name="create-outline" size={22} color={GREEN_900} />
+                <Ionicons name="create-outline" size={20} color={GREEN_900} />
               </TouchableOpacity>
             )}
           </View>
 
-          <View style={styles.badgeGrid}>
-            <InfoBadge
-              icon="cash-outline"
-              label="Precio Ticket"
-              value={`S/ ${event?.ticketPrice.toFixed(2)}`}
-              color={GREEN_500}
-            />
-            <InfoBadge
-              icon="albums-outline"
-              label="Paquete"
-              value={`${event?.pack?.name || "No definido"}`}
-              color={GREEN_500}
-            />
-            <InfoBadge
-              icon="location-outline"
-              label="Ubicación"
-              value={event?.place || "No definido"}
-              color={RED_500}
-              area={2}
-            />
-
-            <InfoBadge
-              icon="calendar-outline"
-              label="Fecha Sorteo"
-              value={formatDateToSpanish(event?.date)}
-              color={BLUE_500}
-              area={2}
-            />
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.sectionHeader}>
-            <Ionicons
-              name="document-text-outline"
-              size={20}
-              color={GREEN_900}
-            />
-            <Title2 styleTitle={styles.sectionTitleText}>
-              Detalles del Evento
-            </Title2>
-          </View>
-          <Text style={styles.descriptionText}>{event?.description}</Text>
-
-          <View style={styles.divider} />
-
-          <View style={styles.sectionHeader}>
-            <Ionicons name="analytics-outline" size={20} color={GREEN_900} />
-            <Title2 styleTitle={styles.sectionTitleText}>
-              Progreso de Tickets
-            </Title2>
-          </View>
-          <View style={styles.progressContainer}>
-            <ProgressBar available={avalaibleTickets} total={totalTickets} />
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.sellerMetricsSection}>
-            <View style={styles.sectionHeader}>
-              <Ionicons
-                name="speedometer-outline"
-                size={20}
-                color={GREEN_900}
-              />
-              <Title2 styleTitle={styles.sectionTitleText}>
-                Métricas del evento
-              </Title2>
+          {/* Key info row */}
+          <View style={styles.infoRow}>
+            <View style={styles.infoChip}>
+              <Text style={styles.infoChipLabel}>Precio</Text>
+              <Text style={styles.infoChipValue}>
+                S/ {ticketPrice.toFixed(2)}
+              </Text>
             </View>
-            <View style={styles.metricsGrid}>
-              <MetricChip
-                label="Vendidos"
-                value={soldTickets}
-                icon="wallet-outline"
-                color={GREEN_500}
-              />
-              <MetricChip
-                label="Reservados"
-                value={reservedTickets}
-                icon="time-outline"
-                color={BLUE_500}
-              />
-              <MetricChip
-                label="Total Cupos"
-                value={totalTickets}
-                icon="apps-outline"
-                color={NEUTRAL_700}
-              />
-              <MetricChip
-                label="Recaudado"
-                value={`S/ ${(soldTickets * (event?.ticketPrice || 0)).toFixed(0)}`}
-                icon="trending-up-outline"
-                color={GREEN_500}
-              />
+            <View style={[styles.infoChip, styles.infoChipCenter]}>
+              <Text style={styles.infoChipLabel}>Fecha</Text>
+              <Text style={styles.infoChipValue} numberOfLines={1}>
+                {formatDateToSpanish(event?.date)}
+              </Text>
+            </View>
+            <View style={styles.infoChip}>
+              <Text style={styles.infoChipLabel}>Lugar</Text>
+              <Text style={styles.infoChipValue} numberOfLines={1}>
+                {event?.place || "—"}
+              </Text>
             </View>
           </View>
 
-          <View style={{ height: 40 }} />
+          <View style={styles.divider} />
+
+          {/* Description */}
+          <Text style={styles.sectionLabel}>Descripción</Text>
+          <Text style={styles.description}>
+            {event?.description || "Sin descripción."}
+          </Text>
+
+          <View style={styles.divider} />
+
+          {/* Ticket progress */}
+          <Text style={styles.sectionLabel}>Tickets</Text>
+          <View style={styles.progressStats}>
+            <View style={styles.progressStat}>
+              <Text style={styles.progressStatNumber}>{availableTickets}</Text>
+              <Text style={styles.progressStatLabel}>Disponibles</Text>
+            </View>
+            <View style={[styles.progressStat, { alignItems: "center" }]}>
+              <Text style={[styles.progressStatNumber, { color: BLUE_500 }]}>
+                {totalTickets > 0
+                  ? `${(((soldTickets + reservedTickets) / totalTickets) * 100).toFixed(0)}%`
+                  : "0%"}
+              </Text>
+              <Text style={styles.progressStatLabel}>Ocupados</Text>
+            </View>
+            <View style={[styles.progressStat, { alignItems: "flex-end" }]}>
+              <Text style={styles.progressStatNumber}>{totalTickets}</Text>
+              <Text style={styles.progressStatLabel}>Total</Text>
+            </View>
+          </View>
+          <View style={styles.progressBarWrapper}>
+            <ProgressBar available={availableTickets} total={totalTickets} />
+          </View>
+
+          {(isAdmin || isSeller) && event?.status >= 2 && (
+            <>
+              <View style={styles.divider} />
+              <Text style={styles.sectionLabel}>Métricas</Text>
+              <View style={styles.metricsGrid}>
+                <View style={styles.metricCard}>
+                  <Text style={[styles.metricNumber, { color: GREEN_500 }]}>
+                    {soldTickets}
+                  </Text>
+                  <Text style={styles.metricCardLabel}>Vendidos</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <Text style={[styles.metricNumber, { color: BLUE_500 }]}>
+                    {reservedTickets}
+                  </Text>
+                  <Text style={styles.metricCardLabel}>Reservados</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <Text style={styles.metricNumber}>{availableTickets}</Text>
+                  <Text style={styles.metricCardLabel}>Disponibles</Text>
+                </View>
+                <View style={styles.metricCard}>
+                  <Text style={[styles.metricNumber, { color: GREEN_900 }]}>
+                    S/ {collected}
+                  </Text>
+                  <Text style={styles.metricCardLabel}>Recaudado</Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
+
+      {/* ── Barra inferior: Vender + Agregar Vendedor ──────── */}
+      {showBottomBar && (
+        <View style={styles.sellBar}>
+          <TouchableOpacity
+            style={styles.sellButton}
+            activeOpacity={0.85}
+            onPress={() =>
+              router.push({
+                pathname: "/(app)/tickets/sell/[id]",
+                params: { id: eventId },
+              })
+            }
+          >
+            <Text style={styles.sellButtonText}>Vender Tickets</Text>
+            <Ionicons name="arrow-forward" size={18} color={WHITE} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.addSellerButton}
+            activeOpacity={0.85}
+            onPress={() => router.push("/vendedores/agregar")}
+          >
+            <Ionicons
+              name="person-add-outline"
+              size={22}
+              color={Colors.principal.blue[900]}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -254,185 +272,241 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: WHITE,
   },
-  centerContent: {
-    justifyContent: "center",
+  scrollContent: {},
+
+  // ── Error ──────────────────────────────────────────────
+  errorContainer: {
+    flex: 1,
     alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: WHITE,
+    padding: 32,
   },
-  scrollContent: {
-    paddingBottom: 20,
+  errorText: {
+    marginTop: 12,
+    fontSize: Typography.sizes.base,
+    color: NEUTRAL_700,
+    textAlign: "center",
   },
-  imageContainer: {
-    width: "100%",
-    height: 280,
+  errorBack: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    backgroundColor: GREEN_50,
+    borderRadius: 10,
+  },
+  errorBackText: {
+    fontSize: Typography.sizes.base,
+    color: GREEN_900,
+    fontWeight: Typography.weights.semibold,
+  },
+
+  // ── Hero ───────────────────────────────────────────────
+  hero: {
+    height: 260,
     backgroundColor: NEUTRAL_100,
   },
-  eventImage: {
+  heroImage: {
     width: "100%",
     height: "100%",
-    resizeMode: "cover",
   },
-  overlayGradient: {
+  heroScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.12)",
+  },
+  statusBadge: {
     position: "absolute",
-    bottom: 0,
-    width: "100%",
-    height: 80,
-    backgroundColor: "rgba(0,0,0,0.05)",
+    top: 16,
+    right: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
   },
-  contentSection: {
-    paddingHorizontal: 20,
-    paddingTop: 25,
+  statusBadgeText: {
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.bold,
+    letterSpacing: 0.5,
+  },
+
+  // ── Content card ───────────────────────────────────────
+  card: {
     backgroundColor: WHITE,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -30,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -28,
+    paddingHorizontal: 20,
+    paddingTop: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     elevation: 5,
+    paddingBottom: 16,
   },
-  headerContent: {
+  titleRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: 20,
+    gap: 12,
   },
-  buttonEdit: {
-    width: 44,
-    height: 44,
+  title: {
+    flex: 1,
+    fontSize: Typography.sizes["2xl"],
+    fontWeight: Typography.weights.extrabold,
+    color: GREEN_900,
+    lineHeight: 30,
+  },
+  editButton: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
     backgroundColor: Colors.principal.yellow[100],
-    justifyContent: "center",
-    alignItems: "center",
     borderWidth: 1,
     borderColor: Colors.principal.yellow[300],
-  },
-  badgeGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    justifyContent: "space-between",
-    marginBottom: 5,
-  },
-  infoBadge: {
-    width: "48%",
-    flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-    borderRadius: 12,
-    backgroundColor: WHITE,
-    borderWidth: 1,
-    borderColor: NEUTRAL_100,
-  },
-  iconContainer: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
     justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
-  badgeLabel: {
-    fontSize: 10,
-    color: NEUTRAL_500,
-    textTransform: "uppercase",
-    fontWeight: "bold",
-  },
-  badgeValue: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: GREEN_900,
     marginTop: 2,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
+
+  // ── Info chips ─────────────────────────────────────────
+  infoRow: {
+    flexDirection: "column",
     gap: 8,
+    marginBottom: 4,
   },
-  sectionTitleText: {
-    marginBottom: 0,
-    fontSize: 18,
+  infoChip: {
+    flex: 1,
+    backgroundColor: NEUTRAL_50,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: NEUTRAL_200,
+  },
+  infoChipCenter: {
+    flex: 1.2,
+  },
+  infoChipLabel: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_500,
+    fontWeight: Typography.weights.medium,
+    marginBottom: 3,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  infoChipValue: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.bold,
     color: GREEN_900,
   },
+
+  // ── Section ────────────────────────────────────────────
   divider: {
     height: 1,
     backgroundColor: NEUTRAL_100,
     marginVertical: 20,
   },
-  descriptionText: {
-    fontSize: 15,
+  sectionLabel: {
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.bold,
+    color: NEUTRAL_500,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+  description: {
+    fontSize: Typography.sizes.base,
     color: NEUTRAL_700,
-    lineHeight: 22,
-    textAlign: "justify",
+    lineHeight: 24,
   },
-  progressContainer: {
-    marginTop: 5,
-  },
-  progressInfo: {
+
+  // ── Progress ───────────────────────────────────────────
+  progressStats: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
+    marginBottom: 12,
   },
-  progressLabel: {
-    fontSize: 12,
-    color: NEUTRAL_700,
+  progressStat: {
+    alignItems: "flex-start",
   },
-  priceValue: {
-    fontSize: Typography.sizes["2xl"],
+  progressStatNumber: {
+    fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.extrabold,
-    color: BLUE_500,
+    color: GREEN_900,
+  },
+  progressStatLabel: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_500,
+    marginTop: 2,
+    fontWeight: Typography.weights.medium,
+  },
+  progressBarWrapper: {
     marginTop: 4,
   },
-  sellerMetricsSection: {
-    backgroundColor: Colors.principal.neutral[50],
-    padding: 15,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: NEUTRAL_100,
-    marginBottom: 30,
-  },
+
+  // ── Metrics ────────────────────────────────────────────
   metricsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 10,
-    marginTop: 10,
+    gap: 8,
   },
-  metricChip: {
+  metricCard: {
+    width: "48%",
+    backgroundColor: NEUTRAL_50,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: NEUTRAL_200,
+  },
+  metricNumber: {
+    fontSize: Typography.sizes.xl,
+    fontWeight: Typography.weights.extrabold,
+    color: NEUTRAL_700,
+    marginBottom: 2,
+  },
+  metricCardLabel: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_500,
+    fontWeight: Typography.weights.medium,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  // ── Sell bar ───────────────────────────────────────────
+  sellBar: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: WHITE,
-    padding: 12,
-    borderRadius: 15,
-    width: "48%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderTopWidth: 1,
+    borderTopColor: NEUTRAL_100,
   },
-  metricIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  sellButton: {
+    flex: 1,
+    backgroundColor: GREEN_900,
+    borderRadius: 16,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  sellButtonText: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+    color: WHITE,
+  },
+  addSellerButton: {
+    width: 52,
+    height: 52,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
-  },
-  metricTextContainer: {
-    flex: 1,
-  },
-  metricLabel: {
-    fontSize: 10,
-    color: NEUTRAL_500,
-    fontWeight: "600",
-    textTransform: "uppercase",
-  },
-  metricValue: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: GREEN_900,
-    marginTop: 2,
+    backgroundColor: Colors.principal.blue[100],
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: BLUE_500,
   },
 });

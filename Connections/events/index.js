@@ -1,8 +1,16 @@
 import { fetchWithAuth } from "../../lib/fetchWithAuth";
 import { ENDPOINTS_EVENTS } from "../APIURLS";
 
-const { GET_BY_USER, GET_BY_ID, GET_CATEGORIES, GET_PACKS, CREATE, UPDATE, UPDATE_TICKETS, FINISH } =
-  ENDPOINTS_EVENTS;
+const {
+  GET_BY_USER,
+  GET_BY_ID,
+  GET_CATEGORIES,
+  GET_PACKS,
+  CREATE,
+  UPDATE,
+  UPDATE_TICKETS,
+  FINISH,
+} = ENDPOINTS_EVENTS;
 
 // GET /events?userId={userId}&eventStatus={status}
 export async function GetEventsByUser(userId, status) {

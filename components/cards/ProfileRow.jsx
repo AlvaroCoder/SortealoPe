@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     color: NEUTRAL_700,
   },
   infoValue: {
-    fontSize: Typography.sizes.md,
+    fontSize: Typography.sizes.base,
     fontWeight: Typography.weights.medium,
     color: GREEN_900,
     marginTop: 2,

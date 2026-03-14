@@ -65,7 +65,15 @@ export default function ScreenHistoryTickets({
       <FlatList
         data={getCurrentData()}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => <EventListItem event={item} />}
+        renderItem={({ item }) => (
+          <EventListItem
+            event={item}
+            compact={currentPosition === "Espera"}
+            eventStatus={
+              eventStatus.find((s) => s.name === currentPosition)?.id
+            }
+          />
+        )}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No hay eventos en este estado</Text>
@@ -110,7 +118,7 @@ const styles = StyleSheet.create({
 
   tabText: {
     fontSize: 14,
-    color: "#374151",
+    color: "#111111",
     fontWeight: "600",
   },
 
@@ -138,6 +146,6 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: "center",
     marginTop: 40,
-    color: "#9CA3AF",
+    color: "#6B7280",
   },
 });
