@@ -1,249 +1,322 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Alert, Dimensions, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Colors, Typography } from '../../../constants/theme';
-import ButtonGradiend from '../../common/Buttons/ButtonGradiendt';
+import { Ionicons } from "@expo/vector-icons";
+import { File, Paths } from "expo-file-system/next";
+import { useRef, useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  Modal,
+  Share,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import QRCode from "react-native-qrcode-svg";
+import { Colors, Typography } from "../../../constants/theme";
+import ButtonGradiend from "../../common/Buttons/ButtonGradiendt";
 
 const GREEN_900 = Colors.principal.green[900];
+const GREEN_500 = Colors.principal.green[500];
+const GREEN_50 = Colors.principal.green[50];
 const RED_500 = Colors.principal.red[500];
-const WHITE = 'white';
+const WHITE = "#FFFFFF";
+const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
+const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
+function buildInviteLink(eventId, ticketQuantity) {
+  return `sortealope://vendedor/invitar?eventId=${eventId}&tickets=${ticketQuantity}`;
+}
+
+// ── Step 1: enter ticket quantity ─────────────────────────────────────────────
 const Step1Content = ({ ticketQuantity, setTicketQuantity, onNext }) => {
-    
-    const handleQuantityChange = (text) => {
-        const cleanText = text.replace(/[^0-9]/g, '');
-        setTicketQuantity(cleanText);
-    };
-
-    const handleContinue = () => {
-        const quantity = parseInt(ticketQuantity);
-        if (isNaN(quantity) || quantity <= 0) {
-            Alert.alert("Error", "Por favor, ingresa una cantidad válida de tickets (mayor a cero).");
-            return;
-        }
-        onNext();
-    };
-
-    return (
-        <View style={modalStyles.stepContainer}>
-            <Text style={modalStyles.modalTitle}>Asignación de Tickets</Text>
-            <Text style={modalStyles.modalSubtitle}>
-                Ingresa la cantidad de tickets que asignarás a este vendedor.
-            </Text>
-
-            <Text style={modalStyles.inputLabel}>Cantidad de Tickets (*)</Text>
-            <TextInput
-                style={modalStyles.textInput}
-                keyboardType='numeric'
-                placeholder='Ej: 100'
-                value={ticketQuantity}
-                onChangeText={handleQuantityChange}
-                maxLength={5}
-                placeholderTextColor={NEUTRAL_200}
-            />
-
-            <ButtonGradiend
-                onPress={handleContinue}
-                style={modalStyles.continueButton}
-            >
-                Continuar 
-            </ButtonGradiend>
-        </View>
-    );
-};
-
-const Step2Content = ({ qrCodeData, onClose, ticketQuantity }) => (
-    <View style={modalStyles.stepContainer}>
-        <Text style={modalStyles.modalTitle}>Código QR de Invitación</Text>
-        <Text style={modalStyles.modalSubtitle}>
-            Asignados: {parseInt(ticketQuantity).toLocaleString()} tickets.
-        </Text>
-
-        <View style={modalStyles.qrCodeBox}>
-            <Text style={modalStyles.qrCodePlaceholder}>
-                [QR GENERADO]
-            </Text>
-            <Text style={modalStyles.qrCodeLink}>{qrCodeData}</Text>
-        </View>
-        
-        <Text style={modalStyles.warningText}>
-            <Ionicons name="warning-outline" size={14} color={RED_500} /> 
-            {' El código es válido por 24 horas.'}
-        </Text>
-
-        <TouchableOpacity
-            style={modalStyles.closeButton}
-            onPress={onClose}
-        >
-            <Text style={modalStyles.closeButtonText}>Cerrar</Text>
-        </TouchableOpacity>
-    </View>
-);
-
-
-export default function QRVendedorModal({
-    visible,
-    onClose,
-    qrCodeData,
-    initialQuantity = '10'
-}) {
-    const [currentStep, setCurrentStep] = useState(1);
-    const [ticketQuantity, setTicketQuantity] = useState(initialQuantity);
-
-    const handleNext = () => {
-        setCurrentStep(2);
-    };
-
-    const handleCloseModal = () => {
-        setCurrentStep(1);
-        onClose();
-    };
-
-    const renderContent = () => {
-        if (currentStep === 1) {
-            return (
-                <Step1Content
-                    ticketQuantity={ticketQuantity}
-                    setTicketQuantity={setTicketQuantity}
-                    onNext={handleNext}
-                />
-            );
-        }
-        return (
-            <Step2Content 
-                qrCodeData={qrCodeData} 
-                onClose={handleCloseModal}
-                ticketQuantity={ticketQuantity}
-            />
-        );
-    };
+  const handleContinue = () => {
+    const qty = parseInt(ticketQuantity, 10);
+    if (isNaN(qty) || qty <= 0) {
+      Alert.alert("Error", "Por favor ingresa una cantidad válida de tickets (mayor a cero).");
+      return;
+    }
+    onNext();
+  };
 
   return (
-      <Modal
-          animationType='slide'
-          transparent={true}
-          visible={visible}
-          onRequestClose={handleCloseModal}
-      >
-        <View style={modalStyles.centeredView}>
-            <View style={modalStyles.modalView}>
-                {renderContent()}
-            </View>
-        </View>
-    </Modal>
+    <View style={styles.stepContainer}>
+      <View style={styles.iconCircle}>
+        <Ionicons name="ticket-outline" size={28} color={GREEN_900} />
+      </View>
+      <Text style={styles.modalTitle}>Asignación de Tickets</Text>
+      <Text style={styles.modalSubtitle}>
+        Ingresa cuántos tickets asignarás a este vendedor.
+      </Text>
+
+      <Text style={styles.inputLabel}>Cantidad de Tickets *</Text>
+      <TextInput
+        style={styles.textInput}
+        keyboardType="numeric"
+        placeholder="Ej: 100"
+        value={ticketQuantity}
+        onChangeText={(t) => setTicketQuantity(t.replace(/[^0-9]/g, ""))}
+        maxLength={5}
+        placeholderTextColor={NEUTRAL_200}
+      />
+
+      <ButtonGradiend onPress={handleContinue} style={styles.continueButton}>
+        Generar QR
+      </ButtonGradiend>
+    </View>
   );
 };
 
-const modalStyles = StyleSheet.create({
-    centeredView: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    },
-    modalView: {
-        width: Dimensions.get('window').width * 0.85,
-        maxWidth: 400,
-        backgroundColor: WHITE,
-        borderRadius: 20,
-        padding: 30,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5
-    },
-    stepContainer: {
-        width: '100%',
-        alignItems: 'center',
-    },
-    modalTitle: {
-        fontSize: Typography.sizes['2xl'],
-        fontWeight: Typography.weights.extrabold,
-        color: GREEN_900,
-        marginBottom: 5,
-        textAlign: 'center',
-    },
-    modalSubtitle: {
-        fontSize: Typography.sizes.base,
-        color: NEUTRAL_700,
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    
-    inputLabel: {
-        fontSize: Typography.sizes.md,
-        fontWeight: Typography.weights.medium,
-        color: GREEN_900,
-        marginBottom: 8,
-        alignSelf: 'flex-start',
-    },
-    textInput: {
-        width: '100%',
-        borderWidth: 1,
-        borderColor: NEUTRAL_200,
-        borderRadius: 12,
-        padding: 15,
-        fontSize: Typography.sizes.lg,
-        color: GREEN_900,
-        backgroundColor: WHITE,
-        marginBottom: 20,
-        textAlign: 'center',
-        fontWeight: Typography.weights.bold,
-    },
-    continueButton: {
-        width: '100%',
-        
-    },
+// ── Step 2: show QR + share ───────────────────────────────────────────────────
+const Step2Content = ({ eventId, ticketQuantity, onClose }) => {
+  const qrRef = useRef(null);
+  const deepLink = buildInviteLink(eventId, ticketQuantity);
+  const QR_SIZE = Dimensions.get("window").width * 0.55;
 
-    qrCodeBox: {
-        width: '100%',
-        aspectRatio: 1,
-        backgroundColor: WHITE,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 10,
-        borderWidth: 5,
-        borderColor: GREEN_900,
-        marginBottom: 20,
-        position: 'relative',
-    },
-    qrCodePlaceholder: {
-        fontSize: 20,
-        color: NEUTRAL_700,
-        padding: 50,
-        backgroundColor: NEUTRAL_200,
-        borderRadius: 5,
-        fontWeight: 'bold',
-    },
-    qrCodeLink: {
-        fontSize: Typography.sizes.xs,
-        color: NEUTRAL_700,
-        marginTop: 10,
-        textAlign: 'center',
-    },
-    warningText: {
-        fontSize: Typography.sizes.sm,
-        color: RED_500,
-        marginTop: 10,
-    },
-    closeButton: {
-        backgroundColor: RED_500,
-        padding: 15,
-        borderRadius: 12,
-        marginTop: 25,
-        width: '100%',
-        alignItems: 'center',
-    },
-    closeButtonText: {
-        color: WHITE,
-        fontWeight: Typography.weights.bold,
-        fontSize: Typography.sizes.lg,
-    }
+  const handleShare = () => {
+    if (!qrRef.current) return;
+    qrRef.current.toDataURL(async (base64) => {
+      try {
+        const file = new File(Paths.cache, `sortealo-vendor-qr-${Date.now()}.png`);
+        file.write(base64, { encoding: "base64" });
+        await Share.share({
+          message: `Invitación de vendedor — Sortealo\n${deepLink}`,
+          url: file.uri,
+        });
+      } catch {
+        Alert.alert("Error", "No se pudo compartir el QR.");
+      }
+    });
+  };
+
+  return (
+    <View style={styles.stepContainer}>
+      <View style={styles.iconCircle}>
+        <Ionicons name="qr-code-outline" size={28} color={GREEN_900} />
+      </View>
+      <Text style={styles.modalTitle}>Código QR listo</Text>
+      <Text style={styles.modalSubtitle}>
+        {parseInt(ticketQuantity, 10).toLocaleString()} tickets asignados.{"\n"}
+        Comparte el QR para que el vendedor se una.
+      </Text>
+
+      {/* QR */}
+      <View style={styles.qrWrapper}>
+        <QRCode
+          value={deepLink}
+          size={QR_SIZE}
+          color={GREEN_900}
+          backgroundColor={WHITE}
+          getRef={(c) => { qrRef.current = c; }}
+        />
+      </View>
+
+      {/* Deep link hint */}
+      <View style={styles.linkBox}>
+        <Ionicons name="link-outline" size={14} color={GREEN_500} />
+        <Text style={styles.linkText} numberOfLines={2}>{deepLink}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+          <Ionicons name="share-outline" size={18} color={GREEN_900} />
+          <Text style={styles.shareButtonText}>Compartir</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Text style={styles.closeButtonText}>Cerrar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+export default function QRVendedorModal({ visible, onClose, eventId, initialQuantity = "10" }) {
+  const [step, setStep] = useState(1);
+  const [ticketQuantity, setTicketQuantity] = useState(initialQuantity);
+
+  const handleClose = () => {
+    setStep(1);
+    setTicketQuantity(initialQuantity);
+    onClose();
+  };
+
+  return (
+    <Modal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={handleClose}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.card}>
+          {/* Close X */}
+          <TouchableOpacity style={styles.closeX} onPress={handleClose}>
+            <Ionicons name="close" size={20} color={NEUTRAL_500} />
+          </TouchableOpacity>
+
+          {step === 1 ? (
+            <Step1Content
+              ticketQuantity={ticketQuantity}
+              setTicketQuantity={setTicketQuantity}
+              onNext={() => setStep(2)}
+            />
+          ) : (
+            <Step2Content
+              eventId={eventId}
+              ticketQuantity={ticketQuantity}
+              onClose={handleClose}
+            />
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.55)",
+  },
+  card: {
+    backgroundColor: WHITE,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 28,
+    paddingBottom: 40,
+  },
+  closeX: {
+    alignSelf: "flex-end",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: NEUTRAL_100,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  stepContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: GREEN_50,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+  },
+  modalTitle: {
+    fontSize: Typography.sizes["2xl"],
+    fontWeight: Typography.weights.extrabold,
+    color: GREEN_900,
+    marginBottom: 6,
+    textAlign: "center",
+  },
+  modalSubtitle: {
+    fontSize: Typography.sizes.sm,
+    color: NEUTRAL_700,
+    marginBottom: 24,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+
+  // Step 1
+  inputLabel: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.semibold,
+    color: GREEN_900,
+    marginBottom: 8,
+    alignSelf: "flex-start",
+  },
+  textInput: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: NEUTRAL_200,
+    borderRadius: 14,
+    padding: 15,
+    fontSize: Typography.sizes.xl,
+    color: GREEN_900,
+    backgroundColor: WHITE,
+    marginBottom: 24,
+    textAlign: "center",
+    fontWeight: Typography.weights.bold,
+  },
+  continueButton: {
+    width: "100%",
+  },
+
+  // Step 2
+  qrWrapper: {
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: NEUTRAL_200,
+    backgroundColor: WHITE,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  linkBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: GREEN_50,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 20,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: Colors.principal.green[100],
+  },
+  linkText: {
+    flex: 1,
+    fontSize: Typography.sizes.xs,
+    color: GREEN_900,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
+  shareButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: GREEN_900,
+  },
+  shareButtonText: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.semibold,
+    color: GREEN_900,
+  },
+  closeButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 14,
+    backgroundColor: RED_500,
+  },
+  closeButtonText: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+    color: WHITE,
+  },
 });

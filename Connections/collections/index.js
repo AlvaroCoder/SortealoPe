@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchWithAuth } from "../../lib/fetchWithAuth";
 import { ENDPOINTS_COLLECTIONS } from "../APIURLS";
 
@@ -23,10 +24,16 @@ export async function CreateCollection(data) {
 
 // POST /collections/create/excel?eventId={eventId}
 // body: FormData with Excel file
+// Uses AsyncStorage directly (NOT fetchWithAuth) because fetchWithAuth injects
+// Content-Type: application/json which corrupts the multipart/form-data boundary.
 export async function CreateCollectionsByExcel(eventId, formData) {
-  return fetchWithAuth(`${CREATE_EXCEL}?eventId=${eventId}`, {
+  const token = await AsyncStorage.getItem("token");
+  return fetch(`${CREATE_EXCEL}?eventId=${eventId}`, {
     method: "POST",
-    headers: {},  // omit Content-Type so fetch sets multipart boundary automatically
+    headers: {
+      Authorization: token ? `Bearer ${token}` : undefined,
+      // NO Content-Type — let fetch set the multipart boundary automatically
+    },
     body: formData,
   });
 }

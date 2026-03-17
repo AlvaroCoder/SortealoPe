@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ProgressBar from "../../../components/cards/ProgressBar";
+import TopSellersCard from "../../../components/cards/TopSellersCard";
 import { ENDPOINTS_EVENTS } from "../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../constants/theme";
 import { useRaffleContext } from "../../../context/RaffleContext";
@@ -64,7 +65,6 @@ export default function EventDetailPage() {
   const ticketPrice = event?.ticketPrice ?? 0;
   const collected = (soldTickets * ticketPrice).toFixed(0);
 
-  // Barra inferior: visible para seller/admin cuando el evento está activo (status 2)
   const showBottomBar = eventStatus >= 2;
 
   const statusConfig = eventStatus >= 2;
@@ -189,7 +189,7 @@ export default function EventDetailPage() {
                   ? `${(((soldTickets + reservedTickets) / totalTickets) * 100).toFixed(0)}%`
                   : "0%"}
               </Text>
-              <Text style={styles.progressStatLabel}>Ocupados</Text>
+              <Text style={styles.progressStatLabel}>Reservados</Text>
             </View>
             <View style={[styles.progressStat, { alignItems: "flex-end" }]}>
               <Text style={styles.progressStatNumber}>{totalTickets}</Text>
@@ -230,6 +230,19 @@ export default function EventDetailPage() {
               </View>
             </>
           )}
+
+          {/* Top Vendedores */}
+          {(data?.collections ?? []).length > 0 && (
+            <>
+              <View style={styles.divider} />
+              <TopSellersCard
+                collections={data?.collections ?? []}
+                eventId={eventId}
+                ticketPrice={ticketPrice}
+                titleEvent={event?.title}
+              />
+            </>
+          )}
         </View>
       </ScrollView>
 
@@ -253,7 +266,12 @@ export default function EventDetailPage() {
           <TouchableOpacity
             style={styles.addSellerButton}
             activeOpacity={0.85}
-            onPress={() => router.push("/vendedores/agregar")}
+            onPress={() =>
+              router.push({
+                pathname: "/vendedores/agregar",
+                params: { eventId },
+              })
+            }
           >
             <Ionicons
               name="person-add-outline"

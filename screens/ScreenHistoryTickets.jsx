@@ -64,7 +64,7 @@ export default function ScreenHistoryTickets({
 
       <FlatList
         data={getCurrentData()}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(_, index) => index.toString()}
         renderItem={({ item }) => (
           <EventListItem
             event={item}

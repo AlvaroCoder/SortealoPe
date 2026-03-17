@@ -6,6 +6,11 @@
 - `GetCollectionsByEvent` returns an array; seller is embedded as `collection.seller.id` or `collection.userId` (varies by backend version)
 - `GenerateTicket` returns a ticket object with `.image` (Cloudinary URL) — also check `.imageUrl` as fallback
 - `GetTicketsByCollection` returns tickets with `.ticketStatus.id` (1=disponible, 2=reservado, 3=comprado) and `.serialNumber` / `.code`
+- `GET /events/{id}` does NOT accept `?eventStatus=` query param — do not append it
+
+## ENDPOINTS_COLLECTIONS.GET_BY_EVENT URL pattern
+- Value is `${BASE_URL}/collections` (no trailing `?` or `=`)
+- Append `?eventId=` when using: `${ENDPOINTS_COLLECTIONS.GET_BY_EVENT}?eventId=${eventId}`
 
 ## Ticket Sell Flow (tickets/sell/[id].jsx)
 - Fully implemented (replaced mock scaffold)
@@ -17,6 +22,11 @@
 - `app/(app)/tickets/_layout.jsx` — Stack with two screens: `index` and `sell/[id]`
 - Both screens use `HeaderBackNav` (declared in layout, no header needed in screen)
 - No `_layout.jsx` needed inside `sell/` folder
+
+## Navigation: vendedores/event stack
+- `app/(app)/vendedores/event/[id].jsx` — Full sellers list for an event (FlatList ranked)
+- Uses its own inline header with `router.back()` (no separate _layout.jsx needed)
+- Reached from TopSellersCard "Ver todos" with `pathname: "/(app)/vendedores/event/[id]"`
 
 ## expo-image usage
 - Import: `import { Image } from "expo-image"` (not react-native Image)
@@ -33,9 +43,26 @@
 - This covers backends that don't embed seller info in the collection response
 
 ## Colors confirmed in use
-- `Colors.principal.yellow[700]` exists (used for reserved ticket text)
+- `Colors.principal.yellow[100]` and `[700]` exist (EVENT_STATUS Pendiente bg/color)
+- `Colors.principal.green[100]` exists (EVENT_STATUS Activo background)
 - `Colors.principal.blue[50]` exists (info box background)
 - `Colors.principal.green[50]` and `[100]` exist (ticket badge background/border)
+
+## EVENT_STATUS constant pattern (event/[id].jsx)
+- Always derive statusConfig from `EVENT_STATUS[event?.status] ?? EVENT_STATUS[1]`
+- Never use route param `eventStatus` for statusConfig — use `event?.status` from API data
+- `showBottomBar = eventStatus >= 2` intentionally uses route param (controls sell bar visibility)
+
+## Key Components
+- `components/cards/TopSellersCard.jsx` — Ranks collections by soldTickets, shows top 3, links to full list
+- `components/cards/VendorRankingRow.jsx` — Single row: rank #, icon, name, tickets sold, sales total
+- `app/(app)/vendedores/event/[id].jsx` — Full ranked seller list for an event (FlatList)
+- `components/common/Dividers/ImportExcelModal.jsx` — Bottom-sheet modal: picks .xlsx/.xls via expo-document-picker, calls CreateCollectionsByExcel; props: visible, onClose, eventId
+
+## Multipart Upload Pattern (collections Excel import)
+- `CreateCollectionsByExcel` uses AsyncStorage + raw fetch (NOT fetchWithAuth) — same reason as UploadImage
+- fetchWithAuth injects `Content-Type: application/json` which breaks multipart boundaries
+- Pattern: `AsyncStorage.getItem("token")` → raw `fetch` with `Authorization` header only, no Content-Type
 
 ## File References
 - See `patterns.md` for deeper architectural notes (linked from here)
