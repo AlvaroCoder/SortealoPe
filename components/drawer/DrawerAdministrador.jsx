@@ -12,10 +12,21 @@ const WHITE = "#FFFFFF";
 const NEUTRAL_100 = Colors.principal.neutral[100];
 
 const NAV_ITEMS = [
-  { route: "/(app)/(drawer)/home", icon: "home-outline", label: "Inicio" },
-  { route: "/(app)/event/asignados", icon: "calendar-outline", label: "Eventos Asignados" },
-  { route: "/(app)/vendedores", icon: "people-outline", label: "Vendedores" },
-  { route: "/(app)/metricas/eventos", icon: "analytics-outline", label: "Métricas" },
+  {
+    route: "/(app)/(drawer)/home",
+    icon: "home-outline",
+    label: "Inicio",
+  },
+  {
+    route: "/(app)/event/asignados",
+    icon: "calendar-outline",
+    label: "Eventos Asignados",
+  },
+  {
+    route: "/(app)/metricas/eventos",
+    icon: "analytics-outline",
+    label: "Métricas",
+  },
 ];
 
 export default function DrawerAdministradorContent({ navigation }) {

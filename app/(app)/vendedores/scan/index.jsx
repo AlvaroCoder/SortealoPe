@@ -1,240 +1,538 @@
-import { Ionicons } from '@expo/vector-icons';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useState } from 'react';
-import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Colors, Typography } from '../../../../constants/theme';
+import { Ionicons } from "@expo/vector-icons";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { useRef, useEffect, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Colors, Typography } from "../../../../constants/theme";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
-const BLUE_500 = Colors.principal.blue[500]; 
 const RED_500 = Colors.principal.red[500];
-const WHITE = Colors.principal.white;
+const WHITE = "#FFFFFF";
+const NEUTRAL_400 = Colors.principal.neutral[400];
 const NEUTRAL_700 = Colors.principal.neutral[700];
-const BLACK = 'black'; 
 
-const { width } = Dimensions.get('window');
-const SCAN_AREA_SIZE = width * 0.7;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const SCAN_SIZE = SCREEN_WIDTH * 0.68;
+const CORNER_SIZE = 28;
+const CORNER_THICKNESS = 4;
+const OVERLAY = "rgba(0,0,0,0.62)";
 
-const SCAN_STATUS = {
-    WAITING: 'Esperando escaneo...',
-    SCANNING: 'Escaneando...',
-    SUCCESS: 'Código QR detectado!',
-    ERROR: 'QR no válido o ilegible.',
-};
+// ── Corner bracket ────────────────────────────────────────────────────────────
+function Corner({ position }) {
+  const isTop = position.includes("T");
+  const isLeft = position.includes("L");
+  return (
+    <>
+      {/* Horizontal bar */}
+      <View
+        style={[
+          styles.cornerBar,
+          styles.cornerBarH,
+          isTop ? { top: 0 } : { bottom: 0 },
+          isLeft ? { left: 0 } : { right: 0 },
+        ]}
+      />
+      {/* Vertical bar */}
+      <View
+        style={[
+          styles.cornerBar,
+          styles.cornerBarV,
+          isTop ? { top: 0 } : { bottom: 0 },
+          isLeft ? { left: 0 } : { right: 0 },
+        ]}
+      />
+    </>
+  );
+}
 
 export default function PageScanQR() {
-    const [scanStatus, setScanStatus] = useState(SCAN_STATUS.WAITING);
-    const [scannedData, setScannedData] = useState(null);
-    const [permission, requestPermission] = useCameraPermissions();
-    const [isScanning, setIsScanning] = useState(true); 
+  const [permission, requestPermission] = useCameraPermissions();
+  const [scanning, setScanning] = useState(true);
+  const [status, setStatus] = useState("waiting"); // waiting | success | error
+  const [scannedData, setScannedData] = useState(null);
+  const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
-    const handleBarcodeScanned = ({ data }) => {
-        setIsScanning(false); 
-        
-        if (data && data.startsWith('ID Vendedor:')) {
-            setScannedData(data);
-            setScanStatus(SCAN_STATUS.SUCCESS);
-        } else {
-            setScannedData(null);
-            setScanStatus(SCAN_STATUS.ERROR);
-            Alert.alert(
-                "QR Inválido", 
-                "El código escaneado no corresponde a un vendedor de Sortealope."
-            );
-        }
-    };
-    
-    const focusColor = scanStatus === SCAN_STATUS.SUCCESS ? GREEN_500 : 
-                       scanStatus === SCAN_STATUS.ERROR ? RED_500 : 
-                       BLUE_500;
-    
-    if (!permission) {
-        return (
-            <View style={[styles.container, { justifyContent: 'center', backgroundColor: WHITE }]}>
-                <Text style={{ color: GREEN_900 }}>Cargando permisos de cámara...</Text>
-            </View>
-        );
-    }
-    
-    if (!permission.granted) {
-        return (
-            <View style={[styles.container, { justifyContent: 'center', backgroundColor: WHITE }]}>
-                <Text style={styles.permissionText}>Necesitamos acceso a la cámara para escanear QR.</Text>
-                <TouchableOpacity onPress={requestPermission} style={styles.requestButton}>
-                    <Text style={styles.requestButtonText}>Otorgar Permiso</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-
-    return (
-        <View style={styles.container}>
-            
-            <CameraView 
-                style={StyleSheet.absoluteFill} 
-                facing="back"
-                barcodeScanningSettings={{ barcodeTypes: ["qr"] }}
-                onBarcodeScanned={isScanning ? handleBarcodeScanned : undefined}
-            >
-                <View style={styles.cameraOverlay}>
-                    
-                    <View style={styles.header}>
-                        <Text style={styles.mainTitle}>Escanear Código QR</Text>
-                        <Text style={styles.subtitle}>Enfoca el código de invitación del vendedor en el área marcada.</Text>
-                    </View>
-
-                    <View style={styles.scanAreaContainer}>
-                        <View style={[styles.scanArea, { borderColor: focusColor }]} />
-                        
-                        <Ionicons name="scan" size={40} color={focusColor} style={styles.focusOverlayIcon} />
-                    </View>
-                    
-                    <Text style={[styles.statusText, { color: focusColor }]}>
-                        {scanStatus}
-                    </Text>
-
-                </View>
-            </CameraView>
-
-            {scannedData && (
-                <View style={styles.resultBox}>
-                    <Ionicons name="person-add-outline" size={24} color={GREEN_900} />
-                    <Text style={styles.resultText}>Vendedor Listo para Asignación:</Text>
-                    <Text style={styles.resultData}>{scannedData}</Text>
-                    
-                    <TouchableOpacity style={styles.assignButton} onPress={() => Alert.alert("Asignación", "Procediendo a asignar el vendedor...")}>
-                        <Text style={styles.assignButtonText}>Asignar Evento</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity style={styles.resetButton} onPress={() => { setScannedData(null); setScanStatus(SCAN_STATUS.WAITING); setIsScanning(true); }}>
-                        <Text style={styles.resetButtonText}>Escanear Otro</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
-        </View>
+  // Animated scan line
+  const scanLine = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scanLine, {
+          toValue: 1,
+          duration: 2200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scanLine, {
+          toValue: 0,
+          duration: 2200,
+          useNativeDriver: true,
+        }),
+      ]),
     );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+
+  const scanLineY = scanLine.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, SCAN_SIZE - 2],
+  });
+
+  const handleScanned = ({ data }) => {
+    if (!scanning) return;
+    setScanning(false);
+
+    if (data?.startsWith("sortealope://vendedor/invitar")) {
+      try {
+        const url = new URL(data);
+        const eventId = url.searchParams.get("eventId");
+        const tickets = url.searchParams.get("tickets");
+        setScannedData({ eventId, tickets });
+        setStatus("success");
+      } catch {
+        setStatus("error");
+        scheduleReset();
+      }
+    } else {
+      setStatus("error");
+      scheduleReset();
+    }
+  };
+
+  const scheduleReset = () => {
+    setTimeout(() => {
+      setStatus("waiting");
+      setScanning(true);
+    }, 2200);
+  };
+
+  const handleReset = () => {
+    setScannedData(null);
+    setStatus("waiting");
+    setScanning(true);
+  };
+
+  // ── Permission screens ───────────────────────────────────────────────────
+  if (!permission) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.permissionText}>Iniciando cámara…</Text>
+      </View>
+    );
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.centered}>
+        <View style={styles.permissionCard}>
+          <View style={styles.permissionIconBox}>
+            <Ionicons name="camera-outline" size={40} color={GREEN_900} />
+          </View>
+          <Text style={styles.permissionTitle}>Acceso a la cámara</Text>
+          <Text style={styles.permissionDesc}>
+            Necesitamos acceso a tu cámara para escanear los códigos QR de
+            invitación.
+          </Text>
+          <TouchableOpacity
+            style={styles.permissionBtn}
+            onPress={requestPermission}
+          >
+            <Text style={styles.permissionBtnText}>Permitir acceso</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  // ── Frame border color ───────────────────────────────────────────────────
+  const frameColor =
+    status === "success"
+      ? GREEN_500
+      : status === "error"
+        ? RED_500
+        : WHITE;
+
+  return (
+    <View style={styles.root}>
+      {/* Camera feed */}
+      <CameraView
+        style={StyleSheet.absoluteFill}
+        facing="back"
+        barcodeScanningSettings={{ barcodeTypes: ["qr"] }}
+        onBarcodeScanned={scanning ? handleScanned : undefined}
+      />
+
+      {/* Cutout overlay — 4 dark rectangles around the scan frame */}
+      <View
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      >
+        {/* Top */}
+        <View style={[styles.overlay, { height: SCREEN_HEIGHT * 0.28 }]} />
+        {/* Middle row */}
+        <View style={{ flexDirection: "row", height: SCAN_SIZE }}>
+          <View style={[styles.overlay, { flex: 1 }]} />
+          {/* Scan frame — transparent center */}
+          <View style={{ width: SCAN_SIZE }} />
+          <View style={[styles.overlay, { flex: 1 }]} />
+        </View>
+        {/* Bottom */}
+        <View style={[styles.overlay, { flex: 1 }]} />
+      </View>
+
+      {/* ── Top instruction ───────────────────────────── */}
+      <View style={[styles.topInfo, { paddingTop: topInset + 16 }]}>
+        <Text style={styles.topTitle}>Escanear QR</Text>
+        <Text style={styles.topSubtitle}>
+          Enfoca el código de invitación del vendedor
+        </Text>
+      </View>
+
+      {/* ── Scan frame (absolutely centered) ─────────── */}
+      <View style={styles.frameWrapper} pointerEvents="none">
+        {/* Dashed border frame */}
+        <View style={[styles.frame, { borderColor: frameColor }]}>
+          {/* Animated scan line */}
+          <Animated.View
+            style={[
+              styles.scanLine,
+              {
+                backgroundColor: frameColor,
+                transform: [{ translateY: scanLineY }],
+              },
+            ]}
+          />
+        </View>
+
+        {/* Corner brackets */}
+        <View style={StyleSheet.absoluteFill}>
+          <Corner position="TL" />
+          <Corner position="TR" />
+          <Corner position="BL" />
+          <Corner position="BR" />
+        </View>
+      </View>
+
+      {/* ── Status label ──────────────────────────────── */}
+      <View style={styles.statusRow} pointerEvents="none">
+        <View
+          style={[
+            styles.statusPill,
+            status === "success" && styles.statusPillSuccess,
+            status === "error" && styles.statusPillError,
+          ]}
+        >
+          <Ionicons
+            name={
+              status === "success"
+                ? "checkmark-circle"
+                : status === "error"
+                  ? "close-circle"
+                  : "scan-outline"
+            }
+            size={15}
+            color={
+              status === "success"
+                ? GREEN_500
+                : status === "error"
+                  ? RED_500
+                  : NEUTRAL_400
+            }
+          />
+          <Text
+            style={[
+              styles.statusText,
+              status === "success" && { color: GREEN_500 },
+              status === "error" && { color: RED_500 },
+            ]}
+          >
+            {status === "success"
+              ? "Código detectado"
+              : status === "error"
+                ? "Código no válido"
+                : "Buscando código QR…"}
+          </Text>
+        </View>
+      </View>
+
+      {/* ── Result bottom sheet ───────────────────────── */}
+      {scannedData && (
+        <View style={[styles.sheet, { paddingBottom: bottomInset + 12 }]}>
+          {/* Handle */}
+          <View style={styles.sheetHandle} />
+
+          <View style={styles.sheetIconRow}>
+            <View style={styles.sheetIconBox}>
+              <Ionicons name="person-add-outline" size={26} color={GREEN_900} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.sheetTitle}>Invitación detectada</Text>
+              <Text style={styles.sheetSub}>Vendedor listo para asignar</Text>
+            </View>
+          </View>
+
+          <View style={styles.sheetRow}>
+            <Text style={styles.sheetRowLabel}>Evento ID</Text>
+            <Text style={styles.sheetRowValue}>#{scannedData.eventId}</Text>
+          </View>
+          <View style={[styles.sheetRow, { borderBottomWidth: 0 }]}>
+            <Text style={styles.sheetRowLabel}>Tickets asignados</Text>
+            <Text style={styles.sheetRowValue}>{scannedData.tickets}</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.assignBtn}
+            activeOpacity={0.85}
+            onPress={() => {
+              /* TODO: connect to assign vendor API */
+            }}
+          >
+            <Text style={styles.assignBtnText}>Asignar vendedor</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.resetBtn} onPress={handleReset}>
+            <Text style={styles.resetBtnText}>Escanear otro código</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: BLACK, 
-    },
-    cameraOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
-        alignItems: 'center',
-        paddingTop: 40,
-    },
-    header: {
-        width: '100%',
-        alignItems: 'center',
-        marginBottom: 30,
-        backgroundColor: 'transparent',
-    },
-    mainTitle: {
-        fontSize: Typography.sizes['2xl'],
-        fontWeight: Typography.weights.extrabold,
-        color: WHITE,
-        marginBottom: 5,
-    },
-    subtitle: {
-        fontSize: Typography.sizes.base,
-        color: Colors.principal.neutral[400], 
-        textAlign: 'center',
-        paddingHorizontal: 30,
-    },
-    
-    scannerWrapper: {
-        flex: 1,
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    scanAreaContainer: {
-        width: SCAN_AREA_SIZE,
-        height: SCAN_AREA_SIZE,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    scanArea: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'transparent',
-        borderWidth: 5,
-        borderRadius: 10,
-    },
-    focusOverlayIcon: {
-        position: 'absolute',
-        opacity: 0.8,
-    },
-    statusText: {
-        fontSize: Typography.sizes.lg,
-        fontWeight: Typography.weights.bold,
-        marginTop: 20,
-        marginBottom: 10,
-    },
-    
-    resultBox: {
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
-        backgroundColor: WHITE,
-        padding: 20,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        alignItems: 'center',
-        zIndex: 10,
-    },
-    resultText: {
-        fontSize: Typography.sizes.md,
-        color: NEUTRAL_700,
-        marginTop: 5,
-    },
-    resultData: {
-        fontSize: Typography.sizes.xl,
-        fontWeight: Typography.weights.extrabold,
-        color: GREEN_900,
-        marginTop: 5,
-    },
-    assignButton: {
-        backgroundColor: GREEN_900,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        marginTop: 15,
-        width: '80%',
-        alignItems: 'center',
-    },
-    assignButtonText: {
-        color: WHITE,
-        fontWeight: Typography.weights.bold,
-    },
-    resetButton: {
-        marginTop: 10,
-    },
-    resetButtonText: {
-        color: RED_500,
-        fontSize: Typography.sizes.sm,
-        fontWeight: Typography.weights.medium,
-    },
-    
-    permissionText: {
-        fontSize: Typography.sizes.xl,
-        color: GREEN_900,
-        textAlign: 'center',
-        marginBottom: 20,
-        paddingHorizontal: 30,
-    },
-    requestButton: {
-        backgroundColor: BLUE_500,
-        paddingVertical: 15,
-        paddingHorizontal: 30,
-        borderRadius: 12,
-    },
-    requestButtonText: {
-        color: WHITE,
-        fontWeight: Typography.weights.bold,
-        fontSize: Typography.sizes.lg,
-    }
+  root: { flex: 1, backgroundColor: "#000" },
+
+  overlay: { backgroundColor: OVERLAY },
+
+  // ── Top info ──────────────────────────────────────────────────────────────
+  topInfo: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    paddingHorizontal: 32,
+    zIndex: 10,
+  },
+  topTitle: {
+    fontSize: Typography.sizes["2xl"],
+    fontWeight: Typography.weights.extrabold,
+    color: WHITE,
+    marginBottom: 6,
+  },
+  topSubtitle: {
+    fontSize: Typography.sizes.sm,
+    color: "rgba(255,255,255,0.7)",
+    textAlign: "center",
+  },
+
+  // ── Scan frame ────────────────────────────────────────────────────────────
+  frameWrapper: {
+    position: "absolute",
+    top: SCREEN_HEIGHT * 0.28,
+    left: (SCREEN_WIDTH - SCAN_SIZE) / 2,
+    width: SCAN_SIZE,
+    height: SCAN_SIZE,
+  },
+  frame: {
+    width: "100%",
+    height: "100%",
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  scanLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 2,
+    opacity: 0.85,
+  },
+
+  // Corner brackets
+  cornerBar: {
+    position: "absolute",
+    backgroundColor: WHITE,
+    borderRadius: 2,
+  },
+  cornerBarH: {
+    width: CORNER_SIZE,
+    height: CORNER_THICKNESS,
+  },
+  cornerBarV: {
+    width: CORNER_THICKNESS,
+    height: CORNER_SIZE,
+  },
+
+  // ── Status pill ───────────────────────────────────────────────────────────
+  statusRow: {
+    position: "absolute",
+    top: SCREEN_HEIGHT * 0.28 + SCAN_SIZE + 20,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 10,
+  },
+  statusPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+  },
+  statusPillSuccess: { borderColor: GREEN_500 },
+  statusPillError: { borderColor: RED_500 },
+  statusText: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.medium,
+    color: "rgba(255,255,255,0.8)",
+  },
+
+  // ── Result sheet ──────────────────────────────────────────────────────────
+  sheet: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: WHITE,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    zIndex: 20,
+  },
+  sheetHandle: {
+    alignSelf: "center",
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.principal.neutral[200],
+    marginBottom: 20,
+  },
+  sheetIconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    marginBottom: 20,
+  },
+  sheetIconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: Colors.principal.green[50],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sheetTitle: {
+    fontSize: Typography.sizes.lg,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+    marginBottom: 2,
+  },
+  sheetSub: {
+    fontSize: Typography.sizes.sm,
+    color: NEUTRAL_400,
+  },
+  sheetRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.principal.neutral[100],
+  },
+  sheetRowLabel: {
+    fontSize: Typography.sizes.sm,
+    color: NEUTRAL_700,
+    fontWeight: Typography.weights.medium,
+  },
+  sheetRowValue: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+  },
+  assignBtn: {
+    backgroundColor: GREEN_900,
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  assignBtnText: {
+    color: WHITE,
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+  },
+  resetBtn: {
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  resetBtnText: {
+    fontSize: Typography.sizes.sm,
+    color: NEUTRAL_400,
+    fontWeight: Typography.weights.medium,
+  },
+
+  // ── Permission screen ─────────────────────────────────────────────────────
+  centered: {
+    flex: 1,
+    backgroundColor: WHITE,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 32,
+  },
+  permissionCard: {
+    alignItems: "center",
+    width: "100%",
+  },
+  permissionIconBox: {
+    width: 88,
+    height: 88,
+    borderRadius: 22,
+    backgroundColor: Colors.principal.green[50],
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+  },
+  permissionTitle: {
+    fontSize: Typography.sizes.xl,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+    marginBottom: 10,
+  },
+  permissionDesc: {
+    fontSize: Typography.sizes.base,
+    color: NEUTRAL_700,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 32,
+  },
+  permissionBtn: {
+    backgroundColor: GREEN_900,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 36,
+  },
+  permissionBtnText: {
+    color: WHITE,
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+  },
+  permissionText: {
+    color: NEUTRAL_700,
+    fontSize: Typography.sizes.base,
+  },
 });

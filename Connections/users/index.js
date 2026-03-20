@@ -9,8 +9,8 @@ export async function GetUserById(userId) {
 }
 
 // PATCH /users/{id}
-export async function UpdateUser(userId, data) {
-  return fetchWithAuth(`${UPDATE}${userId}`, {
+export async function UpdateUser(data) {
+  return fetchWithAuth(`${UPDATE}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });

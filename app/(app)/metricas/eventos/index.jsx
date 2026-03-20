@@ -1,317 +1,355 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import MetricCard from "../../../../components/common/Card/MetricCard";
-import Title2 from "../../../../components/common/Titles/Title2";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { ENDPOINTS_EVENTS } from "../../../../Connections/APIURLS";
+import { useAuthContext } from "../../../../context/AuthContext";
 import { Colors, Typography } from "../../../../constants/theme";
-import CarrouselViewMainCard from "../../../../views/Sliders/CarrouselViewMainCard";
+import { useFetch } from "../../../../lib/useFetch";
+import LoadingScreen from "../../../../screens/LoadingScreen";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
-const GREEN_100 = Colors.principal.green[100];
+const GREEN_50 = Colors.principal.green[50];
+const BLUE_500 = Colors.principal.blue[500];
 const RED_500 = Colors.principal.red[500];
-const WHITE = "#FFFFFF";
-const NEUTRAL_700 = Colors.principal.neutral[700];
+const NEUTRAL_50 = Colors.principal.neutral[50];
+const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
+const NEUTRAL_500 = Colors.principal.neutral[500];
+const NEUTRAL_700 = Colors.principal.neutral[700];
+const WHITE = "#FFFFFF";
+const YELLOW_600 = Colors.principal.yellow[600];
 
-const metricKpiData = [
-  {
-    label: "Eventos Creados",
-    value: "35",
-    icon: "create-outline",
-    color: GREEN_500,
-    useRoute: false,
-  },
-  {
-    label: "Eventos Sorteados",
-    value: "28",
-    icon: "trophy-outline",
-    color: RED_500,
-    useRoute: false,
-  },
-  {
-    label: "Recaudación Prom.",
-    value: "S/ 1.5K",
-    icon: "cash-outline",
-    color: GREEN_900,
-    useRoute: false,
-  },
-];
+const URL_EVENTS = ENDPOINTS_EVENTS.GET_BY_USER;
 
-const mockPopularEvents = [
-  {
-    id: 101,
-    title: "Rifa X - Alta Demanda",
-    ticketsSold: 950,
-    totalTickets: 1000,
-    color: GREEN_500,
-  },
-  {
-    id: 102,
-    title: "Colección Verano",
-    ticketsSold: 800,
-    totalTickets: 1200,
-    color: RED_500,
-  },
-  {
-    id: 103,
-    title: "Viaje a la Playa",
-    ticketsSold: 620,
-    totalTickets: 900,
-    color: GREEN_900,
-  },
-];
+// Single event row — tappable, navigates to event detail
+const EventRow = ({ event }) => {
+  const router = useRouter();
 
-const mockCreatedEvents = [
-  { id: 201, title: "Rifa Diciembre", status: "Activo", date: "20/12/25" },
-  {
-    id: 202,
-    title: "Colección Febrero",
-    status: "Pendiente",
-    date: "01/02/26",
-  },
-  { id: 203, title: "Sorteo Vacacional", status: "Activo", date: "15/01/26" },
-];
+  const handlePress = () => {
+    router.push({
+      pathname: "event/[id]",
+      params: { id: event.id, eventStatus: event.status },
+    });
+  };
 
-const mockRaffledEvents = [
-  { id: 301, title: "Rifa Anterior 1", winner: "Ana P.", date: "10/11/25" },
-  { id: 302, title: "Rifa Anterior 2", winner: "Juan C.", date: "05/11/25" },
-];
+  const formattedDate = event.date
+    ? new Date(event.date).toLocaleDateString("es-PE")
+    : "Sin fecha";
 
-const EventRow = ({ title, status, date, winner }) => (
-  <View style={styles.eventRow}>
-    <View style={styles.eventRowIcon}>
-      <Ionicons
-        name={winner ? "checkmark-done-circle-outline" : "ellipse-outline"}
-        size={14}
-        color={winner ? GREEN_500 : GREEN_900}
-      />
-    </View>
-    <View style={styles.eventRowContent}>
-      <Text style={styles.eventRowTitle} numberOfLines={1}>
-        {title}
-      </Text>
-      <Text style={styles.eventRowDetail}>
-        {winner ? `Ganador: ${winner}` : `Fecha: ${date}`}
-      </Text>
-    </View>
-    <Text
-      style={[
-        styles.eventRowStatus,
-        status === "Activo" && styles.statusActive,
-      ]}
-    >
-      {status || "Finalizado"}
-    </Text>
-  </View>
-);
+  return (
+    <TouchableOpacity style={styles.eventRow} onPress={handlePress}>
+      <View style={styles.eventRowContent}>
+        <Text style={styles.eventRowTitle} numberOfLines={1}>
+          {event.title}
+        </Text>
+        <Text style={styles.eventRowDate}>{formattedDate}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={NEUTRAL_500} />
+    </TouchableOpacity>
+  );
+};
 
 export default function PageMetricEventos() {
+  const { userData, loading: loadingAuth } = useAuthContext();
+
+  // Only start fetching once auth is resolved and userId is available
+  const shouldFetch = !!userData?.userId && !loadingAuth;
+  const userId = userData?.userId;
+
+  const {
+    data: eventsEspera,
+    loading: loadingEspera,
+    refetch: refetchEspera,
+  } = useFetch(shouldFetch ? `${URL_EVENTS}?userId=${userId}&eventStatus=1` : null);
+
+  const {
+    data: eventsActivos,
+    loading: loadingActivos,
+    refetch: refetchActivos,
+  } = useFetch(shouldFetch ? `${URL_EVENTS}?userId=${userId}&eventStatus=2` : null);
+
+  const {
+    data: eventsFinalizados,
+    loading: loadingFinalizados,
+    refetch: refetchFinalizados,
+  } = useFetch(shouldFetch ? `${URL_EVENTS}?userId=${userId}&eventStatus=3` : null);
+
+  // Pull-to-refresh state — cleared once all fetches resolve
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (refreshing && !loadingEspera && !loadingActivos && !loadingFinalizados) {
+      setRefreshing(false);
+    }
+  }, [refreshing, loadingEspera, loadingActivos, loadingFinalizados]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    refetchEspera();
+    refetchActivos();
+    refetchFinalizados();
+  };
+
+  // Derived metrics from real API data
+  const allEvents = [
+    ...(eventsEspera ?? []),
+    ...(eventsActivos ?? []),
+    ...(eventsFinalizados ?? []),
+  ];
+
+  const totalCreados = allEvents.length;
+  const totalActivos = (eventsActivos ?? []).length;
+  const totalFinalizados = (eventsFinalizados ?? []).length;
+
+  // Revenue approximation: soldTickets * ticketPrice per event
+  // Falls back to checking nested collections array if backend embeds it
+  const totalRevenue = allEvents.reduce((sum, e) => {
+    const sold =
+      e.soldTickets ??
+      e.collections?.reduce((s, c) => s + (c.soldTickets ?? 0), 0) ??
+      0;
+    return sum + sold * (e.ticketPrice ?? 0);
+  }, 0);
+
+  // Format revenue: show "S/ 1.5K" for thousands, plain for smaller amounts
+  const revenueLabel =
+    totalRevenue >= 1000
+      ? `S/ ${(totalRevenue / 1000).toFixed(1)}K`
+      : `S/ ${totalRevenue.toFixed(0)}`;
+
+  // Show loading overlay during initial load (not during pull-to-refresh)
+  const isInitialLoading =
+    !refreshing && (loadingAuth || loadingEspera || loadingActivos || loadingFinalizados);
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <View style={styles.header}>
-        <Title2 styleTitle={styles.mainTitle}>Métricas de Eventos</Title2>
-        <Text style={styles.subtitle}>
-          Análisis de rendimiento de tus rifas.
-        </Text>
-      </View>
+    <SafeAreaView style={styles.safeArea} edges={["bottom"]}>
+      <View style={styles.container}>
+        {/* Overlay spinner on first load */}
+        {isInitialLoading && <LoadingScreen text="Cargando métricas..." />}
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Métricas del evento</Text>
-        <View style={styles.kpiGrid}>
-          {metricKpiData.map((kpi, index) => (
-            <MetricCard key={index} {...kpi} />
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.sectionNoPadding}>
-        <Text style={styles.sectionTitle}>Eventos Más Populares</Text>
-        <CarrouselViewMainCard data={mockPopularEvents} />
-        <View style={styles.popularHint}>
-          <Ionicons name="trending-up-outline" size={18} color={GREEN_500} />
-          <Text style={styles.popularHintText}>
-            Basado en tickets vendidos y recaudación.
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={GREEN_500}
+              colors={[GREEN_500]}
+            />
+          }
+        >
+          {/* Page header */}
+          <Text style={styles.pageTitle}>Métricas de Eventos</Text>
+          <Text style={styles.pageSubtitle}>
+            Análisis de rendimiento de tus rifas.
           </Text>
-        </View>
+
+          {/* KPI summary grid — 2 × 2 */}
+          <View style={styles.kpiGrid}>
+            <View style={styles.kpiCard}>
+              <Text style={[styles.kpiValue, { color: GREEN_900 }]}>
+                {totalCreados}
+              </Text>
+              <Text style={styles.kpiLabel}>Creados</Text>
+            </View>
+
+            <View style={styles.kpiCard}>
+              <Text style={[styles.kpiValue, { color: GREEN_500 }]}>
+                {totalActivos}
+              </Text>
+              <Text style={styles.kpiLabel}>Activos</Text>
+            </View>
+
+            <View style={styles.kpiCard}>
+              <Text style={[styles.kpiValue, { color: BLUE_500 }]}>
+                {totalFinalizados}
+              </Text>
+              <Text style={styles.kpiLabel}>Finalizados</Text>
+            </View>
+
+            <View style={styles.kpiCard}>
+              <Text style={[styles.kpiValue, { color: YELLOW_600 }]}>
+                {revenueLabel}
+              </Text>
+              <Text style={styles.kpiLabel}>Recaudación</Text>
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Eventos Activos section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="ellipse" size={8} color={GREEN_500} />
+              <Text style={styles.sectionTitle}>Eventos Activos</Text>
+              <Text style={styles.sectionCount}>{totalActivos}</Text>
+            </View>
+
+            {(eventsActivos ?? []).length === 0 ? (
+              <Text style={styles.emptyText}>No hay eventos activos.</Text>
+            ) : (
+              // Show up to 5 events
+              (eventsActivos ?? []).slice(0, 5).map((event) => (
+                <EventRow key={event.id} event={event} />
+              ))
+            )}
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Eventos Finalizados section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="ellipse" size={8} color={BLUE_500} />
+              <Text style={styles.sectionTitle}>Eventos Finalizados</Text>
+              <Text style={styles.sectionCount}>{totalFinalizados}</Text>
+            </View>
+
+            {(eventsFinalizados ?? []).length === 0 ? (
+              <Text style={styles.emptyText}>No hay eventos finalizados.</Text>
+            ) : (
+              // Show up to 5 events
+              (eventsFinalizados ?? []).slice(0, 5).map((event) => (
+                <EventRow key={event.id} event={event} />
+              ))
+            )}
+          </View>
+        </ScrollView>
       </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.doubleSectionContainer}>
-        <View style={styles.eventListColumn}>
-          <Text style={styles.sectionTitle}>Eventos Creados</Text>
-          {mockCreatedEvents.map((event) => (
-            <EventRow key={event.id} {...event} />
-          ))}
-          <TouchableOpacity style={styles.viewAllButton}>
-            <Text style={styles.viewAllButtonText}>Ver todos activos</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.eventListColumn}>
-          <Text style={styles.sectionTitle}>Eventos Sorteados</Text>
-          {mockRaffledEvents.map((event) => (
-            <EventRow key={event.id} {...event} status="Finalizado" />
-          ))}
-          <TouchableOpacity style={styles.viewAllButton}>
-            <Text style={styles.viewAllButtonText}>Ver historial</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: WHITE,
+  },
   container: {
     flex: 1,
     backgroundColor: WHITE,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
     paddingBottom: 40,
   },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    marginBottom: 20,
-  },
-  mainTitle: {
-    color: GREEN_900,
-    fontSize: Typography.sizes["3xl"],
-    fontWeight: Typography.weights.extrabold,
-  },
-  subtitle: {
-    fontSize: Typography.sizes.base,
-    color: NEUTRAL_700,
-    marginTop: 5,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: NEUTRAL_200,
-    marginVertical: 20,
-    marginHorizontal: 24,
-  },
-  section: {
-    paddingHorizontal: 24,
-  },
-  sectionNoPadding: {
-    paddingLeft: 24,
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: Typography.sizes.xl,
-    fontWeight: Typography.weights.bold,
-    color: GREEN_900,
-    marginBottom: 15,
-  },
 
-  // --- ESTILOS KPI GRID ---
-  kpiGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  metricCard: {
-    width: "30%", // Tres tarjetas por fila
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
-    alignItems: "center",
-    backgroundColor: GREEN_100,
-  },
-  metricIconContainer: {
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 8,
-  },
-  metricValue: {
+  // Page header
+  pageTitle: {
     fontSize: Typography.sizes["2xl"],
     fontWeight: Typography.weights.extrabold,
     color: GREEN_900,
+    marginBottom: 4,
   },
-  metricLabel: {
+  pageSubtitle: {
     fontSize: Typography.sizes.sm,
     color: NEUTRAL_700,
-    textAlign: "center",
-    marginTop: 2,
+    marginBottom: 20,
   },
 
-  // --- ESTILOS EVENTOS POPULARES ---
-  popularHint: {
+  // KPI grid
+  kpiGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 24,
+  },
+  kpiCard: {
+    width: "47%",
+    backgroundColor: NEUTRAL_50,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: NEUTRAL_200,
+  },
+  kpiValue: {
+    fontSize: Typography.sizes["2xl"],
+    fontWeight: Typography.weights.extrabold,
+    marginBottom: 4,
+  },
+  kpiLabel: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_500,
+    fontWeight: Typography.weights.medium,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  // Section layout
+  section: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 24,
-    marginTop: 10,
-    marginBottom: 10,
+    gap: 8,
+    marginBottom: 12,
   },
-  popularHintText: {
+  sectionTitle: {
+    flex: 1,
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+  },
+  sectionCount: {
     fontSize: Typography.sizes.sm,
-    color: GREEN_500,
-    marginLeft: 5,
+    fontWeight: Typography.weights.semibold,
+    color: NEUTRAL_500,
+    backgroundColor: NEUTRAL_100,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
 
-  // --- ESTILOS EVENTOS CREADOS/SORTEADOS (DOUBLE COLUMN) ---
-  doubleSectionContainer: {
-    flexDirection: "column",
-      paddingHorizontal: 12,
-    gap : 20
-  },
-  eventListColumn: {
-    flex: 1,
-    paddingHorizontal: 12,
-  },
+  // Event list rows
   eventRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: NEUTRAL_200,
-  },
-  eventRowIcon: {
-    marginRight: 10,
+    borderBottomColor: NEUTRAL_100,
   },
   eventRowContent: {
     flex: 1,
   },
   eventRowTitle: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.medium,
-    color: GREEN_900,
-  },
-  eventRowDetail: {
     fontSize: Typography.sizes.sm,
-    color: NEUTRAL_700,
-    marginTop: 2,
+    fontWeight: Typography.weights.semibold,
+    color: "#111111",
+    marginBottom: 2,
   },
-  eventRowStatus: {
+  eventRowDate: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_500,
+  },
+
+  // Empty state
+  emptyText: {
     fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.bold,
-    color: RED_500,
+    color: NEUTRAL_500,
+    paddingVertical: 16,
+    textAlign: "center",
   },
-  statusActive: {
-    color: GREEN_500,
-  },
-  viewAllButton: {
-    marginTop: 10,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: GREEN_500,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  viewAllButtonText: {
-    color: GREEN_500,
-    fontWeight: Typography.weights.medium,
+
+  // Divider between sections
+  divider: {
+    height: 1,
+    backgroundColor: NEUTRAL_200,
+    marginBottom: 24,
   },
 });

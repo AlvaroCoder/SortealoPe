@@ -36,7 +36,9 @@ export default function ButtonProfileDrawer({
       <View style={styles.profileInfo}>
         <Text style={styles.profileName}>{userName || "Usuario"}</Text>
 
-              <View style={{ width: 'auto', display: 'flex' , alignItems : 'flex-start'}}>
+        <View
+          style={{ width: "auto", display: "flex", alignItems: "flex-start" }}
+        >
           <Text style={styles.profileRole}>{userRole}</Text>
         </View>
       </View>

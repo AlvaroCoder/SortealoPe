@@ -1,7 +1,10 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
+  Animated,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -14,16 +17,92 @@ import { Colors, Typography } from "../../constants/theme";
 import { useAuthContext } from "../../context/AuthContext";
 import LoadingScreen from "../../screens/LoadingScreen";
 
+const GREEN_900 = Colors.principal.green[900];
+const GREEN_700 = Colors.principal.green[700];
+const GREEN_500 = Colors.principal.green[500];
+const NEUTRAL_300 = Colors.principal.neutral[300];
+const NEUTRAL_600 = Colors.principal.neutral[600];
+const BLUE_600 = Colors.principal.blue[600];
+const WHITE = "#FFFFFF";
+
 const DIGITS = 6;
 const INITIAL_TIME = 15 * 60;
+const SUCCESS_DISPLAY_MS = 3000;
 
+// ── Success screen ────────────────────────────────────────────────────────────
+function SuccessScreen({ email, onDone }) {
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Animate icon in
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 60,
+        friction: 6,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Auto-navigate after SUCCESS_DISPLAY_MS
+    const timer = setTimeout(onDone, SUCCESS_DISPLAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <LinearGradient
+      colors={[GREEN_900, GREEN_500, WHITE]}
+      locations={[0, 0.55, 1]}
+      style={styles.successContainer}
+    >
+      <Animated.View
+        style={[
+          styles.successContent,
+          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+        ]}
+      >
+        {/* Checkmark circle */}
+        <View style={styles.checkCircle}>
+          <Ionicons name="checkmark" size={52} color={GREEN_900} />
+        </View>
+
+        <Text style={styles.successTitle}>¡Felicitaciones!</Text>
+        <Text style={styles.successSubtitle}>
+          Tu cuenta ha sido verificada exitosamente.
+        </Text>
+
+        {/* Email chip */}
+        <View style={styles.emailChip}>
+          <Ionicons name="mail-outline" size={14} color={GREEN_700} />
+          <Text style={styles.emailChipText} numberOfLines={1}>
+            {email}
+          </Text>
+        </View>
+
+        <Text style={styles.successHint}>
+          Redirigiendo al inicio de sesión…
+        </Text>
+      </Animated.View>
+    </LinearGradient>
+  );
+}
+
+// ── Main screen ───────────────────────────────────────────────────────────────
 export default function ValidateCode() {
   const { userData, validateCode, resendCode, loading } = useAuthContext();
   const router = useRouter();
+
   const [code, setCode] = useState(Array(DIGITS).fill(""));
   const inputsRef = useRef([]);
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
   const [canResend, setCanResend] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -61,11 +140,7 @@ export default function ValidateCode() {
     if (result?.error) {
       return Alert.alert("Error", result.error);
     }
-    Alert.alert(
-      "¡Cuenta verificada!",
-      "Tu correo ha sido verificado. Ya puedes iniciar sesión.",
-      [{ text: "Iniciar sesión", onPress: () => router.replace("/(auth)/login") }]
-    );
+    setShowSuccess(true);
   };
 
   const handleResend = async () => {
@@ -82,6 +157,15 @@ export default function ValidateCode() {
 
   const isComplete = code.every((digit) => digit !== "");
 
+  if (showSuccess) {
+    return (
+      <SuccessScreen
+        email={userData?.email}
+        onDone={() => router.replace("/(auth)/login")}
+      />
+    );
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -90,11 +174,9 @@ export default function ValidateCode() {
       {loading && <LoadingScreen />}
       <View style={styles.content}>
         <Text style={styles.title}>Validar Código</Text>
-
         <Text style={styles.subTitle}>
           Ingresa el código que enviamos a tu correo 📩
         </Text>
-
         <Text style={styles.emailText}>{userData?.email}</Text>
 
         <View style={styles.codeContainer}>
@@ -132,9 +214,7 @@ export default function ValidateCode() {
           onPress={canResend ? handleResend : null}
           disabled={!canResend}
         >
-          <Text
-            style={[styles.resendText, !canResend && styles.resendDisabled]}
-          >
+          <Text style={[styles.resendText, !canResend && styles.resendDisabled]}>
             Reenviar código
           </Text>
         </TouchableOpacity>
@@ -144,9 +224,10 @@ export default function ValidateCode() {
 }
 
 const styles = StyleSheet.create({
+  // ── Validate form ────────────────────────────────────────────────────────
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: WHITE,
     justifyContent: "center",
     paddingHorizontal: 24,
   },
@@ -163,7 +244,7 @@ const styles = StyleSheet.create({
   subTitle: {
     textAlign: "center",
     fontSize: Typography.sizes.base,
-    color: Colors.principal.neutral[600],
+    color: NEUTRAL_600,
     marginBottom: 8,
   },
   emailText: {
@@ -181,22 +262,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 10,
     fontSize: Typography.sizes["2xl"],
-    color: Colors.principal.green[900],
-    borderColor: Colors.principal.neutral[300],
-    backgroundColor: "white",
+    color: GREEN_900,
+    borderColor: NEUTRAL_300,
+    backgroundColor: WHITE,
   },
   inputFilled: {
-    borderColor: Colors.principal.green[500],
+    borderColor: GREEN_500,
   },
   timerText: {
     fontSize: 16,
     fontWeight: Typography.weights.medium,
-    color: Colors.principal.green[700],
+    color: GREEN_700,
     marginBottom: 25,
   },
   button: {
     width: "100%",
-    backgroundColor: Colors.principal.green[700],
+    backgroundColor: GREEN_700,
     paddingVertical: 15,
     borderRadius: 12,
     alignItems: "center",
@@ -206,17 +287,79 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   buttonText: {
-    color: "white",
+    color: WHITE,
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.bold,
   },
   resendText: {
-    color: Colors.principal.blue[600],
+    color: BLUE_600,
     textDecorationLine: "underline",
     fontSize: Typography.sizes.base,
     fontWeight: Typography.weights.medium,
   },
   resendDisabled: {
     opacity: 0.4,
+  },
+
+  // ── Success screen ───────────────────────────────────────────────────────
+  successContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
+  },
+  successContent: {
+    alignItems: "center",
+    width: "100%",
+  },
+  checkCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: WHITE,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 28,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  successTitle: {
+    fontSize: Typography.sizes["3xl"],
+    fontWeight: Typography.weights.extrabold,
+    color: WHITE,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  successSubtitle: {
+    fontSize: Typography.sizes.base,
+    color: WHITE,
+    textAlign: "center",
+    opacity: 0.9,
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  emailChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: WHITE,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 32,
+    maxWidth: "90%",
+  },
+  emailChipText: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.semibold,
+    color: GREEN_700,
+  },
+  successHint: {
+    fontSize: Typography.sizes.sm,
+    color: WHITE,
+    opacity: 0.65,
   },
 });

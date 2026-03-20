@@ -1,6 +1,5 @@
-export const BASE_URL = "http://192.168.1.102:8087/api/v1";
+export const BASE_URL = "http://192.168.1.100:8087/api/v1";
 
-// ─── Auth (públicos, sin JWT) ─────────────────────────────────────────────────
 export const ENDPOINTS_LOGIN = {
   LOGIN: `${BASE_URL}/auth/login`,
   REGISTER: `${BASE_URL}/auth/register`,
@@ -11,7 +10,6 @@ export const ENDPOINTS_LOGIN = {
   FORGOT_PASSWORD: `${BASE_URL}/auth/forgot-password`,
 };
 
-// ─── Events (protegidos) ──────────────────────────────────────────────────────
 export const ENDPOINTS_EVENTS = {
   // GET /events?userId=&eventStatus=
   GET_BY_USER: `${BASE_URL}/events`,
@@ -68,7 +66,7 @@ export const ENDPOINTS_USERS = {
   // GET   /users/{id}
   GET_BY_ID: `${BASE_URL}/users/`,
   // PATCH /users/{id}
-  UPDATE: `${BASE_URL}/users/`,
+  UPDATE: `${BASE_URL}/users`,
 };
 
 // ─── Images (protegido) ───────────────────────────────────────────────────────

@@ -64,5 +64,15 @@
 - fetchWithAuth injects `Content-Type: application/json` which breaks multipart boundaries
 - Pattern: `AsyncStorage.getItem("token")` → raw `fetch` with `Authorization` header only, no Content-Type
 
+## Profile Image Upload (profile.jsx)
+- Avatar tap → `ActionSheetIOS` (iOS) or `Alert` (Android) → launchPicker(useCamera)
+- `ImagePicker.launchImageLibraryAsync` / `launchCameraAsync` with `allowsEditing:true, aspect:[1,1]`
+- FormData: `formData.append("file", { uri, type: "image/ext", name: filename })`
+- Chain: `UploadImage(formData)` → `.json()` → extract `url`/`imageUrl`/`image` → `UpdateUser({ image: url })`
+- Local override state `avatarUri` reflects change without refetch
+- User data image field: `userData?.image ?? userData?.profileImage ?? userData?.photo` (check all variants)
+- `expo-image` `<Image>` used for photo display (`contentFit="cover"`, `transition={200}`)
+- Camera badge: `position:absolute, bottom:6, right:6` inside `overflow:"hidden"` avatar ring
+
 ## File References
 - See `patterns.md` for deeper architectural notes (linked from here)

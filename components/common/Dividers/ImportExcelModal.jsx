@@ -1,5 +1,5 @@
-import * as DocumentPicker from "expo-document-picker";
 import { Ionicons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -46,7 +46,10 @@ export default function ImportExcelModal({ visible, onClose, eventId }) {
 
   const handleImport = async () => {
     if (!file) {
-      Alert.alert("Sin archivo", "Por favor selecciona un archivo Excel primero.");
+      Alert.alert(
+        "Sin archivo",
+        "Por favor selecciona un archivo Excel primero.",
+      );
       return;
     }
     if (!eventId) {
@@ -64,13 +67,18 @@ export default function ImportExcelModal({ visible, onClose, eventId }) {
       });
 
       const response = await CreateCollectionsByExcel(eventId, formData);
+      console.log("Respuesta : ", await response.text());
+
       if (response.ok) {
         Alert.alert("Éxito", "Vendedores importados correctamente.", [
           { text: "OK", onPress: handleClose },
         ]);
       } else {
         const body = await response.text();
-        Alert.alert("Error", `No se pudieron importar los vendedores.\n${body}`);
+        Alert.alert(
+          "Error",
+          `No se pudieron importar los vendedores.\n${body}`,
+        );
       }
     } catch (err) {
       Alert.alert("Error", err.message ?? "Error inesperado al importar.");
@@ -98,7 +106,11 @@ export default function ImportExcelModal({ visible, onClose, eventId }) {
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <View style={styles.iconBox}>
-                <Ionicons name="cloud-upload-outline" size={20} color={GREEN_900} />
+                <Ionicons
+                  name="cloud-upload-outline"
+                  size={20}
+                  color={GREEN_900}
+                />
               </View>
               <Text style={styles.title}>Importar desde Excel</Text>
             </View>
@@ -113,7 +125,11 @@ export default function ImportExcelModal({ visible, onClose, eventId }) {
 
           {/* Format hint */}
           <View style={styles.hintBox}>
-            <Ionicons name="information-circle-outline" size={14} color={GREEN_500} />
+            <Ionicons
+              name="information-circle-outline"
+              size={14}
+              color={GREEN_500}
+            />
             <Text style={styles.hintText}>
               El archivo debe tener columnas:{" "}
               <Text style={styles.hintBold}>username</Text>,{" "}
@@ -133,7 +149,10 @@ export default function ImportExcelModal({ visible, onClose, eventId }) {
               color={file ? GREEN_900 : NEUTRAL_500}
             />
             <Text
-              style={[styles.fileButtonText, file && styles.fileButtonTextSelected]}
+              style={[
+                styles.fileButtonText,
+                file && styles.fileButtonTextSelected,
+              ]}
               numberOfLines={1}
             >
               {file ? file.name : "Seleccionar archivo..."}
@@ -170,7 +189,11 @@ export default function ImportExcelModal({ visible, onClose, eventId }) {
                 <ActivityIndicator color={WHITE} size="small" />
               ) : (
                 <>
-                  <Ionicons name="cloud-upload-outline" size={16} color={WHITE} />
+                  <Ionicons
+                    name="cloud-upload-outline"
+                    size={16}
+                    color={WHITE}
+                  />
                   <Text style={styles.importButtonText}>Importar</Text>
                 </>
               )}

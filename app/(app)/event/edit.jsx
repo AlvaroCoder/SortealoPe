@@ -1,7 +1,5 @@
-import { useLocalSearchParams } from "expo-router";
-
-import { useEffect, useState } from "react";
-
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -16,22 +14,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import DatePickerInput from "../../../components/common/Buttons/ButtonDatePicker";
 import ButtonGradiend from "../../../components/common/Buttons/ButtonGradiendt";
 import ButtonUploadImage from "../../../components/common/Buttons/ButtonUploadImage";
-import Title from "../../../components/common/Titles/Title";
 import { ENDPOINTS_EVENTS } from "../../../Connections/APIURLS";
 import { UpdateEvent } from "../../../Connections/events";
 import { Colors, Typography } from "../../../constants/theme";
 import { useFetch } from "../../../lib/useFetch";
-import { useUser } from "../../../lib/useUser";
 import LoadingScreen from "../../../screens/LoadingScreen";
+
+const GREEN_900 = Colors.principal.green[900];
+const NEUTRAL_700 = Colors.principal.neutral[700];
+const NEUTRAL_200 = Colors.principal.neutral[200];
+const NEUTRAL_100 = Colors.principal.neutral[100];
+const NEUTRAL_50 = Colors.principal.neutral[50];
+const WHITE = "#FFFFFF";
 
 const URL_EVENT_ID = ENDPOINTS_EVENTS.GET_BY_ID;
 
 export default function EditEventPage() {
   const params = useLocalSearchParams();
   const eventId = params.id;
-  const { data, loading: loadingData } = useFetch(`${URL_EVENT_ID}${eventId}`);
+  const { data, loading: loadingData } = useFetch(
+    `${URL_EVENT_ID}${eventId}?eventStatus=2`,
+  );
   const [loading, setLoading] = useState(false);
-  const { token } = useUser();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -39,14 +43,16 @@ export default function EditEventPage() {
     location: "",
     date: new Date(),
   });
-
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  // Snapshot of the data as it arrived from the API — used to compute the diff
+  const originalData = useRef(null);
 
   useEffect(() => {
     if (data) {
       setIsLoading(false);
-
       setFormData(data);
+      originalData.current = data;
     }
   }, [data]);
 
@@ -57,22 +63,65 @@ export default function EditEventPage() {
   const handleSave = async () => {
     if (!formData.title || !formData.ticketPrice || !formData.date) {
       Alert.alert("Error", "El título, precio y fecha son obligatorios.");
-
       return;
     }
+
+    // Only diff against the fields the form can actually edit — prevents
+    // sending backend-owned fields (id, status, collections, etc.)
+    const EDITABLE_FIELDS = [
+      "title",
+      "description",
+      "ticketPrice",
+      "date",
+      "place",
+      "image",
+    ];
+    const original = originalData.current ?? {};
+    const changedFields = {};
+
+    for (const key of EDITABLE_FIELDS) {
+      const prev = original[key];
+      const next = formData[key];
+
+      if (key === "date") {
+        // Compare by timestamp to avoid ISO format mismatches ("2025-01-01T00:00:00" vs Date object)
+        const prevTime = prev ? new Date(prev).getTime() : null;
+        const nextTime = next ? new Date(next).getTime() : null;
+        if (prevTime !== nextTime) {
+          changedFields[key] = next instanceof Date ? next.toISOString() : next;
+        }
+      } else {
+        const prevStr = String(prev ?? "");
+        const nextStr = String(next ?? "");
+        if (prevStr !== nextStr) {
+          // ticketPrice must be a number, not a string
+          changedFields[key] = key === "ticketPrice" ? parseFloat(next) : next;
+        }
+      }
+    }
+
+    if (Object.keys(changedFields).length === 0) {
+      Alert.alert("Sin cambios", "No has modificado ningún campo.");
+      return;
+    }
+
     setLoading(true);
-    const response = await UpdateEvent(formData, eventId, token);
-    console.log(await response.json());
+    // UpdateEvent(eventId, data) — note: eventId is first, data second
+    const response = await UpdateEvent(eventId, changedFields);
+
+    if (!response.ok) {
+      setLoading(false);
+      Alert.alert("Error", "No se pudo guardar el evento.");
+      return;
+    }
+
     setLoading(false);
+    router.push("/(drawer)/home/(tab)");
     Alert.alert("Guardado", `El evento "${formData.title}" fue actualizado.`);
   };
 
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Cargando evento…</Text>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -80,21 +129,26 @@ export default function EditEventPage() {
       {(loading || loadingData) && <LoadingScreen />}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
         >
           <View style={styles.header}>
-            <Title>{formData.title}</Title>
+            <Text style={styles.mainTitle} numberOfLines={2}>
+              {formData.title}
+            </Text>
             <Text style={styles.headerSubtitle}>
-              Personaliza los detalles del sorteo
+              Edita los detalles del evento
             </Text>
           </View>
 
+          {/* Información Básica */}
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>Información Básica</Text>
 
@@ -105,10 +159,11 @@ export default function EditEventPage() {
                 value={formData.title}
                 onChangeText={(text) => updateForm("title", text)}
                 placeholder="Ej: Rifa Navideña"
-                placeholderTextColor={Colors.principal.neutral[200]}
+                placeholderTextColor={NEUTRAL_200}
                 returnKeyType="next"
               />
             </View>
+
             <View style={styles.inputWrapper}>
               <Text style={styles.inputLabel}>Descripción</Text>
               <TextInput
@@ -116,12 +171,13 @@ export default function EditEventPage() {
                 value={formData.description}
                 onChangeText={(text) => updateForm("description", text)}
                 placeholder="Breve descripción del evento"
-                placeholderTextColor={Colors.principal.neutral[200]}
+                placeholderTextColor={NEUTRAL_200}
                 multiline
               />
             </View>
           </View>
 
+          {/* Detalles y Fechas */}
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>Detalles y Fechas</Text>
 
@@ -135,7 +191,7 @@ export default function EditEventPage() {
                   updateForm("ticketPrice", text.replace(/[^0-9.]/g, ""))
                 }
                 placeholder="0.00"
-                placeholderTextColor={Colors.principal.neutral[200]}
+                placeholderTextColor={NEUTRAL_200}
               />
             </View>
 
@@ -152,13 +208,12 @@ export default function EditEventPage() {
                 value={formData.place}
                 onChangeText={(text) => updateForm("place", text)}
                 placeholder="Ej: Sede Central"
-                placeholderTextColor={Colors.principal.neutral[200]}
+                placeholderTextColor={NEUTRAL_200}
               />
             </View>
           </View>
 
-          {/* Imagen */}
-
+          {/* Imagen Principal */}
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>Imagen Principal</Text>
             <ButtonUploadImage
@@ -182,178 +237,95 @@ export default function EditEventPage() {
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: WHITE,
   },
   container: {
     flex: 1,
   },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 100,
+  },
+
+  // Header
+  header: {
+    marginBottom: 24,
+  },
+  mainTitle: {
+    fontSize: Typography.sizes["2xl"],
+    fontWeight: Typography.weights.extrabold,
+    color: GREEN_900,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: Typography.sizes.sm,
+    color: NEUTRAL_700,
+  },
+
+  // Section cards
+  sectionCard: {
+    backgroundColor: WHITE,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: NEUTRAL_100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 16,
+  },
+
+  // Inputs
+  inputWrapper: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.semibold,
+    color: NEUTRAL_700,
+    marginBottom: 6,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: NEUTRAL_200,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: Typography.sizes.base,
+    color: "#111111",
+    backgroundColor: NEUTRAL_50,
+  },
+  textArea: {
+    minHeight: 100,
+    textAlignVertical: "top",
+    paddingTop: 12,
+  },
+  priceInput: {
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+  },
+
+  // Bottom button bar
   buttonContainer: {
     position: "absolute",
     bottom: 0,
-    left: 20,
-    right: 20,
-    padding: 10,
-    backgroundColor: "white",
-    zIndex: 100,
-  },
-  scrollContent: {
+    left: 0,
+    right: 0,
     paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  header: {
-    marginBottom: 20,
-    paddingVertical: 10,
-  },
-  simulatedMainTitle: {
-    fontSize: Typography.sizes["2xl"],
-    fontWeight: "800",
-    color: Colors.principal.green[900],
-  },
-  headerSubtitle: {
-    fontSize: Typography.sizes.base,
-    color: Colors.principal.neutral[700],
-    marginTop: 4,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.principal.white,
-  },
-  loadingText: {
-    fontSize: Typography.sizes.lg,
-    color: Colors.principal.green[500],
-    fontWeight: "600",
-    marginTop: 10,
-  },
-  sectionCard: {
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: Colors.principal.neutral[100],
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-  },
-  sectionTitle: {
-    fontSize: Typography.sizes.lg,
-    fontWeight: "700",
-    color: Colors.principal.red[500],
-    marginBottom: 18,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  // --- Estilos de Inputs ---
-  inputWrapper: {
-    marginBottom: 18,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: Colors.principal.green[900],
-    marginBottom: 8,
-  },
-  textInput: {
-    borderWidth: 1.5,
-    borderColor: Colors.principal.neutral[100],
-    borderRadius: 14,
-    padding: 14,
-    fontSize: 16,
-    color: Colors.principal.green[900],
-    backgroundColor: "#F8FAFC",
-  },
-  textArea: {
-    minHeight: 110,
-    textAlignVertical: "top",
-  },
-  priceInput: {
-    fontWeight: "bold",
-    color: Colors.principal.green[500],
-  },
-  simulatedPicker: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: Colors.principal.neutral[100],
-    borderRadius: 14,
-    padding: 14,
-    backgroundColor: "#F8FAFC",
-  },
-  // --- ButtonUploadImage Rediseñado ---
-  customUploadButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.principal.white,
-    borderWidth: 2,
-    borderColor: Colors.principal.neutral[200],
-    borderStyle: "dashed",
-    borderRadius: 16,
-    padding: 16,
-  },
-  customUploadButtonActive: {
-    borderColor: Colors.principal.green[500],
-    backgroundColor: Colors.principal.green[50],
-    borderStyle: "solid",
-  },
-  uploadIconContainer: {
-    width: 54,
-    height: 54,
-    borderRadius: 12,
-    backgroundColor: "#F1F5F9",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  uploadTextContainer: {
-    flex: 1,
-  },
-  uploadTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: Colors.principal.neutral[700],
-    marginBottom: 2,
-  },
-  uploadSubtitle: {
-    fontSize: 12,
-    color: Colors.principal.neutral[700],
-    opacity: 0.7,
-  },
-  imageDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.principal.green[500],
-    position: "absolute",
-    top: 10,
-    right: 10,
-  },
-  // --- Footer ---
-  footer: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: Colors.principal.white,
+    paddingVertical: 12,
+    backgroundColor: WHITE,
     borderTopWidth: 1,
-    borderTopColor: Colors.principal.neutral[100],
-  },
-  simulatedGradient: {
-    backgroundColor: Colors.principal.green[900],
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: "center",
-    elevation: 5,
-    shadowColor: Colors.principal.green[900],
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  simulatedGradientText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "700",
+    borderTopColor: NEUTRAL_200,
   },
 });

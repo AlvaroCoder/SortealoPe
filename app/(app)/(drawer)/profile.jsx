@@ -1,6 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
+  ActionSheetIOS,
+  ActivityIndicator,
+  Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,11 +16,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ENDPOINTS_USERS } from "../../../Connections/APIURLS";
+import { UploadImage } from "../../../Connections/images";
+import { UpdateUser } from "../../../Connections/users";
 import { Colors, Typography } from "../../../constants/theme";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useRaffleContext } from "../../../context/RaffleContext";
 import { useFetch } from "../../../lib/useFetch";
 import LoadingScreen from "../../../screens/LoadingScreen";
+
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_700 = Colors.principal.green[700];
 const GREEN_500 = Colors.principal.green[500];
@@ -75,12 +85,16 @@ export default function Perfil() {
     `${USER_URL}${userStorage?.userId}`,
   );
 
+  console.log("Data de usuario: ", userData);
+
+  // Local avatar URI — overrides the server value after a successful upload
+  const [avatarUri, setAvatarUri] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
   const displayName =
     userData?.firstName && userData?.lastName
       ? `${userData.firstName} ${userData.lastName}`
       : userData?.username || userData?.email || "Usuario";
-
-  console.log(displayName);
 
   const initials = (() => {
     if (userData?.firstName && userData?.lastName) {
@@ -91,12 +105,140 @@ export default function Perfil() {
     return "?";
   })();
 
+  // Resolve the image to display: local override > server value > null
+  const profileImageSource =
+    avatarUri ??
+    userData?.image ??
+    userData?.profileImage ??
+    userData?.photo ??
+    null;
+
   const roleConfig = ROLE_CONFIG[userRole] ?? ROLE_CONFIG.Comprador;
 
   const handleLogout = async () => {
     await signout();
     router.replace("/(auth)/login");
   };
+
+  // ── Image picker helpers ──────────────────────────────────────────────────
+
+  const launchPicker = async (useCamera) => {
+    // Request the appropriate permission
+    if (useCamera) {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permisos necesarios",
+          "Necesitamos acceso a tu cámara para tomar una foto.",
+        );
+        return;
+      }
+    } else {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permisos necesarios",
+          "Necesitamos acceso a tu galería para seleccionar una foto.",
+        );
+        return;
+      }
+    }
+
+    const pickerOptions = {
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], // square crop for avatars
+      quality: 0.85,
+    };
+
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync(pickerOptions)
+      : await ImagePicker.launchImageLibraryAsync(pickerOptions);
+
+    if (result.canceled || !result.assets?.length) return;
+
+    const asset = result.assets[0];
+
+    await uploadProfileImage(asset);
+  };
+
+  const uploadProfileImage = async (asset) => {
+    setUploading(true);
+    try {
+      // Build multipart FormData — same pattern as event image upload
+      const extension = asset.uri.split(".").pop() ?? "jpg";
+      const formData = new FormData();
+      formData.append("file", {
+        uri: asset.uri,
+        type: `image/${extension}`,
+        name: asset.uri.split("/").pop() ?? `avatar.${extension}`,
+      });
+
+      // Step 1: upload to image service (uses AsyncStorage internally, no fetchWithAuth)
+      const uploadRes = await UploadImage(formData);
+      if (!uploadRes.ok) {
+        Alert.alert("Error", "No se pudo subir la imagen. Intenta de nuevo.");
+        return;
+      }
+
+      const uploadData = await uploadRes.json();
+      // Backend may return the URL as `url`, `imageUrl`, or `image`
+      const imageUrl =
+        uploadData?.url ?? uploadData?.imageUrl ?? uploadData?.image;
+
+      if (!imageUrl) {
+        Alert.alert("Error", "No se recibió la URL de la imagen subida.");
+        return;
+      }
+
+      // Step 2: persist the URL in the user record (PATCH /users)
+      const updateRes = await UpdateUser({ image: imageUrl });
+      if (!updateRes.ok) {
+        Alert.alert(
+          "Error",
+          "La imagen fue subida pero no se pudo guardar en tu perfil. Intenta de nuevo.",
+        );
+        return;
+      }
+
+      // Step 3: reflect the change locally without refetching
+      setAvatarUri(imageUrl);
+      Alert.alert("Listo", "Foto de perfil actualizada.");
+    } catch (err) {
+      console.error("uploadProfileImage error:", err);
+      Alert.alert("Error", "Ocurrió un error inesperado. Intenta de nuevo.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAvatarPress = () => {
+    if (uploading) return;
+
+    if (Platform.OS === "ios") {
+      // Native action sheet on iOS
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ["Cancelar", "Tomar foto", "Elegir de galería"],
+          cancelButtonIndex: 0,
+        },
+        (index) => {
+          if (index === 1) launchPicker(true);
+          else if (index === 2) launchPicker(false);
+        },
+      );
+    } else {
+      // Cross-platform Alert-based picker on Android
+      Alert.alert("Foto de perfil", "Elige una opción", [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Tomar foto", onPress: () => launchPicker(true) },
+        { text: "Elegir de galería", onPress: () => launchPicker(false) },
+      ]);
+    }
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (loading || loadingFetch) return <LoadingScreen />;
 
@@ -111,11 +253,39 @@ export default function Perfil() {
           {/* Decorative circle */}
           <View style={styles.bannerCircle} />
 
-          <View style={styles.avatarRing}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarInitials}>{initials}</Text>
+          {/* Tappable avatar with camera badge */}
+          <TouchableOpacity
+            style={styles.avatarRing}
+            onPress={handleAvatarPress}
+            activeOpacity={0.85}
+            disabled={uploading}
+          >
+            {/* Photo or initials */}
+            {profileImageSource ? (
+              <Image
+                source={{ uri: profileImageSource }}
+                style={styles.avatarImage}
+                contentFit="cover"
+                transition={200}
+              />
+            ) : (
+              <View style={styles.avatar}>
+                <Text style={styles.avatarInitials}>{initials}</Text>
+              </View>
+            )}
+
+            {/* Uploading spinner overlay */}
+            {uploading && (
+              <View style={styles.avatarOverlay}>
+                <ActivityIndicator size="small" color={WHITE} />
+              </View>
+            )}
+
+            {/* Camera badge — bottom-right corner of the ring */}
+            <View style={styles.cameraBadge}>
+              <Ionicons name="camera" size={12} color={WHITE} />
             </View>
-          </View>
+          </TouchableOpacity>
 
           <Text style={styles.displayName}>{displayName}</Text>
 
@@ -227,14 +397,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 14,
+    // Needed so the camera badge and overlay clip correctly
+    overflow: "hidden",
   },
   avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 102, // fills the ring (108 - 2*3 border)
+    height: 102,
+    borderRadius: 51,
     backgroundColor: GREEN_500,
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatarImage: {
+    width: 102,
+    height: 102,
+    borderRadius: 51,
   },
   avatarInitials: {
     fontSize: Typography.sizes["3xl"],
@@ -242,6 +419,29 @@ const styles = StyleSheet.create({
     color: GREEN_900,
     letterSpacing: 2,
   },
+  // Semi-transparent overlay shown while uploading
+  avatarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  // Small camera icon badge at the bottom-right of the avatar ring
+  cameraBadge: {
+    position: "absolute",
+    bottom: 6,
+    right: 6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: GREEN_900,
+    borderWidth: 2,
+    borderColor: WHITE,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 500,
+  },
+
   displayName: {
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.extrabold,
