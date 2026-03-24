@@ -16,8 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ENDPOINTS_USERS } from "../../../Connections/APIURLS";
-import { UploadImage } from "../../../Connections/images";
-import { UpdateUser } from "../../../Connections/users";
+import { UploadUserImage } from "../../../Connections/images";
 import { Colors, Typography } from "../../../constants/theme";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useRaffleContext } from "../../../context/RaffleContext";
@@ -82,10 +81,8 @@ export default function Perfil() {
   const router = useRouter();
 
   const { data: userData, loading: loadingFetch } = useFetch(
-    `${USER_URL}${userStorage?.userId}`,
+    userStorage?.userId ? `${USER_URL}${userStorage.userId}` : null,
   );
-
-  console.log("Data de usuario: ", userData);
 
   // Local avatar URI — overrides the server value after a successful upload
   const [avatarUri, setAvatarUri] = useState(null);
@@ -105,13 +102,8 @@ export default function Perfil() {
     return "?";
   })();
 
-  // Resolve the image to display: local override > server value > null
-  const profileImageSource =
-    avatarUri ??
-    userData?.image ??
-    userData?.profileImage ??
-    userData?.photo ??
-    null;
+  // El campo de foto en UserDto es "photo" (Cloudinary URL)
+  const profileImageSource = avatarUri ?? userData?.photo ?? null;
 
   const roleConfig = ROLE_CONFIG[userRole] ?? ROLE_CONFIG.Comprador;
 
@@ -166,47 +158,34 @@ export default function Perfil() {
   const uploadProfileImage = async (asset) => {
     setUploading(true);
     try {
-      // Build multipart FormData — same pattern as event image upload
       const extension = asset.uri.split(".").pop() ?? "jpg";
       const formData = new FormData();
+      // POST /images/user requiere "file" + "userId"
       formData.append("file", {
         uri: asset.uri,
         type: `image/${extension}`,
         name: asset.uri.split("/").pop() ?? `avatar.${extension}`,
       });
+      formData.append("userId", String(userStorage?.userId));
 
-      // Step 1: upload to image service (uses AsyncStorage internally, no fetchWithAuth)
-      const uploadRes = await UploadImage(formData);
-      if (!uploadRes.ok) {
-        Alert.alert("Error", "No se pudo subir la imagen. Intenta de nuevo.");
+      // Una sola llamada: sube la imagen Y actualiza user.photo en el backend
+      const res = await UploadUserImage(formData);
+      if (!res.ok) {
+        Alert.alert("Error", "No se pudo actualizar la foto. Intenta de nuevo.");
         return;
       }
 
-      const uploadData = await uploadRes.json();
-      // Backend may return the URL as `url`, `imageUrl`, or `image`
-      const imageUrl =
-        uploadData?.url ?? uploadData?.imageUrl ?? uploadData?.image;
+      const resJson = await res.json();
+      const imageUrl = resJson?.url;
 
       if (!imageUrl) {
-        Alert.alert("Error", "No se recibió la URL de la imagen subida.");
+        Alert.alert("Error", "No se recibió la URL de la imagen.");
         return;
       }
 
-      // Step 2: persist the URL in the user record (PATCH /users)
-      const updateRes = await UpdateUser({ image: imageUrl });
-      if (!updateRes.ok) {
-        Alert.alert(
-          "Error",
-          "La imagen fue subida pero no se pudo guardar en tu perfil. Intenta de nuevo.",
-        );
-        return;
-      }
-
-      // Step 3: reflect the change locally without refetching
       setAvatarUri(imageUrl);
       Alert.alert("Listo", "Foto de perfil actualizada.");
-    } catch (err) {
-      console.error("uploadProfileImage error:", err);
+    } catch {
       Alert.alert("Error", "Ocurrió un error inesperado. Intenta de nuevo.");
     } finally {
       setUploading(false);
@@ -307,33 +286,36 @@ export default function Perfil() {
 
         {/* ── Content cards ────────────────────────────────── */}
         <View style={styles.content}>
-          {/* Contact info */}
-          <ProfileSection title="Contacto">
-            {userData?.email && (
+          {/* Personal info */}
+          <ProfileSection title="Datos personales">
+            {(userData?.firstName || userData?.lastName) && (
               <ProfileRow
-                icon="mail-outline"
-                label="Correo electrónico"
-                value={userData.email}
+                icon="person-outline"
+                label="Nombre completo"
+                value={`${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`.trim()}
               />
             )}
-            {userData?.phone ? (
-              <ProfileRow
-                icon="call-outline"
-                label="Teléfono"
-                value={userData.phone}
-                last
-              />
-            ) : (
-              userData?.email && <View style={styles.rowLast} />
-            )}
+            <ProfileRow
+              icon="call-outline"
+              label="Teléfono"
+              value={userData?.phone || "No registrado"}
+              last
+            />
           </ProfileSection>
 
           {/* Account info */}
           <ProfileSection title="Cuenta">
+            {userData?.username && (
+              <ProfileRow
+                icon="at-outline"
+                label="Usuario"
+                value={`@${userData.username}`}
+              />
+            )}
             <ProfileRow
-              icon="notifications-outline"
-              label="Notificaciones"
-              value="Activadas"
+              icon="mail-outline"
+              label="Correo electrónico"
+              value={userData?.email || "—"}
               last
             />
           </ProfileSection>

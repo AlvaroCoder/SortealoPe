@@ -62,8 +62,8 @@ export default function DrawerContent({ navigation }) {
     return "?";
   })();
 
-  const profileImage =
-    userData?.image ?? userData?.profileImage ?? userData?.photo ?? null;
+  // El campo de foto en UserDto es "photo" (URL Cloudinary)
+  const profileImage = userData?.photo ?? null;
 
   const navigate = (route) => {
     router.push(route);

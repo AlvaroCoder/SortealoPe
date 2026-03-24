@@ -12,8 +12,20 @@ export async function UploadImage(formData) {
     method: "POST",
     headers: {
       Authorization: token ? `Bearer ${token}` : undefined,
-      // Content-Type is intentionally omitted so fetch sets the
-      // correct multipart/form-data boundary automatically.
+      // Content-Type omitido: fetch establece el boundary de multipart automáticamente
+    },
+    body: formData,
+  });
+}
+
+// POST /images/user — sube foto de perfil y actualiza user.photo en una sola llamada
+// formData debe incluir: "file" (imagen) + "userId" (ID del usuario)
+export async function UploadUserImage(formData) {
+  const token = await AsyncStorage.getItem("token");
+  return fetch(ENDPOINTS_IMAGES.UPLOAD_USER, {
+    method: "POST",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : undefined,
     },
     body: formData,
   });

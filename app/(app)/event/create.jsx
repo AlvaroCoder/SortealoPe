@@ -71,50 +71,73 @@ export default function CreateEventStepper() {
   };
 
   const handleSubmit = async () => {
+    if (!formData.image) {
+      Alert.alert(
+        "Imagen requerida",
+        "Debes subir una imagen de banner para el evento.",
+      );
+      return;
+    }
+
     setLoading(true);
-    const newDataFormData = {
-      ...formData,
-      hostId: userData?.userId || null,
-      date: formData.date ? formatterDateToISO(formData.date) : null,
-    };
 
     try {
-      if (formData?.image) {
-        const formDataMultipart = new FormData();
-        formDataMultipart.append("file", formData.image);
+      // 1. Subir imagen primero
+      const multipart = new FormData();
+      multipart.append("file", formData.image); // { uri, type, name }
 
-        const responseUpload = await UploadImage(formDataMultipart);
-        const responseJSON = await responseUpload.json();
-
-        if (responseJSON?.status > 200) {
-          Alert.alert(
-            "Error al subir la imagen",
-            "No se pudo subir la imagen. Inténtalo de nuevo.",
-          );
-          return;
-        }
-        console.log("Imagen >> ", responseJSON);
-
-        const imageUrl = responseJSON?.url;
-
-        newDataFormData.image = imageUrl || "";
+      const uploadRes = await UploadImage(multipart);
+      if (!uploadRes.ok) {
+        Alert.alert("Error", "No se pudo subir la imagen. Inténtalo de nuevo.");
+        return;
       }
 
-      const response = await CreateEvent(newDataFormData);
+      const uploadJson = await uploadRes.json();
+      const imageUrl = uploadJson?.url;
+
+      console.log("Respuesta imagen : ", imageUrl);
+
+      if (!imageUrl) {
+        Alert.alert("Error", "No se recibió la URL de la imagen subida.");
+        return;
+      }
+
+      // 2. Construir payload con tipos correctos
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        date: formatterDateToISO(formData.date),
+        place: formData.place,
+        ticketsPerCollection: Number(formData.ticketsPerCollection),
+        collectionsQuantity: 1, // siempre 1
+        ticketPrice: parseFloat(formData.ticketPrice),
+        packId: Number(formData.packId),
+        image: imageUrl,
+        hostId: userData?.userId,
+        eventCategoryId: Number(formData.eventCategoryId),
+        status: 1, // siempre 1
+      };
+
+      console.log("Datos enviados : ", payload);
+
+      // 3. Crear evento
+      const response = await CreateEvent(payload);
 
       if (response.ok) {
         Alert.alert(
-          "Evento Creado",
-          `El evento ha sido creado con los datos del formulario. `,
+          "Evento creado",
+          "Tu evento fue enviado y está pendiente de aprobación.",
+          [{ text: "OK", onPress: () => router.replace("/(app)/(drawer)") }],
         );
-
-        router.push("/(app)/(drawer)");
       } else {
-        Alert.alert("Error ", `El evento no se creo`);
+        const errJson = await response.json().catch(() => null);
+        Alert.alert(
+          "Error",
+          errJson?.message || "No se pudo crear el evento. Inténtalo de nuevo.",
+        );
       }
-    } catch (error) {
-      console.error("Error al crear el evento:", error);
-      Alert.alert("Error", "No se pudo crear el evento. Inténtalo de nuevo.");
+    } catch {
+      Alert.alert("Error", "Ocurrió un error inesperado. Inténtalo de nuevo.");
     } finally {
       setLoading(false);
     }

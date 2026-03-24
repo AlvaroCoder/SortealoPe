@@ -2,44 +2,47 @@ import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { ENDPOINTS_EVENTS } from "../../../../../Connections/APIURLS";
 import { useAuthContext } from "../../../../../context/AuthContext";
-import { useFetch } from "../../../../../lib/useFetch";
+import { usePaginatedFetch } from "../../../../../lib/usePaginatedFetch";
 import LoadingScreen from "../../../../../screens/LoadingScreen";
 import ScreenHistoryTickets from "../../../../../screens/ScreenHistoryTickets";
 
-const URL_GET_EVENTS = ENDPOINTS_EVENTS.GET_BY_USER;
+const BASE_URL = ENDPOINTS_EVENTS.GET_BY_USER;
 
 export default function History() {
   const { userData, loading: loadingAuth } = useAuthContext();
   const [refreshing, setRefreshing] = useState(false);
 
-  const shouldFetch = userData?.userId && !loadingAuth;
+  const shouldFetch = !!userData?.userId && !loadingAuth;
 
-  const { loading: loadingEspera, data: dataEspera, refetch: refetchEspera } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}?userId=${userData?.userId}&eventStatus=1` : null,
-  );
-  const { loading: loadingCreada, data: dataCreada, refetch: refetchCreada } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}?userId=${userData?.userId}&eventStatus=2` : null,
-  );
-  const { loading: loadingGanada, data: dataGanada, refetch: refetchGanada } = useFetch(
-    shouldFetch ? `${URL_GET_EVENTS}?userId=${userData?.userId}&eventStatus=3` : null,
+  const espera = usePaginatedFetch(
+    shouldFetch ? `${BASE_URL}?role=HOST&eventStatus=1` : null,
   );
 
-  // Stop the refresh indicator once all fetches finish
+  const creada = usePaginatedFetch(
+    shouldFetch ? `${BASE_URL}?role=HOST&eventStatus=2` : null,
+  );
+  const ganada = usePaginatedFetch(
+    shouldFetch ? `${BASE_URL}?role=HOST&eventStatus=3` : null,
+  );
+
+  // Desactiva el indicador de refresh cuando los tres terminan de cargar
   useEffect(() => {
-    if (refreshing && !loadingEspera && !loadingCreada && !loadingGanada) {
+    if (refreshing && !espera.loading && !creada.loading && !ganada.loading) {
       setRefreshing(false);
     }
-  }, [refreshing, loadingEspera, loadingCreada, loadingGanada]);
+  }, [refreshing, espera.loading, creada.loading, ganada.loading]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    refetchEspera();
-    refetchCreada();
-    refetchGanada();
+    espera.refresh();
+    creada.refresh();
+    ganada.refresh();
   };
 
+  // Muestra LoadingScreen solo durante la carga inicial (antes del primer fetch)
   const isInitialLoading =
-    !refreshing && (loadingAuth || loadingEspera || loadingCreada || loadingGanada);
+    !refreshing &&
+    (loadingAuth || !espera.fetched || !creada.fetched || !ganada.fetched);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -47,9 +50,32 @@ export default function History() {
         <LoadingScreen />
       ) : (
         <ScreenHistoryTickets
-          dataEspera={dataEspera}
-          dataCreada={dataCreada}
-          dataGanada={dataGanada}
+          tabs={[
+            {
+              label: "Espera",
+              items: espera.items,
+              loading: espera.loading,
+              hasMore: espera.hasMore,
+              total: espera.totalElements,
+              loadMore: espera.loadMore,
+            },
+            {
+              label: "Creada",
+              items: creada.items,
+              loading: creada.loading,
+              hasMore: creada.hasMore,
+              total: creada.totalElements,
+              loadMore: creada.loadMore,
+            },
+            {
+              label: "Sorteados",
+              items: ganada.items,
+              loading: ganada.loading,
+              hasMore: ganada.hasMore,
+              total: ganada.totalElements,
+              loadMore: ganada.loadMore,
+            },
+          ]}
           onRefresh={handleRefresh}
           refreshing={refreshing}
         />

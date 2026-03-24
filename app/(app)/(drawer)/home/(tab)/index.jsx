@@ -14,15 +14,14 @@ const YELLOW_700 = Colors.principal.yellow[700];
 
 export default function Home() {
   const router = useRouter();
-  const { userData: authData } = useAuthContext();
+  const { userData: authData, accessToken } = useAuthContext();
   const [dismissed, setDismissed] = useState(false);
+  console.log(accessToken);
 
   // Pre-load user profile to detect incomplete fields
   const { data: userData, refetch } = useFetch(
     authData?.userId ? `${ENDPOINTS_USERS.GET_BY_ID}${authData.userId}` : null,
   );
-
-  console.log("userData ", userData);
 
   // Re-fetch every time this screen gains focus so the banner disappears
   // immediately after the user completes their profile

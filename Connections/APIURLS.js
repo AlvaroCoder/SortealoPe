@@ -71,8 +71,10 @@ export const ENDPOINTS_USERS = {
 
 // ─── Images (protegido) ───────────────────────────────────────────────────────
 export const ENDPOINTS_IMAGES = {
-  // POST /images  (multipart/form-data)
+  // POST /images  (multipart/form-data, field: "file") → ImageDto { url }
   UPLOAD: `${BASE_URL}/images`,
+  // POST /images/user  (multipart: "file" + "userId") → ImageDto { url }, actualiza user.photo
+  UPLOAD_USER: `${BASE_URL}/images/user`,
 };
 
 // ─── Admin (protegidos) ───────────────────────────────────────────────────────

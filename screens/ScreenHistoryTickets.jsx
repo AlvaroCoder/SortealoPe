@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   RefreshControl,
@@ -10,27 +11,37 @@ import {
   View,
 } from "react-native";
 import EventListItem from "../components/common/Card/EventListItem";
-import { Colors } from "../constants/theme";
+import { Colors, Typography } from "../constants/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const TABS = [
-  { id: 1, name: "Espera" },
-  { id: 2, name: "Creada" },
-  { id: 3, name: "Sorteados" },
-];
+const GREEN_900 = Colors.principal.green[900];
+const GREEN_50 = Colors.principal.green[50];
+const NEUTRAL_200 = Colors.principal.neutral[200];
+const NEUTRAL_400 = Colors.principal.neutral[400];
+const NEUTRAL_500 = Colors.principal.neutral[500];
 
+/**
+ * @param {{
+ *   tabs: Array<{
+ *     label: string,
+ *     items: any[],
+ *     loading: boolean,
+ *     hasMore: boolean,
+ *     total: number,
+ *     loadMore: () => void,
+ *   }>,
+ *   onRefresh: () => void,
+ *   refreshing: boolean,
+ * }} props
+ */
 export default function ScreenHistoryTickets({
-  dataEspera = [],
-  dataCreada = [],
-  dataGanada = [],
+  tabs = [],
   onRefresh,
   refreshing = false,
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef(null);
-
-  const allData = [dataEspera, dataCreada, dataGanada];
 
   const goToTab = (index) => {
     setCurrentIndex(index);
@@ -44,19 +55,41 @@ export default function ScreenHistoryTickets({
 
   return (
     <View style={styles.container}>
-      {/* ── Tabs ─────────────────────────────────────────────── */}
+      {/* ── Tab bar ─────────────────────────────────────────────── */}
       <View style={styles.tabsWrapper}>
-        {TABS.map((tab, index) => {
+        {tabs.map((tab, index) => {
           const isActive = index === currentIndex;
           return (
             <TouchableOpacity
-              key={tab.id}
-              style={[styles.tabButton, isActive && styles.activeTab]}
+              key={tab.label}
+              style={styles.tabButton}
               onPress={() => goToTab(index)}
+              activeOpacity={0.7}
             >
-              <Text style={[styles.tabText, isActive && styles.activeTabText]}>
-                {tab.name}
-              </Text>
+              <View style={styles.tabLabelRow}>
+                <Text
+                  style={[styles.tabText, isActive && styles.activeTabText]}
+                >
+                  {tab.label}
+                </Text>
+                {tab.total > 0 && (
+                  <View
+                    style={[
+                      styles.countBadge,
+                      isActive && styles.countBadgeActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.countBadgeText,
+                        isActive && styles.countBadgeTextActive,
+                      ]}
+                    >
+                      {tab.total > 99 ? "99+" : tab.total}
+                    </Text>
+                  </View>
+                )}
+              </View>
               {isActive && <View style={styles.activeIndicator} />}
             </TouchableOpacity>
           );
@@ -73,31 +106,63 @@ export default function ScreenHistoryTickets({
         scrollEventThrottle={16}
         style={styles.pager}
       >
-        {allData.map((data, pageIndex) => (
-          <View key={pageIndex} style={styles.page}>
+        {tabs.map((tab, pageIndex) => (
+          <View key={tab.label} style={styles.page}>
             <FlatList
-              data={data}
-              keyExtractor={(_, i) => i.toString()}
+              data={tab.items}
+              keyExtractor={(item, i) =>
+                item?.id != null ? String(item.id) : String(i)
+              }
               renderItem={({ item }) => (
                 <EventListItem
                   event={item}
                   compact={pageIndex === 0}
-                  eventStatus={TABS[pageIndex].id}
+                  eventStatus={pageIndex + 1}
                 />
               )}
               contentContainerStyle={styles.listContent}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>No hay eventos en este estado</Text>
-              }
+              // Pull-to-refresh solo en el tab visible
               refreshControl={
-                onRefresh && pageIndex === currentIndex ? (
+                pageIndex === currentIndex ? (
                   <RefreshControl
                     refreshing={refreshing}
                     onRefresh={onRefresh}
-                    colors={[Colors.principal.green[900]]}
-                    tintColor={Colors.principal.green[900]}
+                    colors={[GREEN_900]}
+                    tintColor={GREEN_900}
                   />
                 ) : undefined
+              }
+              // Infinite scroll
+              onEndReached={tab.loadMore}
+              onEndReachedThreshold={0.3}
+              // Spinner de "cargando más" al fondo
+              ListFooterComponent={
+                tab.loading && tab.items.length > 0 ? (
+                  <View style={styles.footerLoader}>
+                    <ActivityIndicator size="small" color={GREEN_900} />
+                    <Text style={styles.footerLoaderText}>
+                      Cargando más eventos…
+                    </Text>
+                  </View>
+                ) : tab.hasMore ? (
+                  // Espacio vacío cuando hay más pero no está cargando aún
+                  <View style={styles.footerSpacer} />
+                ) : tab.items.length > 0 ? (
+                  <Text style={styles.footerEnd}>
+                    · {tab.total}{" "}
+                    {tab.total === 1 ? "evento" : "eventos"} en total ·
+                  </Text>
+                ) : null
+              }
+              ListEmptyComponent={
+                !tab.loading ? (
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyIcon}>📋</Text>
+                    <Text style={styles.emptyText}>
+                      No hay eventos en este estado
+                    </Text>
+                  </View>
+                ) : null
               }
             />
           </View>
@@ -113,30 +178,51 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 
-  // ── Tabs ────────────────────────────────────────────────────
+  // ── Tab bar ──────────────────────────────────────────────────
   tabsWrapper: {
     flexDirection: "row",
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 0,
-    gap: 8,
   },
   tabButton: {
     flex: 1,
     alignItems: "center",
     paddingVertical: 10,
-    borderRadius: 0,
     position: "relative",
   },
-  activeTab: {},
+  tabLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   tabText: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "600",
+    fontSize: Typography.sizes.sm,
+    color: NEUTRAL_500,
+    fontWeight: Typography.weights.semibold,
   },
   activeTabText: {
-    color: "#0f3d2e",
-    fontWeight: "700",
+    color: GREEN_900,
+    fontWeight: Typography.weights.bold,
+  },
+  countBadge: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: NEUTRAL_200,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  countBadgeActive: {
+    backgroundColor: GREEN_50,
+  },
+  countBadgeText: {
+    fontSize: 10,
+    fontWeight: Typography.weights.bold,
+    color: NEUTRAL_400,
+  },
+  countBadgeTextActive: {
+    color: GREEN_900,
   },
   activeIndicator: {
     position: "absolute",
@@ -145,7 +231,7 @@ const styles = StyleSheet.create({
     right: "10%",
     height: 3,
     borderRadius: 2,
-    backgroundColor: "#0f3d2e",
+    backgroundColor: GREEN_900,
   },
 
   // ── Pager ───────────────────────────────────────────────────
@@ -153,7 +239,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 2,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: NEUTRAL_200,
   },
   page: {
     width: SCREEN_WIDTH,
@@ -162,11 +248,46 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 20,
+    paddingBottom: 24,
+    flexGrow: 1,
+  },
+
+  // ── Footer ───────────────────────────────────────────────────
+  footerLoader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 16,
+  },
+  footerLoaderText: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_400,
+  },
+  footerSpacer: {
+    height: 8,
+  },
+  footerEnd: {
+    textAlign: "center",
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_400,
+    paddingVertical: 16,
+  },
+
+  // ── Empty state ──────────────────────────────────────────────
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 60,
+  },
+  emptyIcon: {
+    fontSize: 36,
+    marginBottom: 12,
   },
   emptyText: {
+    fontSize: Typography.sizes.base,
+    color: NEUTRAL_400,
     textAlign: "center",
-    marginTop: 40,
-    color: "#6B7280",
   },
 });

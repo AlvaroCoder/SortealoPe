@@ -17,8 +17,6 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
   };
 
   const handleFinalSubmit = () => {
-    console.log("Formulario", form);
-
     if (onSubmit) onSubmit();
   };
 
