@@ -2,16 +2,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchWithAuth } from "../../lib/fetchWithAuth";
 import { ENDPOINTS_COLLECTIONS } from "../APIURLS";
 
-const { GET_BY_EVENT, GET_BY_ID, CREATE, CREATE_EXCEL } = ENDPOINTS_COLLECTIONS;
+const { GET_BY_EVENT, GET_BY_ID, CREATE, CREATE_EXCEL, CONFIRM } =
+  ENDPOINTS_COLLECTIONS;
 
 // GET /collections?eventId={eventId}
 export async function GetCollectionsByEvent(eventId) {
   return fetchWithAuth(`${GET_BY_EVENT}?eventId=${eventId}`);
 }
 
-// GET /collections/{collectionId}
-export async function GetCollectionById(collectionId) {
-  return fetchWithAuth(`${GET_BY_ID}${collectionId}`);
+// GET /collections/{collectionId}?eventId=
+export async function GetCollectionById(collectionId, eventId) {
+  return fetchWithAuth(`${GET_BY_ID}${collectionId}?eventId=${eventId}`);
 }
 
 // POST /collections/create
@@ -20,6 +21,12 @@ export async function CreateCollection(data) {
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+// PATCH /collections/confirm/{code}
+// Asigna la colección al vendedor autenticado (el JWT identifica al vendedor)
+export async function ConfirmCollection(code) {
+  return fetchWithAuth(`${CONFIRM}${code}`, { method: "POST" });
 }
 
 // POST /collections/create/excel?eventId={eventId}

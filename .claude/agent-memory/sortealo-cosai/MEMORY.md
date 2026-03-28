@@ -19,9 +19,17 @@
 - `isBooked` state flag tracks whether a rollback is needed on cancel
 
 ## Navigation: tickets stack
-- `app/(app)/tickets/_layout.jsx` — Stack with two screens: `index` and `sell/[id]`
-- Both screens use `HeaderBackNav` (declared in layout, no header needed in screen)
-- No `_layout.jsx` needed inside `sell/` folder
+- `app/(app)/tickets/_layout.jsx` — Stack with 4 screens: `index`, `sell/[id]`, `vendedor/sell/[id]`, `claim`
+- All screens use `HeaderBackNav` declared in layout; no header needed in the screen files
+- `claim` screen: buyer deep-link landing — reads `reservationCode` from `useLocalSearchParams()`, shows QR + "Ir al inicio" button
+
+## Deep Links (lib/deepLinks.js)
+- `createTicketClaimURL(reservationCode)` uses `Linking.createURL` from `expo-linking`
+- In Expo Go: `exp://IP:port/--/tickets/claim?reservationCode=...`
+- In production standalone: `sortealope://tickets/claim?reservationCode=...`
+- app.json scheme changed from `sortealofrontend` to `sortealope`
+- Both sell screens (admin: `sell/[id].jsx` and vendor: `vendedor/sell/[id].jsx`) import from `lib/deepLinks`
+- NEVER use hardcoded `https://sortealope.app/tickets?...` — always use `createTicketClaimURL`
 
 ## Navigation: vendedores/event stack
 - `app/(app)/vendedores/event/[id].jsx` — Full sellers list for an event (FlatList ranked)

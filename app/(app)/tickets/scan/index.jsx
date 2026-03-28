@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -13,9 +13,10 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ConfirmCollection } from "../../../../Connections/collections";
+import { BookTickets } from "../../../../Connections/tickets";
 import { Colors, Typography } from "../../../../constants/theme";
 
+// ─── Design tokens ─────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const RED_500 = Colors.principal.red[500];
@@ -29,13 +30,27 @@ const CORNER_SIZE = 28;
 const CORNER_THICKNESS = 4;
 const OVERLAY = "rgba(0,0,0,0.62)";
 
-// ── Corner bracket ────────────────────────────────────────────────────────────
+// ─── Extrae el reservationCode de cualquier formato de URL válido ──────────────
+// Soporta:
+//   sortealope://tickets/claim?reservationCode=UUID  (producción)
+//   exp://IP:port/--/tickets/claim?reservationCode=UUID  (Expo Go)
+function extractReservationCode(data) {
+  if (!data) return null;
+  try {
+    const url = new URL(data);
+    return url.searchParams.get("reservationCode") ?? null;
+  } catch {
+    // No es una URL válida
+    return null;
+  }
+}
+
+// ─── Corner bracket ────────────────────────────────────────────────────────────
 function Corner({ position }) {
   const isTop = position.includes("T");
   const isLeft = position.includes("L");
   return (
     <>
-      {/* Horizontal bar */}
       <View
         style={[
           styles.cornerBar,
@@ -44,7 +59,6 @@ function Corner({ position }) {
           isLeft ? { left: 0 } : { right: 0 },
         ]}
       />
-      {/* Vertical bar */}
       <View
         style={[
           styles.cornerBar,
@@ -57,17 +71,15 @@ function Corner({ position }) {
   );
 }
 
-export default function PageScanQR() {
+// ─── Main screen ───────────────────────────────────────────────────────────────
+export default function BuyerScanQR() {
   const router = useRouter();
-
   const [permission, requestPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(true);
-  const [status, setStatus] = useState("waiting"); // waiting | success | error
-  const [scannedData, setScannedData] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState("waiting"); // waiting | success | error | loading
   const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
 
-  // Animated scan line
+  // ── Animated scan line ─────────────────────────────────────────────────────
   const scanLine = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const loop = Animated.loop(
@@ -86,34 +98,14 @@ export default function PageScanQR() {
     );
     loop.start();
     return () => loop.stop();
-  }, []);
+  }, [scanLine]);
 
   const scanLineY = scanLine.interpolate({
     inputRange: [0, 1],
     outputRange: [0, SCAN_SIZE - 2],
   });
 
-  const handleScanned = ({ data }) => {
-    if (!scanning) return;
-    setScanning(false);
-
-    if (data?.startsWith("sortealope://vendedor/invitar")) {
-      try {
-        const url = new URL(data);
-        const code = url.searchParams.get("code");
-        if (!code) throw new Error("Sin código");
-        setScannedData({ code });
-        setStatus("success");
-      } catch {
-        setStatus("error");
-        scheduleReset();
-      }
-    } else {
-      setStatus("error");
-      scheduleReset();
-    }
-  };
-
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const scheduleReset = () => {
     setTimeout(() => {
       setStatus("waiting");
@@ -121,30 +113,48 @@ export default function PageScanQR() {
     }, 2200);
   };
 
-  const handleReset = () => {
-    setScannedData(null);
-    setStatus("waiting");
-    setScanning(true);
-  };
+  const handleScanned = ({ data }) => {
+    if (!scanning) return;
+    setScanning(false);
 
-  const handleAccept = async () => {
-    if (!scannedData?.code) return;
-    setSubmitting(true);
-    try {
-      const res = await ConfirmCollection(scannedData.code);
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.message ?? "No se pudo aceptar la invitación.");
-      }
-      router.push("/(app)/event/asignados");
-    } catch (err) {
-      Alert.alert("Error", err.message);
-    } finally {
-      setSubmitting(false);
+    const reservationCode = extractReservationCode(data);
+    if (reservationCode) {
+      setStatus("loading");
+      handleBookTickets(reservationCode);
+    } else {
+      setStatus("error");
+      scheduleReset();
     }
   };
 
-  // ── Permission screens ───────────────────────────────────────────────────
+  const handleBookTickets = async (reservationCode) => {
+    try {
+      const res = await BookTickets(reservationCode);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.message ?? "No se pudo confirmar la compra.");
+      }
+      setStatus("success");
+      // Navegar a la pantalla de confirmación del ticket
+      router.push({
+        pathname: "/(app)/tickets/claim",
+        params: { reservationCode },
+      });
+    } catch (err) {
+      setStatus("error");
+      Alert.alert("Error al confirmar", err.message, [
+        {
+          text: "Intentar de nuevo",
+          onPress: () => {
+            setStatus("waiting");
+            setScanning(true);
+          },
+        },
+      ]);
+    }
+  };
+
+  // ── Permission screens ─────────────────────────────────────────────────────
   if (!permission) {
     return (
       <View style={styles.centered}>
@@ -162,8 +172,7 @@ export default function PageScanQR() {
           </View>
           <Text style={styles.permissionTitle}>Acceso a la cámara</Text>
           <Text style={styles.permissionDesc}>
-            Necesitamos acceso a tu cámara para escanear los códigos QR de
-            invitación.
+            Necesitamos acceso a tu cámara para escanear el QR de tu ticket.
           </Text>
           <TouchableOpacity
             style={styles.permissionBtn}
@@ -176,13 +185,22 @@ export default function PageScanQR() {
     );
   }
 
-  // ── Frame border color ───────────────────────────────────────────────────
+  // ── Frame border color by status ───────────────────────────────────────────
   const frameColor =
-    status === "success"
+    status === "success" || status === "loading"
       ? GREEN_500
       : status === "error"
         ? RED_500
         : WHITE;
+
+  const statusLabel =
+    status === "loading"
+      ? "Confirmando compra…"
+      : status === "success"
+        ? "¡Ticket confirmado!"
+        : status === "error"
+          ? "QR no válido"
+          : "Apunta al QR del vendedor";
 
   return (
     <View style={styles.root}>
@@ -194,17 +212,14 @@ export default function PageScanQR() {
         onBarcodeScanned={scanning ? handleScanned : undefined}
       />
 
-      {/* Cutout overlay — 4 dark rectangles around the scan frame */}
-      <View
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      >
+      {/* Cutout overlay */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
         {/* Top */}
         <View style={[styles.overlay, { height: SCREEN_HEIGHT * 0.28 }]} />
         {/* Middle row */}
         <View style={{ flexDirection: "row", height: SCAN_SIZE }}>
           <View style={[styles.overlay, { flex: 1 }]} />
-          {/* Scan frame — transparent center */}
+          {/* Transparent scan area */}
           <View style={{ width: SCAN_SIZE }} />
           <View style={[styles.overlay, { flex: 1 }]} />
         </View>
@@ -212,19 +227,17 @@ export default function PageScanQR() {
         <View style={[styles.overlay, { flex: 1 }]} />
       </View>
 
-      {/* ── Top instruction ───────────────────────────── */}
+      {/* ── Top instruction ─────────────────────────────────────── */}
       <View style={[styles.topInfo, { paddingTop: topInset + 16 }]}>
-        <Text style={styles.topTitle}>Escanear QR</Text>
+        <Text style={styles.topTitle}>Escanear ticket</Text>
         <Text style={styles.topSubtitle}>
-          Enfoca el código de invitación del vendedor
+          Escanea el QR que te mostró el vendedor para recibir tus tickets
         </Text>
       </View>
 
-      {/* ── Scan frame (absolutely centered) ─────────── */}
+      {/* ── Scan frame ──────────────────────────────────────────── */}
       <View style={styles.frameWrapper} pointerEvents="none">
-        {/* Dashed border frame */}
         <View style={[styles.frame, { borderColor: frameColor }]}>
-          {/* Animated scan line */}
           <Animated.View
             style={[
               styles.scanLine,
@@ -235,8 +248,6 @@ export default function PageScanQR() {
             ]}
           />
         </View>
-
-        {/* Corner brackets */}
         <View style={StyleSheet.absoluteFill}>
           <Corner position="TL" />
           <Corner position="TR" />
@@ -245,98 +256,66 @@ export default function PageScanQR() {
         </View>
       </View>
 
-      {/* ── Status label ──────────────────────────────── */}
+      {/* ── Status pill ─────────────────────────────────────────── */}
       <View style={styles.statusRow} pointerEvents="none">
         <View
           style={[
             styles.statusPill,
-            status === "success" && styles.statusPillSuccess,
+            (status === "success" || status === "loading") &&
+              styles.statusPillSuccess,
             status === "error" && styles.statusPillError,
           ]}
         >
-          <Ionicons
-            name={
-              status === "success"
-                ? "checkmark-circle"
-                : status === "error"
-                  ? "close-circle"
-                  : "scan-outline"
-            }
-            size={15}
-            color={
-              status === "success"
-                ? GREEN_500
-                : status === "error"
-                  ? RED_500
-                  : NEUTRAL_400
-            }
-          />
+          {status === "loading" ? (
+            <ActivityIndicator size="small" color={GREEN_500} />
+          ) : (
+            <Ionicons
+              name={
+                status === "success"
+                  ? "checkmark-circle"
+                  : status === "error"
+                    ? "close-circle"
+                    : "scan-outline"
+              }
+              size={15}
+              color={
+                status === "success"
+                  ? GREEN_500
+                  : status === "error"
+                    ? RED_500
+                    : NEUTRAL_400
+              }
+            />
+          )}
           <Text
             style={[
               styles.statusText,
-              status === "success" && { color: GREEN_500 },
+              (status === "success" || status === "loading") && {
+                color: GREEN_500,
+              },
               status === "error" && { color: RED_500 },
             ]}
           >
-            {status === "success"
-              ? "Código detectado"
-              : status === "error"
-                ? "Código no válido"
-                : "Buscando código QR…"}
+            {statusLabel}
           </Text>
         </View>
       </View>
 
-      {/* ── Result bottom sheet ───────────────────────── */}
-      {scannedData && (
-        <View style={[styles.sheet, { paddingBottom: bottomInset + 12 }]}>
-          {/* Handle */}
-          <View style={styles.sheetHandle} />
-
-          <View style={styles.sheetIconRow}>
-            <View style={styles.sheetIconBox}>
-              <Ionicons name="person-add-outline" size={26} color={GREEN_900} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.sheetTitle}>Invitación detectada</Text>
-              <Text style={styles.sheetSub}>Vendedor listo para asignar</Text>
-            </View>
-          </View>
-
-          <View style={[styles.sheetRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.sheetRowLabel}>Código de colección</Text>
-            <Text
-              style={[styles.sheetRowValue, { fontFamily: "monospace", flex: 1, textAlign: "right" }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {scannedData.code}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={[styles.assignBtn, submitting && { opacity: 0.7 }]}
-            activeOpacity={0.85}
-            onPress={handleAccept}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <ActivityIndicator size="small" color={WHITE} />
-            ) : null}
-            <Text style={styles.assignBtnText}>
-              {submitting ? "Procesando…" : "Aceptar invitación"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.resetBtn} onPress={handleReset}>
-            <Text style={styles.resetBtnText}>Escanear otro código</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {/* ── Bottom hint ─────────────────────────────────────────── */}
+      <View
+        style={[styles.bottomHint, { paddingBottom: bottomInset + 24 }]}
+        pointerEvents="none"
+      >
+        <Ionicons name="information-circle-outline" size={14} color="rgba(255,255,255,0.6)" />
+        <Text style={styles.bottomHintText}>
+          Solicita al vendedor que te muestre el QR en su pantalla
+        </Text>
+      </View>
     </View>
   );
 }
 
+// ─── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#000" },
 
@@ -394,14 +373,8 @@ const styles = StyleSheet.create({
     backgroundColor: WHITE,
     borderRadius: 2,
   },
-  cornerBarH: {
-    width: CORNER_SIZE,
-    height: CORNER_THICKNESS,
-  },
-  cornerBarV: {
-    width: CORNER_THICKNESS,
-    height: CORNER_SIZE,
-  },
+  cornerBarH: { width: CORNER_SIZE, height: CORNER_THICKNESS },
+  cornerBarV: { width: CORNER_THICKNESS, height: CORNER_SIZE },
 
   // ── Status pill ───────────────────────────────────────────────────────────
   statusRow: {
@@ -431,92 +404,25 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
   },
 
-  // ── Result sheet ──────────────────────────────────────────────────────────
-  sheet: {
+  // ── Bottom hint ───────────────────────────────────────────────────────────
+  bottomHint: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: WHITE,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    zIndex: 20,
-  },
-  sheetHandle: {
-    alignSelf: "center",
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.principal.neutral[200],
-    marginBottom: 20,
-  },
-  sheetIconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    marginBottom: 20,
-  },
-  sheetIconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: Colors.principal.green[50],
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sheetTitle: {
-    fontSize: Typography.sizes.lg,
-    fontWeight: Typography.weights.bold,
-    color: GREEN_900,
-    marginBottom: 2,
-  },
-  sheetSub: {
-    fontSize: Typography.sizes.sm,
-    color: NEUTRAL_400,
-  },
-  sheetRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.principal.neutral[100],
-  },
-  sheetRowLabel: {
-    fontSize: Typography.sizes.sm,
-    color: NEUTRAL_700,
-    fontWeight: Typography.weights.medium,
-  },
-  sheetRowValue: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.bold,
-    color: GREEN_900,
-  },
-  assignBtn: {
-    backgroundColor: GREEN_900,
-    borderRadius: 14,
-    paddingVertical: 15,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    marginTop: 20,
+    gap: 6,
+    paddingHorizontal: 32,
+    paddingTop: 16,
+    zIndex: 10,
   },
-  assignBtnText: {
-    color: WHITE,
-    fontSize: Typography.sizes.base,
-    fontWeight: Typography.weights.bold,
-  },
-  resetBtn: {
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  resetBtnText: {
-    fontSize: Typography.sizes.sm,
-    color: NEUTRAL_400,
-    fontWeight: Typography.weights.medium,
+  bottomHintText: {
+    fontSize: Typography.sizes.xs,
+    color: "rgba(255,255,255,0.6)",
+    textAlign: "center",
+    flex: 1,
   },
 
   // ── Permission screen ─────────────────────────────────────────────────────
@@ -527,10 +433,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 32,
   },
-  permissionCard: {
-    alignItems: "center",
-    width: "100%",
-  },
+  permissionCard: { alignItems: "center", width: "100%" },
   permissionIconBox: {
     width: 88,
     height: 88,
@@ -564,8 +467,5 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.base,
     fontWeight: Typography.weights.bold,
   },
-  permissionText: {
-    color: NEUTRAL_700,
-    fontSize: Typography.sizes.base,
-  },
+  permissionText: { color: NEUTRAL_700, fontSize: Typography.sizes.base },
 });

@@ -1,17 +1,15 @@
 import { fetchWithAuth } from "../../lib/fetchWithAuth";
 import { ENDPOINTS_TICKETS } from "../APIURLS";
 
-const { GET_BY_COLLECTION, GET_BY_USER, GET_BY_ID, GET_STATUS, BOOK, CONFIRM, RELEASE, GENERATE } =
+const { GET, GET_BY_ID, GET_STATUS, RESERVATION, BOOK_TICKETS, CONFIRM, RELEASE } =
   ENDPOINTS_TICKETS;
 
-// GET /tickets?collectionId={id}  (protegido)
-export async function GetTicketsByCollection(collectionId) {
-  return fetchWithAuth(`${GET_BY_COLLECTION}?collectionId=${collectionId}`);
-}
-
-// GET /tickets?userId={id}  (protegido)
-export async function GetTicketsByUser(userId) {
-  return fetchWithAuth(`${GET_BY_USER}?userId=${userId}`);
+// GET /tickets?eventId=&collectionId=&ticketStatus=&page=&size=  (protegido)
+// ticketStatus: 1=disponible  2=reservado  3=comprado  4=confirmado
+export async function GetTickets(eventId, collectionId, ticketStatus, page = 0, size = 200) {
+  return fetchWithAuth(
+    `${GET}?eventId=${eventId}&collectionId=${collectionId}&ticketStatus=${ticketStatus}&page=${page}&size=${size}`,
+  );
 }
 
 // GET /tickets/{ticketId}  (protegido)
@@ -24,27 +22,38 @@ export async function GetTicketsStatus() {
   return fetch(GET_STATUS);
 }
 
-// PATCH /tickets/bookTicket?buyerId={buyerId}&ticketCode={code}
-export async function BookTicket(buyerId, ticketCode) {
-  return fetchWithAuth(`${BOOK}?buyerId=${buyerId}&ticketCode=${ticketCode}`, {
-    method: "PATCH",
+// POST /tickets/reservation?eventId={eventId}
+// Body: { ticketCodes: [uuid, ...] }
+// Returns: { id: "reservation-uuid", ... }
+export async function CreateReservation(eventId, ticketCodes) {
+  return fetchWithAuth(`${RESERVATION}?eventId=${eventId}`, {
+    method: "POST",
+    body: JSON.stringify({ ticketCodes }),
   });
 }
 
-// PATCH /tickets/confirmTicket/{ticketCode}
-export async function ConfirmTicket(ticketCode, data) {
-  return fetchWithAuth(`${CONFIRM}${ticketCode}`, {
-    method: "PATCH",
-    body: JSON.stringify(data),
-  });
+// PATCH /tickets/bookTickets/{reservationCode}
+// Confirma la reserva → tickets pasan a estado 3=comprado
+export async function BookTickets(reservationCode) {
+  return fetchWithAuth(`${BOOK_TICKETS}${reservationCode}`, { method: "PATCH" });
 }
 
-// PATCH /tickets/releaseTicket/{ticketCode}
-export async function ReleaseTicket(ticketCode) {
-  return fetchWithAuth(`${RELEASE}${ticketCode}`, { method: "PATCH" });
+// PATCH /tickets/confirmTicket?eventId=&ticketCode=
+// Body: { modalityId, operationNumber }
+export async function ConfirmTicket(eventId, ticketCode, data) {
+  return fetchWithAuth(
+    `${CONFIRM}?eventId=${eventId}&ticketCode=${ticketCode}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    },
+  );
 }
 
-// POST /tickets/generateTicket/{ticketCode}
-export async function GenerateTicket(ticketCode) {
-  return fetchWithAuth(`${GENERATE}${ticketCode}`, { method: "POST" });
+// PATCH /tickets/releaseTicket?eventId=&ticketCode=
+export async function ReleaseTicket(eventId, ticketCode) {
+  return fetchWithAuth(
+    `${RELEASE}?eventId=${eventId}&ticketCode=${ticketCode}`,
+    { method: "PATCH" },
+  );
 }

@@ -15,6 +15,24 @@ export default function RootLayout() {
           header: () => <HeaderBackNav title="Vender Tickets" />,
         }}
       />
+      <Stack.Screen
+        name="vendedor/sell/[id]"
+        options={{
+          header: () => <HeaderBackNav title="Vender Tickets" />,
+        }}
+      />
+      <Stack.Screen
+        name="claim"
+        options={{
+          header: () => <HeaderBackNav title="Mis Tickets" />,
+        }}
+      />
+      <Stack.Screen
+        name="scan/index"
+        options={{
+          header: () => <HeaderBackNav title="Escanear QR" />,
+        }}
+      />
     </Stack>
   );
 }

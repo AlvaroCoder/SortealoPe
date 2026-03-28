@@ -44,7 +44,11 @@ export default function EventSellersScreen() {
     eventId ? `${ENDPOINTS_COLLECTIONS.GET_BY_EVENT}?eventId=${eventId}` : null,
   );
 
-  const sorted = [...(collections ?? [])].sort(
+  const items = Array.isArray(collections)
+    ? collections
+    : (collections?.content ?? []);
+
+  const sorted = [...items].sort(
     (a, b) => (b.soldTickets ?? 0) - (a.soldTickets ?? 0),
   );
 

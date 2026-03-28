@@ -10,9 +10,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ProgressBar from "../../../components/cards/ProgressBar";
-import TopSellersCard from "../../../components/cards/TopSellersCard";
 import { ENDPOINTS_EVENTS } from "../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../constants/theme";
+import { useAuthContext } from "../../../context/AuthContext";
 import { useRaffleContext } from "../../../context/RaffleContext";
 import { useDateFormatter } from "../../../lib/dateFormatter";
 import { useFetch } from "../../../lib/useFetch";
@@ -36,17 +36,17 @@ export default function EventDetailPage() {
   const { formatDateToSpanish } = useDateFormatter();
   const router = useRouter();
   const { id: eventId, eventStatus } = useLocalSearchParams();
+  console.log("Event id : ", eventId);
+
   const { isAdmin, isSeller } = useRaffleContext();
+  const { userData } = useAuthContext();
+  const userId = userData?.userId;
 
   const { data, loading } = useFetch(
     `${URL_EVENT_ID}${eventId}?eventStatus=${eventStatus}`,
   );
-  const event = data;
 
-  const totalTickets =
-    data?.collections
-      ?.map((c) => c.ticketsQuantity)
-      .reduce((a, b) => a + b, 0) ?? 0;
+  const event = data;
 
   const availableTickets =
     data?.collections
@@ -61,6 +61,8 @@ export default function EventDetailPage() {
   const soldTickets =
     data?.collections?.map((c) => c.soldTickets).reduce((a, b) => a + b, 0) ??
     0;
+
+  const totalTickets = availableTickets + reservedTickets + soldTickets;
 
   const ticketPrice = event?.ticketPrice ?? 0;
   const collected = (soldTickets * ticketPrice).toFixed(0);
@@ -129,7 +131,7 @@ export default function EventDetailPage() {
             <Text style={styles.title} numberOfLines={2}>
               {event?.title}
             </Text>
-            {isAdmin && (
+            {isAdmin && event?.status >= 2 && (
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() =>
@@ -177,28 +179,37 @@ export default function EventDetailPage() {
           <View style={styles.divider} />
 
           {/* Ticket progress */}
-          <Text style={styles.sectionLabel}>Tickets</Text>
-          <View style={styles.progressStats}>
-            <View style={styles.progressStat}>
-              <Text style={styles.progressStatNumber}>{availableTickets}</Text>
-              <Text style={styles.progressStatLabel}>Disponibles</Text>
-            </View>
-            <View style={[styles.progressStat, { alignItems: "center" }]}>
-              <Text style={[styles.progressStatNumber, { color: BLUE_500 }]}>
-                {totalTickets > 0
-                  ? `${(((soldTickets + reservedTickets) / totalTickets) * 100).toFixed(0)}%`
-                  : "0%"}
-              </Text>
-              <Text style={styles.progressStatLabel}>Reservados</Text>
-            </View>
-            <View style={[styles.progressStat, { alignItems: "flex-end" }]}>
-              <Text style={styles.progressStatNumber}>{totalTickets}</Text>
-              <Text style={styles.progressStatLabel}>Total</Text>
-            </View>
-          </View>
-          <View style={styles.progressBarWrapper}>
-            <ProgressBar available={availableTickets} total={totalTickets} />
-          </View>
+          {isAdmin && event?.status >= 2 && (
+            <>
+              <Text style={styles.sectionLabel}>Tickets</Text>
+              <View style={styles.progressStats}>
+                <View style={styles.progressStat}>
+                  <Text
+                    style={[styles.progressStatNumber, { color: GREEN_500 }]}
+                  >
+                    {soldTickets}
+                  </Text>
+                  <Text style={styles.progressStatLabel}>Vendidos</Text>
+                </View>
+                <View style={[styles.progressStat, { alignItems: "center" }]}>
+                  <Text style={styles.progressStatNumber}>
+                    {availableTickets}
+                  </Text>
+                  <Text style={styles.progressStatLabel}>Disponibles</Text>
+                </View>
+                <View style={[styles.progressStat, { alignItems: "flex-end" }]}>
+                  <Text style={styles.progressStatNumber}>{totalTickets}</Text>
+                  <Text style={styles.progressStatLabel}>Total</Text>
+                </View>
+              </View>
+              <View style={styles.progressBarWrapper}>
+                <ProgressBar
+                  available={availableTickets}
+                  total={totalTickets}
+                />
+              </View>
+            </>
+          )}
 
           {(isAdmin || isSeller) && event?.status >= 2 && (
             <>
@@ -231,22 +242,155 @@ export default function EventDetailPage() {
             </>
           )}
 
-          {/* Top Vendedores */}
-          {(data?.collections ?? []).length > 0 && (
-            <>
-              <View style={styles.divider} />
-              <TopSellersCard
-                collections={data?.collections ?? []}
-                eventId={eventId}
-                ticketPrice={ticketPrice}
-                titleEvent={event?.title}
-              />
-            </>
-          )}
+          {/* Colecciones — solo para eventos en estado 2 (activo) */}
+          {Number(eventStatus) === 2 &&
+            (() => {
+              // Admin ve todas las colecciones; vendedor solo ve la suya
+              const allCols = data?.collections ?? [];
+              const visibleCols = isAdmin
+                ? allCols
+                : allCols.filter(
+                    (c) =>
+                      c.seller?.id === userId ||
+                      c.seller?.userId === userId ||
+                      c.userId === userId,
+                  );
+              if (visibleCols.length === 0) return null;
+              return (
+                <>
+                  <View style={styles.divider} />
+                  <Text style={styles.sectionLabel}>
+                    {isAdmin ? "Talonarios" : "Mi Talonario"}
+                  </Text>
+                  {visibleCols.map((col, index) => {
+                    const sellerName =
+                      col.seller?.firstName && col.seller?.lastName
+                        ? `${col.seller.firstName} ${col.seller.lastName}`
+                        : (col.seller?.username ?? "Sin vendedor");
+                    const colTotal = col.ticketsQuantity ?? 0;
+                    const colSold = col.soldTickets ?? 0;
+                    const colReserved = col.reservedTickets ?? 0;
+                    const colAvailable = col.availableTickets ?? 0;
+                    const pct =
+                      colTotal > 0
+                        ? `${(((colSold + colReserved) / colTotal) * 100).toFixed(0)}%`
+                        : "0%";
+
+                    return (
+                      <TouchableOpacity
+                        key={col.id ?? col.code ?? index}
+                        style={styles.collectionCard}
+                        activeOpacity={0.75}
+                        onPress={() =>
+                          isAdmin
+                            ? router.push({
+                                pathname: "/(app)/vendedores/event/[id]",
+                                params: {
+                                  id: eventId,
+                                  titleEvent: event?.title,
+                                },
+                              })
+                            : router.push({
+                                pathname: "/(app)/tickets/sell/[id]",
+                                params: { id: eventId },
+                              })
+                        }
+                      >
+                        {/* Header */}
+                        <View style={styles.collectionHeader}>
+                          <View style={styles.collectionAvatar}>
+                            <Text style={styles.collectionAvatarText}>
+                              {sellerName[0]?.toUpperCase() ?? "?"}
+                            </Text>
+                          </View>
+                          <View style={styles.collectionInfo}>
+                            <Text
+                              style={styles.collectionName}
+                              numberOfLines={1}
+                            >
+                              {sellerName}
+                            </Text>
+                            <Text style={styles.collectionCode}>
+                              #{col.code}
+                            </Text>
+                          </View>
+                          <View style={styles.collectionBadge}>
+                            <Text style={styles.collectionBadgeText}>
+                              {pct} ocupado
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Mini progress bar */}
+                        <View style={styles.colBarBg}>
+                          <View
+                            style={[
+                              styles.colBarFill,
+                              {
+                                width:
+                                  colTotal > 0
+                                    ? `${((colSold + colReserved) / colTotal) * 100}%`
+                                    : "0%",
+                              },
+                            ]}
+                          />
+                        </View>
+
+                        {/* Stats row */}
+                        <View style={styles.collectionStats}>
+                          <View style={styles.collectionStat}>
+                            <Text
+                              style={[
+                                styles.collectionStatNum,
+                                { color: GREEN_500 },
+                              ]}
+                            >
+                              {colSold}
+                            </Text>
+                            <Text style={styles.collectionStatLabel}>
+                              Vendidos
+                            </Text>
+                          </View>
+                          <View style={styles.collectionStat}>
+                            <Text
+                              style={[
+                                styles.collectionStatNum,
+                                { color: BLUE_500 },
+                              ]}
+                            >
+                              {colReserved}
+                            </Text>
+                            <Text style={styles.collectionStatLabel}>
+                              Reservados
+                            </Text>
+                          </View>
+                          <View style={styles.collectionStat}>
+                            <Text style={styles.collectionStatNum}>
+                              {colAvailable}
+                            </Text>
+                            <Text style={styles.collectionStatLabel}>
+                              Disponibles
+                            </Text>
+                          </View>
+                          <View style={styles.collectionStat}>
+                            <Text style={styles.collectionStatNum}>
+                              {colTotal}
+                            </Text>
+                            <Text style={styles.collectionStatLabel}>
+                              Total
+                            </Text>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </>
+              );
+            })()}
         </View>
       </ScrollView>
 
-      {/* ── Barra inferior: Vender + Agregar Vendedor ──────── */}
+      {/* ── Barra inferior: Vender + Agregar Vendedor (solo admin) ── */}
       {showBottomBar && (
         <View style={styles.sellBar}>
           <TouchableOpacity
@@ -263,22 +407,24 @@ export default function EventDetailPage() {
             <Ionicons name="arrow-forward" size={18} color={WHITE} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.addSellerButton}
-            activeOpacity={0.85}
-            onPress={() =>
-              router.push({
-                pathname: "/vendedores/agregar",
-                params: { eventId },
-              })
-            }
-          >
-            <Ionicons
-              name="person-add-outline"
-              size={22}
-              color={Colors.principal.blue[900]}
-            />
-          </TouchableOpacity>
+          {isAdmin && (
+            <TouchableOpacity
+              style={styles.addSellerButton}
+              activeOpacity={0.85}
+              onPress={() =>
+                router.push({
+                  pathname: "/vendedores/agregar",
+                  params: { eventId },
+                })
+              }
+            >
+              <Ionicons
+                name="person-add-outline"
+                size={22}
+                color={Colors.principal.blue[900]}
+              />
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </SafeAreaView>
@@ -489,6 +635,90 @@ const styles = StyleSheet.create({
     fontWeight: Typography.weights.medium,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+  },
+
+  // ── Collection cards ────────────────────────────────────
+  collectionCard: {
+    backgroundColor: NEUTRAL_50,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: NEUTRAL_200,
+    padding: 14,
+    marginBottom: 10,
+  },
+  collectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 10,
+  },
+  collectionAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: GREEN_500,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  collectionAvatarText: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.extrabold,
+    color: WHITE,
+  },
+  collectionInfo: {
+    flex: 1,
+  },
+  collectionName: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+  },
+  collectionCode: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_500,
+    marginTop: 1,
+  },
+  collectionBadge: {
+    backgroundColor: GREEN_50,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  collectionBadgeText: {
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+  },
+  colBarBg: {
+    height: 6,
+    backgroundColor: NEUTRAL_200,
+    borderRadius: 3,
+    marginBottom: 10,
+    overflow: "hidden",
+  },
+  colBarFill: {
+    height: 6,
+    backgroundColor: GREEN_500,
+    borderRadius: 3,
+  },
+  collectionStats: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  collectionStat: {
+    alignItems: "center",
+  },
+  collectionStatNum: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.extrabold,
+    color: NEUTRAL_700,
+  },
+  collectionStatLabel: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_500,
+    fontWeight: Typography.weights.medium,
+    marginTop: 2,
   },
 
   // ── Sell bar ───────────────────────────────────────────

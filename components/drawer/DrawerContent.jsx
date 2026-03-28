@@ -2,7 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { ENDPOINTS_USERS } from "../../Connections/APIURLS";
 import { Colors, Typography } from "../../constants/theme";
 import { useAuthContext } from "../../context/AuthContext";
@@ -38,6 +41,11 @@ const NAV_ITEMS = [
     route: "/(app)/vendedores/scan",
     icon: "qr-code-outline",
     label: "Escanear QR",
+  },
+  {
+    route: "/(app)/tickets/scan",
+    icon: "qr-code-outline",
+    label: "Escanear QR Comprador",
   },
 ];
 

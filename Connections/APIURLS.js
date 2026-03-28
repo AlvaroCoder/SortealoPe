@@ -1,4 +1,4 @@
-export const BASE_URL = "http://192.168.1.100:8087/api/v1";
+export const BASE_URL = "http://192.168.1.44:8087/api/v1";
 
 export const ENDPOINTS_LOGIN = {
   LOGIN: `${BASE_URL}/auth/login`,
@@ -33,32 +33,32 @@ export const ENDPOINTS_EVENTS = {
 export const ENDPOINTS_COLLECTIONS = {
   // GET /collections?eventId=
   GET_BY_EVENT: `${BASE_URL}/collections`,
-  // GET /collections/{collectionId}
+  // GET /collections/{collectionId}?eventId=
   GET_BY_ID: `${BASE_URL}/collections/`,
-  // POST /collections/create
+  // POST /collections/create  Body: { eventId, ticketsQuantity }  → retorna CollectionDto con { code, ... }
   CREATE: `${BASE_URL}/collections/create`,
   // POST /collections/create/excel?eventId=
   CREATE_EXCEL: `${BASE_URL}/collections/create/excel`,
+  // PATCH /collections/confirm/{code}  → asigna la colección al vendedor autenticado
+  CONFIRM: `${BASE_URL}/collections/confirm/`,
 };
 
 // ─── Tickets ──────────────────────────────────────────────────────────────────
 export const ENDPOINTS_TICKETS = {
-  // GET /tickets?collectionId=   (protegido)
-  GET_BY_COLLECTION: `${BASE_URL}/tickets`,
-  // GET /tickets?userId=         (protegido)
-  GET_BY_USER: `${BASE_URL}/tickets`,
+  // GET /tickets?eventId=&collectionId=&ticketStatus=&page=&size=  (protegido, todos los params obligatorios)
+  GET: `${BASE_URL}/tickets`,
   // GET /tickets/{ticketId}      (protegido)
   GET_BY_ID: `${BASE_URL}/tickets/`,
   // GET /tickets/status          (público)
   GET_STATUS: `${BASE_URL}/tickets/status`,
-  // PATCH /tickets/bookTicket?buyerId=&ticketCode=
-  BOOK: `${BASE_URL}/tickets/bookTicket`,
-  // PATCH /tickets/confirmTicket/{ticketCode}
-  CONFIRM: `${BASE_URL}/tickets/confirmTicket/`,
-  // PATCH /tickets/releaseTicket/{ticketCode}
-  RELEASE: `${BASE_URL}/tickets/releaseTicket/`,
-  // POST  /tickets/generateTicket/{ticketCode}
-  GENERATE: `${BASE_URL}/tickets/generateTicket/`,
+  // POST /tickets/reservation?eventId=  Body: { ticketCodes: [uuid, ...] }
+  RESERVATION: `${BASE_URL}/tickets/reservation`,
+  // PATCH /tickets/bookTickets/{reservationCode}
+  BOOK_TICKETS: `${BASE_URL}/tickets/bookTickets/`,
+  // PATCH /tickets/confirmTicket?eventId=&ticketCode=  Body: { modalityId, operationNumber }
+  CONFIRM: `${BASE_URL}/tickets/confirmTicket`,
+  // PATCH /tickets/releaseTicket?eventId=&ticketCode=
+  RELEASE: `${BASE_URL}/tickets/releaseTicket`,
 };
 
 // ─── Users (protegidos) ───────────────────────────────────────────────────────

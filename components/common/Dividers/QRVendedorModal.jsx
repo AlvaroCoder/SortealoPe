@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { File, Paths } from "expo-file-system/next";
 import { useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   Modal,
@@ -13,6 +14,7 @@ import {
   View,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import { CreateCollection } from "../../../Connections/collections";
 import { Colors, Typography } from "../../../constants/theme";
 import ButtonGradiend from "../../common/Buttons/ButtonGradiendt";
 
@@ -26,19 +28,50 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
-function buildInviteLink(eventId, ticketQuantity) {
-  return `sortealope://vendedor/invitar?eventId=${eventId}&tickets=${ticketQuantity}`;
+// Deep link que el vendedor va a escanear: contiene el code de la colección
+function buildInviteLink(code) {
+  return `sortealope://vendedor/invitar?code=${encodeURIComponent(code)}`;
 }
 
-// ── Step 1: enter ticket quantity ─────────────────────────────────────────────
-const Step1Content = ({ ticketQuantity, setTicketQuantity, onNext }) => {
-  const handleContinue = () => {
+// ── Step 1: enter ticket quantity + call API ───────────────────────────────────
+const Step1Content = ({ ticketQuantity, setTicketQuantity, eventId, onNext }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleContinue = async () => {
     const qty = parseInt(ticketQuantity, 10);
     if (isNaN(qty) || qty <= 0) {
-      Alert.alert("Error", "Por favor ingresa una cantidad válida de tickets (mayor a cero).");
+      Alert.alert(
+        "Error",
+        "Por favor ingresa una cantidad válida de tickets (mayor a cero).",
+      );
       return;
     }
-    onNext();
+
+    setLoading(true);
+    try {
+      const res = await CreateCollection({
+        eventId: parseInt(eventId, 10),
+        ticketsQuantity: qty,
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.message ?? "No se pudo crear la colección.");
+      }
+
+      const data = await res.json();
+      const code = data?.code;
+
+      if (!code) {
+        throw new Error("La API no devolvió el código de colección.");
+      }
+
+      onNext(code);
+    } catch (err) {
+      Alert.alert("Error", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,26 +93,42 @@ const Step1Content = ({ ticketQuantity, setTicketQuantity, onNext }) => {
         onChangeText={(t) => setTicketQuantity(t.replace(/[^0-9]/g, ""))}
         maxLength={5}
         placeholderTextColor={NEUTRAL_200}
+        editable={!loading}
       />
 
-      <ButtonGradiend onPress={handleContinue} style={styles.continueButton}>
-        Generar QR
+      <ButtonGradiend
+        onPress={handleContinue}
+        style={[styles.continueButton, loading && { opacity: 0.7 }]}
+        disabled={loading}
+      >
+        {loading ? "Creando colección…" : "Generar QR"}
       </ButtonGradiend>
+
+      {loading && (
+        <ActivityIndicator
+          size="small"
+          color={GREEN_900}
+          style={{ marginTop: 12 }}
+        />
+      )}
     </View>
   );
 };
 
 // ── Step 2: show QR + share ───────────────────────────────────────────────────
-const Step2Content = ({ eventId, ticketQuantity, onClose }) => {
+const Step2Content = ({ collectionCode, ticketQuantity, onClose }) => {
   const qrRef = useRef(null);
-  const deepLink = buildInviteLink(eventId, ticketQuantity);
+  const deepLink = buildInviteLink(collectionCode);
   const QR_SIZE = Dimensions.get("window").width * 0.55;
 
   const handleShare = () => {
     if (!qrRef.current) return;
     qrRef.current.toDataURL(async (base64) => {
       try {
-        const file = new File(Paths.cache, `sortealo-vendor-qr-${Date.now()}.png`);
+        const file = new File(
+          Paths.cache,
+          `sortealo-vendor-qr-${Date.now()}.png`,
+        );
         file.write(base64, { encoding: "base64" });
         await Share.share({
           message: `Invitación de vendedor — Sortealo\n${deepLink}`,
@@ -109,14 +158,26 @@ const Step2Content = ({ eventId, ticketQuantity, onClose }) => {
           size={QR_SIZE}
           color={GREEN_900}
           backgroundColor={WHITE}
-          getRef={(c) => { qrRef.current = c; }}
+          getRef={(c) => {
+            qrRef.current = c;
+          }}
         />
+      </View>
+
+      {/* Código textual */}
+      <View style={styles.codeBox}>
+        <Ionicons name="key-outline" size={14} color={GREEN_500} />
+        <Text style={styles.codeText} numberOfLines={1}>
+          {collectionCode}
+        </Text>
       </View>
 
       {/* Deep link hint */}
       <View style={styles.linkBox}>
         <Ionicons name="link-outline" size={14} color={GREEN_500} />
-        <Text style={styles.linkText} numberOfLines={2}>{deepLink}</Text>
+        <Text style={styles.linkText} numberOfLines={2}>
+          {deepLink}
+        </Text>
       </View>
 
       <View style={styles.row}>
@@ -134,14 +195,26 @@ const Step2Content = ({ eventId, ticketQuantity, onClose }) => {
 };
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-export default function QRVendedorModal({ visible, onClose, eventId, initialQuantity = "10" }) {
+export default function QRVendedorModal({
+  visible,
+  onClose,
+  eventId,
+  initialQuantity = "10",
+}) {
   const [step, setStep] = useState(1);
   const [ticketQuantity, setTicketQuantity] = useState(initialQuantity);
+  const [collectionCode, setCollectionCode] = useState(null);
 
   const handleClose = () => {
     setStep(1);
     setTicketQuantity(initialQuantity);
+    setCollectionCode(null);
     onClose();
+  };
+
+  const handleNext = (code) => {
+    setCollectionCode(code);
+    setStep(2);
   };
 
   return (
@@ -162,11 +235,12 @@ export default function QRVendedorModal({ visible, onClose, eventId, initialQuan
             <Step1Content
               ticketQuantity={ticketQuantity}
               setTicketQuantity={setTicketQuantity}
-              onNext={() => setStep(2)}
+              eventId={eventId}
+              onNext={handleNext}
             />
           ) : (
             <Step2Content
-              eventId={eventId}
+              collectionCode={collectionCode}
               ticketQuantity={ticketQuantity}
               onClose={handleClose}
             />
@@ -260,12 +334,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: NEUTRAL_200,
     backgroundColor: WHITE,
-    marginBottom: 16,
+    marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
+  },
+  codeBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: Colors.principal.green[50],
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 8,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: Colors.principal.green[100],
+  },
+  codeText: {
+    flex: 1,
+    fontSize: Typography.sizes.sm,
+    color: GREEN_900,
+    fontWeight: Typography.weights.semibold,
+    fontFamily: "monospace",
   },
   linkBox: {
     flexDirection: "row",
