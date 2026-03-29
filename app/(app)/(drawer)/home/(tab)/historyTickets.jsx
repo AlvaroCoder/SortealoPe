@@ -12,24 +12,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import QRCode from "react-native-qrcode-svg";
-import { Colors, Typography } from "../../../../../constants/theme";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
+  ENDPOINTS_COLLECTIONS,
   ENDPOINTS_EVENTS,
   ENDPOINTS_TICKETS,
 } from "../../../../../Connections/APIURLS";
-import { useAuthContext } from "../../../../../context/AuthContext";
+import { Colors, Typography } from "../../../../../constants/theme";
 import { fetchWithAuth } from "../../../../../lib/fetchWithAuth";
+import { usePaginatedFetch } from "../../../../../lib/usePaginatedFetch";
 import LoadingScreen from "../../../../../screens/LoadingScreen";
 
-// ─── Color tokens ────────────────────────────────────────────────────────────
+// ─── Color tokens ─────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const GREEN_50 = Colors.principal.green[50];
-const YELLOW_500 = Colors.principal.yellow[500];
-const YELLOW_100 = Colors.principal.yellow[100];
-const YELLOW_700 = Colors.principal.yellow[700];
+const GREEN_100 = Colors.principal.green[100];
 const NEUTRAL_50 = Colors.principal.neutral[50];
 const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
@@ -37,40 +36,25 @@ const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 
-// ─── Tab definitions ──────────────────────────────────────────────────────────
-const TABS = [
-  {
-    key: "SOLD",
-    label: "Comprados",
-    icon: "checkmark-circle-outline",
-    color: GREEN_500,
-  },
-  {
-    key: "RESERVED",
-    label: "Reservados",
-    icon: "time-outline",
-    color: YELLOW_500,
-  },
-];
-
-// ─── Date helpers ─────────────────────────────────────────────────────────────
+// ─── Date helpers ──────────────────────────────────────────────────────────────
 function formatDate(dateStr) {
   if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("es-PE", { day: "numeric", month: "long" });
+  return new Date(dateStr).toLocaleDateString("es-PE", {
+    day: "numeric",
+    month: "long",
+  });
 }
 
 function formatTime(dateStr) {
   if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString("es-PE", {
+  return new Date(dateStr).toLocaleTimeString("es-PE", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
   });
 }
 
-// ─── Ticket Detail Modal ──────────────────────────────────────────────────────
+// ─── Ticket Detail Modal ───────────────────────────────────────────────────────
 function TicketDetailModal({ ticket, visible, onClose }) {
   if (!ticket) return null;
 
@@ -81,9 +65,7 @@ function TicketDetailModal({ ticket, visible, onClose }) {
       transparent
       onRequestClose={onClose}
     >
-      {/* Backdrop */}
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        {/* Prevent tap-through on card content */}
         <Pressable style={styles.modalWrapper} onPress={() => {}}>
           <ScrollView
             contentContainerStyle={styles.modalScrollContent}
@@ -91,7 +73,6 @@ function TicketDetailModal({ ticket, visible, onClose }) {
           >
             {/* ── Physical ticket card ── */}
             <View style={styles.ticketCard}>
-
               {/* TOP SECTION */}
               <View style={styles.ticketTop}>
                 {/* Event title banner */}
@@ -101,7 +82,7 @@ function TicketDetailModal({ ticket, visible, onClose }) {
                   </Text>
                 </View>
 
-                {/* 2-column info row: Lugar + Precio */}
+                {/* 2-column: Lugar + Precio */}
                 <View style={styles.ticketInfoGrid}>
                   <View style={styles.ticketInfoCell}>
                     <Text style={styles.ticketInfoLabel}>Lugar</Text>
@@ -109,15 +90,19 @@ function TicketDetailModal({ ticket, visible, onClose }) {
                       {ticket.place ?? "—"}
                     </Text>
                   </View>
-                  <View style={[styles.ticketInfoCell, styles.ticketInfoCellRight]}>
+                  <View
+                    style={[styles.ticketInfoCell, styles.ticketInfoCellRight]}
+                  >
                     <Text style={styles.ticketInfoLabel}>Precio</Text>
-                    <Text style={[styles.ticketInfoValue, styles.ticketPriceValue]}>
-                      S/. {ticket.price?.toFixed(2) ?? "—"}
+                    <Text
+                      style={[styles.ticketInfoValue, styles.ticketPriceValue]}
+                    >
+                      S/. {ticket.ticketPrice?.toFixed(2) ?? "—"}
                     </Text>
                   </View>
                 </View>
 
-                {/* 2-column info row: Fecha + Hora */}
+                {/* 2-column: Fecha + Hora */}
                 <View style={styles.ticketInfoGrid}>
                   <View style={styles.ticketInfoCell}>
                     <Text style={styles.ticketInfoLabel}>Fecha</Text>
@@ -125,7 +110,9 @@ function TicketDetailModal({ ticket, visible, onClose }) {
                       {formatDate(ticket.date)}
                     </Text>
                   </View>
-                  <View style={[styles.ticketInfoCell, styles.ticketInfoCellRight]}>
+                  <View
+                    style={[styles.ticketInfoCell, styles.ticketInfoCellRight]}
+                  >
                     <Text style={styles.ticketInfoLabel}>Hora</Text>
                     <Text style={styles.ticketInfoValue}>
                       {formatTime(ticket.date)}
@@ -133,33 +120,22 @@ function TicketDetailModal({ ticket, visible, onClose }) {
                   </View>
                 </View>
 
-                {/* Image / icon placeholder */}
+                {/* Icon placeholder */}
                 <View style={styles.ticketImageBox}>
                   <Ionicons name="gift-outline" size={52} color={NEUTRAL_500} />
-                </View>
-
-                {/* Serial number pill */}
-                <View style={styles.serialPill}>
-                  <Text style={styles.serialText}>
-                    N.° {ticket.serialNumber ?? "—"}
-                  </Text>
                 </View>
               </View>
 
               {/* TEAR LINE */}
               <View style={styles.tearLine}>
-                {/* Left notch */}
                 <View style={styles.notchLeft} />
-                {/* Dashed centre */}
                 <View style={styles.dashedCenter} />
-                {/* Right notch */}
                 <View style={styles.notchRight} />
               </View>
 
-              {/* BOTTOM SECTION (stub) */}
+              {/* BOTTOM STUB */}
               <View style={styles.ticketBottom}>
                 <View style={styles.stubRow}>
-                  {/* Left column: buyer info */}
                   <View style={styles.stubInfo}>
                     <Text style={styles.stubLabel}>Nombre y Apellido</Text>
                     <Text style={styles.stubValue} numberOfLines={2}>
@@ -188,7 +164,6 @@ function TicketDetailModal({ ticket, visible, onClose }) {
                     </Text>
                   </View>
 
-                  {/* Right column: QR code */}
                   <View style={styles.stubQR}>
                     <QRCode
                       value={ticket.code ?? "sortealo"}
@@ -201,7 +176,6 @@ function TicketDetailModal({ ticket, visible, onClose }) {
               </View>
             </View>
 
-            {/* Close button below card */}
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <Text style={styles.closeButtonText}>Cerrar</Text>
             </TouchableOpacity>
@@ -212,196 +186,148 @@ function TicketDetailModal({ ticket, visible, onClose }) {
   );
 }
 
-// ─── Ticket list item ─────────────────────────────────────────────────────────
+// ─── Ticket list item ──────────────────────────────────────────────────────────
 function TicketItem({ ticket, onPress }) {
-  const isSold = ticket.status === "SOLD";
-
   return (
     <TouchableOpacity
-      style={[styles.itemCard, isSold ? styles.itemCardSold : styles.itemCardReserved]}
-      onPress={isSold ? onPress : undefined}
-      activeOpacity={isSold ? 0.75 : 1}
+      style={styles.itemCard}
+      onPress={onPress}
+      activeOpacity={0.75}
     >
-      {/* Colored left accent bar */}
-      <View
-        style={[
-          styles.itemAccentBar,
-          { backgroundColor: isSold ? GREEN_500 : YELLOW_500 },
-        ]}
-      />
+      {/* Green accent bar */}
+      <View style={styles.itemAccentBar} />
 
       <View style={styles.itemBody}>
         {/* Event title */}
-        <Text
-          style={[
-            styles.itemTitle,
-            isSold ? styles.itemTitleSold : styles.itemTitleReserved,
-          ]}
-          numberOfLines={1}
-        >
+        <Text style={styles.itemTitle} numberOfLines={1}>
           {ticket.eventTitle ?? "Evento"}
         </Text>
 
-        {/* Place & date row */}
+        {/* Place */}
         <View style={styles.itemMetaRow}>
           <Ionicons name="location-outline" size={13} color={NEUTRAL_500} />
           <Text style={styles.itemMetaText} numberOfLines={1}>
             {ticket.place ?? "—"}
           </Text>
         </View>
+
+        {/* Date */}
         <View style={styles.itemMetaRow}>
           <Ionicons name="calendar-outline" size={13} color={NEUTRAL_500} />
           <Text style={styles.itemMetaText}>
-            {formatDate(ticket.date)}  {formatTime(ticket.date)}
+            {formatDate(ticket.date)} {formatTime(ticket.date)}
           </Text>
         </View>
 
-        {/* Bottom row: price chip + action */}
+        {/* Footer: price + link */}
         <View style={styles.itemFooter}>
-          {/* Price chip */}
-          <View
-            style={[
-              styles.priceChip,
-              isSold ? styles.priceChipSold : styles.priceChipReserved,
-            ]}
-          >
-            <Text
-              style={[
-                styles.priceChipText,
-                isSold ? styles.priceChipTextSold : styles.priceChipTextReserved,
-              ]}
-            >
-              S/. {ticket.price?.toFixed(2) ?? "—"}
+          <View style={styles.priceChip}>
+            <Text style={styles.priceChipText}>
+              S/. {ticket.ticketPrice?.toFixed(2) ?? "—"}
             </Text>
           </View>
-
-          {/* Right side action / badge */}
-          {isSold ? (
-            <Text style={styles.itemDetailLink}>Ver detalle →</Text>
-          ) : (
-            <View style={styles.pendingBadge}>
-              <Ionicons
-                name="time-outline"
-                size={12}
-                color={YELLOW_700}
-                style={{ marginRight: 3 }}
-              />
-              <Text style={styles.pendingBadgeText}>Pendiente de pago</Text>
-            </View>
-          )}
+          <Text style={styles.itemDetailLink}>Ver detalle →</Text>
         </View>
-
-        {/* Reserved warning note */}
-        {!isSold && (
-          <View style={styles.reservedNote}>
-            <Ionicons name="information-circle-outline" size={13} color={YELLOW_700} />
-            <Text style={styles.reservedNoteText}>
-              Escaneaste el QR, pago no confirmado
-            </Text>
-          </View>
-        )}
       </View>
     </TouchableOpacity>
   );
 }
 
-// ─── Main screen ──────────────────────────────────────────────────────────────
+// ─── Main screen ───────────────────────────────────────────────────────────────
 export default function HistoryTickets() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState(TABS[0].key);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
-  const { loading: loadingAuth } = useAuthContext();
-
   const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+
+  const {
+    items: events,
+    loading: loadingEvents,
+    fetched,
+    refresh,
+  } = usePaginatedFetch(
+    `${ENDPOINTS_EVENTS.GET_BY_USER}?role=BUYER&eventStatus=2`,
+  );
 
   useEffect(() => {
-    // Skip until auth is ready
-    if (loadingAuth) return;
+    if (!fetched) return;
+
+    const evList = events ?? [];
+    if (evList.length === 0) {
+      setTickets([]);
+      return;
+    }
+
+    console.log(evList);
 
     let cancelled = false;
+    setLoadingTickets(true);
 
-    async function loadTickets() {
-      setLoading(true);
+    async function fetchTickets() {
       try {
-        // Step 1: fetch all events where the user is a BUYER
-        const eventsRes = await fetchWithAuth(
-          `${ENDPOINTS_EVENTS.GET_BY_USER}?role=BUYER&page=0&size=50`
-        );
-        if (!eventsRes.ok) return;
-
-        const eventsJson = await eventsRes.json();
-        const events = Array.isArray(eventsJson)
-          ? eventsJson
-          : eventsJson?.content ?? [];
-
-        if (events.length === 0) {
-          if (!cancelled) setTickets([]);
-          return;
-        }
-
-        // Step 2: for every event, fetch SOLD (status=3) and RESERVED (status=2) tickets
-        const allTickets = [];
+        const all = [];
 
         await Promise.all(
-          events.map(async (event) => {
-            const [soldRes, reservedRes] = await Promise.all([
-              fetchWithAuth(
-                `${ENDPOINTS_TICKETS.GET}?eventId=${event.id}&ticketStatus=3&page=0&size=200`
-              ),
-              fetchWithAuth(
-                `${ENDPOINTS_TICKETS.GET}?eventId=${event.id}&ticketStatus=2&page=0&size=200`
-              ),
-            ]);
+          evList.map(async (event) => {
+            // Obtener colecciones del evento
+            const colRes = await fetchWithAuth(
+              `${ENDPOINTS_COLLECTIONS.GET_BY_EVENT}?eventId=${event.id}&page=0&size=50`,
+            );
+            if (!colRes.ok) return;
+            const colJson = await colRes.json();
+            const cols = Array.isArray(colJson)
+              ? colJson
+              : (colJson?.content ?? []);
 
-            // Helper: extract ticket array from Page<TicketDto> or plain array
-            async function extractTickets(res, statusLabel) {
-              if (!res.ok) return [];
-              const json = await res.json();
-              const items = Array.isArray(json) ? json : json?.content ?? [];
-              return items.map((t) => ({
-                id: t.id,
-                code: t.code,
-                serialNumber: t.serialNumber,
-                status: statusLabel,
-                eventTitle: event.title,
-                place: event.place,
-                date: event.date,
-                price: event.ticketPrice,
-                buyerName: t.buyer
-                  ? `${t.buyer.firstName ?? ""} ${t.buyer.lastName ?? ""}`.trim()
-                  : null,
-                buyerPhone: t.buyer?.phone ?? null,
-              }));
-            }
+            // Tickets comprados (ticketStatus=2) por colección
+            await Promise.all(
+              cols.map(async (col) => {
+                const res = await fetchWithAuth(
+                  `${ENDPOINTS_TICKETS.GET}?eventId=${event.id}&collectionId=${col.id}&ticketStatus=2&page=0&size=200`,
+                );
 
-            const [sold, reserved] = await Promise.all([
-              extractTickets(soldRes, "SOLD"),
-              extractTickets(reservedRes, "RESERVED"),
-            ]);
+                if (!res.ok) return;
+                const json = await res.json();
+                console.log("Respuesta : ", json);
 
-            allTickets.push(...sold, ...reserved);
-          })
+                const items = Array.isArray(json)
+                  ? json
+                  : (json?.content ?? []);
+                items.forEach((t) =>
+                  all.push({
+                    id: t.id,
+                    code: t.code,
+                    serialNumber: t.serialNumber,
+                    eventTitle: event.title,
+                    place: event.place,
+                    date: event.date,
+                    price: event.ticketPrice,
+                    image: event.image,
+                    buyerName: t.buyer
+                      ? `${t.buyer.firstName ?? ""} ${t.buyer.lastName ?? ""}`.trim()
+                      : null,
+                    buyerPhone: t.buyer?.phone ?? null,
+                  }),
+                );
+              }),
+            );
+          }),
         );
 
-        if (!cancelled) setTickets(allTickets);
+        if (!cancelled) setTickets(all);
       } catch (err) {
         console.warn("HistoryTickets fetch error:", err);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoadingTickets(false);
       }
     }
 
-    loadTickets();
-
+    fetchTickets();
     return () => {
       cancelled = true;
     };
-  }, [loadingAuth]);
-
-  const filteredTickets = tickets.filter((t) => t.status === activeTab);
+  }, [fetched, events]);
 
   function openDetail(ticket) {
     setSelectedTicket(ticket);
@@ -413,75 +339,46 @@ export default function HistoryTickets() {
     setSelectedTicket(null);
   }
 
+  const isLoading = loadingEvents || loadingTickets;
+
   return (
     <SafeAreaView style={styles.screen} edges={["bottom"]}>
-      {(loadingAuth || loading) && <LoadingScreen />}
-
-      {/* ── Tabs ── */}
-      <View style={styles.tabContainer}>
-        {TABS.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            style={[
-              styles.tabItem,
-              activeTab === tab.key && {
-                backgroundColor: GREEN_900,
-                borderColor: GREEN_900,
-              },
-            ]}
-            onPress={() => setActiveTab(tab.key)}
-          >
-            <Ionicons
-              name={tab.icon}
-              size={17}
-              color={activeTab === tab.key ? WHITE : GREEN_900}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === tab.key && styles.tabTextActive,
-              ]}
-            >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Subtitle note for RESERVED tab */}
-      {activeTab === "RESERVED" && (
-        <View style={styles.reservedHint}>
-          <Ionicons name="alert-circle-outline" size={14} color={YELLOW_700} />
-          <Text style={styles.reservedHintText}>
-            Escaneaste el QR pero aún no pagaste
-          </Text>
-        </View>
-      )}
+      {isLoading && <LoadingScreen />}
 
       {/* ── Ticket list ── */}
       <FlatList
-        data={filteredTickets}
-        keyExtractor={(item, idx) =>
-          item.id?.toString() ?? idx.toString()
-        }
+        data={events}
+        keyExtractor={(item, idx) => item.id?.toString() ?? idx.toString()}
         renderItem={({ item }) => (
           <TicketItem ticket={item} onPress={() => openDetail(item)} />
         )}
         contentContainerStyle={styles.listContent}
+        onRefresh={refresh}
+        refreshing={loadingEvents}
+        ListHeaderComponent={
+          !isLoading && tickets.length > 0 ? (
+            <View style={styles.listHeader}>
+              <Ionicons name="ticket-outline" size={15} color={GREEN_500} />
+              <Text style={styles.listHeaderText}>
+                {tickets.length} ticket{tickets.length !== 1 ? "s" : ""}{" "}
+                comprado{tickets.length !== 1 ? "s" : ""}
+              </Text>
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
-          !loading && (
+          !isLoading && (
             <View style={styles.emptyContainer}>
               <Ionicons name="ticket-outline" size={52} color={NEUTRAL_200} />
               <Text style={styles.emptyText}>
-                No tienes tickets{" "}
-                {activeTab === "SOLD" ? "comprados" : "reservados"}.
+                Aún no tienes tickets comprados.
               </Text>
             </View>
           )
         }
       />
 
-      {/* ── FAB: Escanear QR de compra ── */}
+      {/* ── FAB: Escanear QR ── */}
       <TouchableOpacity
         style={styles.fab}
         activeOpacity={0.85}
@@ -491,7 +388,7 @@ export default function HistoryTickets() {
         <Text style={styles.fabText}>Escanear QR</Text>
       </TouchableOpacity>
 
-      {/* ── Ticket detail modal (SOLD only) ── */}
+      {/* ── Detail modal ── */}
       <TicketDetailModal
         ticket={selectedTicket}
         visible={modalVisible}
@@ -501,67 +398,32 @@ export default function HistoryTickets() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: NEUTRAL_50,
   },
 
-  // ── Tabs ──
-  tabContainer: {
-    flexDirection: "row",
-    backgroundColor: GREEN_50,
-    borderBottomWidth: 1,
-    borderBottomColor: NEUTRAL_200,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    gap: 10,
-  },
-  tabItem: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: WHITE,
-    borderWidth: 1,
-    borderColor: NEUTRAL_200,
-    gap: 6,
-  },
-  tabText: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.bold,
-    color: GREEN_900,
-  },
-  tabTextActive: {
-    color: WHITE,
-  },
-
-  // ── Reserved hint banner ──
-  reservedHint: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: YELLOW_100,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: YELLOW_500,
-  },
-  reservedHintText: {
-    fontSize: Typography.sizes.xs,
-    color: YELLOW_700,
-    fontWeight: Typography.weights.medium,
-    flex: 1,
-  },
-
-  // ── List ──
+  // ── List header ──
   listContent: {
     padding: 16,
     paddingBottom: 100,
   },
+  listHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  listHeaderText: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.semibold,
+    color: NEUTRAL_700,
+  },
+
+  // ── FAB ──
   fab: {
     position: "absolute",
     right: 16,
@@ -592,6 +454,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
+    borderColor: Colors.principal.green[200],
     overflow: "hidden",
     elevation: 2,
     shadowColor: "#000",
@@ -599,14 +462,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-  itemCardSold: {
-    borderColor: Colors.principal.green[200],
-  },
-  itemCardReserved: {
-    borderColor: Colors.principal.yellow[200],
-  },
   itemAccentBar: {
     width: 5,
+    backgroundColor: GREEN_500,
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
   },
@@ -618,13 +476,21 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: Typography.sizes.base,
     fontWeight: Typography.weights.bold,
+    color: GREEN_900,
     marginBottom: 2,
   },
-  itemTitleSold: {
-    color: GREEN_900,
+  serialRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    marginBottom: 2,
   },
-  itemTitleReserved: {
-    color: NEUTRAL_700,
+  serialBadge: {
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+    fontFamily: Platform.OS === "ios" ? "ui-monospace" : "monospace",
+    letterSpacing: 0.5,
   },
   itemMetaRow: {
     flexDirection: "row",
@@ -643,68 +509,36 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   priceChip: {
+    backgroundColor: GREEN_50,
+    borderWidth: 1,
+    borderColor: GREEN_100,
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 20,
   },
-  priceChipSold: {
-    backgroundColor: Colors.principal.green[100],
-  },
-  priceChipReserved: {
-    backgroundColor: YELLOW_100,
-  },
   priceChipText: {
     fontSize: Typography.sizes.xs,
     fontWeight: Typography.weights.semibold,
-  },
-  priceChipTextSold: {
     color: GREEN_900,
-  },
-  priceChipTextReserved: {
-    color: YELLOW_700,
   },
   itemDetailLink: {
     fontSize: Typography.sizes.xs,
     color: GREEN_500,
     fontWeight: Typography.weights.semibold,
   },
-  pendingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: YELLOW_100,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 20,
-  },
-  pendingBadgeText: {
-    fontSize: Typography.sizes.xs,
-    color: YELLOW_700,
-    fontWeight: Typography.weights.semibold,
-  },
-  reservedNote: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 4,
-  },
-  reservedNoteText: {
-    fontSize: Typography.sizes.xs,
-    color: YELLOW_700,
-    flex: 1,
-  },
 
   // ── Empty state ──
   emptyContainer: {
     alignItems: "center",
-    paddingVertical: 50,
+    paddingVertical: 60,
     backgroundColor: GREEN_50,
-    borderRadius: 12,
-    marginTop: 12,
+    borderRadius: 16,
+    marginTop: 24,
   },
   emptyText: {
     fontSize: Typography.sizes.base,
     color: NEUTRAL_700,
-    marginTop: 12,
+    marginTop: 14,
     textAlign: "center",
   },
 
@@ -729,15 +563,12 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: WHITE,
     borderRadius: 20,
-    // Shadow
     elevation: 8,
     shadowColor: "#000",
     shadowOpacity: 0.18,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
   },
-
-  // Top section
   ticketTop: {
     paddingBottom: 16,
   },
@@ -822,7 +653,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "rgba(0,0,0,0.55)", // matches backdrop color
+    backgroundColor: "rgba(0,0,0,0.55)",
     marginLeft: -10,
   },
   dashedCenter: {
@@ -837,11 +668,11 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "rgba(0,0,0,0.55)", // matches backdrop color
+    backgroundColor: "rgba(0,0,0,0.55)",
     marginRight: -10,
   },
 
-  // Bottom stub section
+  // Bottom stub
   ticketBottom: {
     paddingHorizontal: 20,
     paddingTop: 12,
