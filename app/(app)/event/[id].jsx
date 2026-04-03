@@ -36,7 +36,6 @@ export default function EventDetailPage() {
   const { formatDateToSpanish } = useDateFormatter();
   const router = useRouter();
   const { id: eventId, eventStatus } = useLocalSearchParams();
-  console.log("Event id : ", eventId);
 
   const { isAdmin, isSeller } = useRaffleContext();
   const { userData } = useAuthContext();
@@ -89,14 +88,10 @@ export default function EventDetailPage() {
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       {loading && <LoadingScreen />}
-      {/**isAdmin && <FloatinActionButtons /> */}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.scrollContent,
-          // Admin FAB is ~90px; seller CTA is in-flow so no extra padding needed
-        ]}
+        contentContainerStyle={[styles.scrollContent]}
         style={{ flex: 1 }}
       >
         {/* ── Hero image ────────────────────────────────────── */}
@@ -203,10 +198,7 @@ export default function EventDetailPage() {
                 </View>
               </View>
               <View style={styles.progressBarWrapper}>
-                <ProgressBar
-                  available={availableTickets}
-                  total={totalTickets}
-                />
+                <ProgressBar soldTickets={soldTickets} total={totalTickets} />
               </View>
             </>
           )}
@@ -226,7 +218,7 @@ export default function EventDetailPage() {
                   <Text style={[styles.metricNumber, { color: BLUE_500 }]}>
                     {reservedTickets}
                   </Text>
-                  <Text style={styles.metricCardLabel}>Reservados</Text>
+                  <Text style={styles.metricCardLabel}>En espera</Text>
                 </View>
                 <View style={styles.metricCard}>
                   <Text style={styles.metricNumber}>{availableTickets}</Text>
@@ -236,7 +228,7 @@ export default function EventDetailPage() {
                   <Text style={[styles.metricNumber, { color: GREEN_900 }]}>
                     S/ {collected}
                   </Text>
-                  <Text style={styles.metricCardLabel}>Recaudado</Text>
+                  <Text style={styles.metricCardLabel}>Reservados</Text>
                 </View>
               </View>
             </>
@@ -262,19 +254,30 @@ export default function EventDetailPage() {
                   <Text style={styles.sectionLabel}>
                     {isAdmin ? "Talonarios" : "Mi Talonario"}
                   </Text>
+                  <Text
+                    style={{
+                      fontSize: Typography.sizes.sm,
+                      color: NEUTRAL_500,
+                      marginBottom: 12,
+                    }}
+                  >
+                    Talonarios de los vendedores asignados a este evento.
+                  </Text>
                   {visibleCols.map((col, index) => {
                     const sellerName =
                       col.seller?.firstName && col.seller?.lastName
                         ? `${col.seller.firstName} ${col.seller.lastName}`
                         : (col.seller?.username ?? "Sin vendedor");
-                    const colTotal = col.ticketsQuantity ?? 0;
+
                     const colSold = col.soldTickets ?? 0;
                     const colReserved = col.reservedTickets ?? 0;
                     const colAvailable = col.availableTickets ?? 0;
+                    const colTotal = colReserved + colAvailable + colSold;
                     const pct =
                       colTotal > 0
                         ? `${(((colSold + colReserved) / colTotal) * 100).toFixed(0)}%`
                         : "0%";
+                    console.log("Col : ", col);
 
                     return (
                       <TouchableOpacity
@@ -282,18 +285,13 @@ export default function EventDetailPage() {
                         style={styles.collectionCard}
                         activeOpacity={0.75}
                         onPress={() =>
-                          isAdmin
-                            ? router.push({
-                                pathname: "/(app)/vendedores/event/[id]",
-                                params: {
-                                  id: eventId,
-                                  titleEvent: event?.title,
-                                },
-                              })
-                            : router.push({
-                                pathname: "/(app)/tickets/sell/[id]",
-                                params: { id: eventId },
-                              })
+                          router.push({
+                            pathname: "/vendedores/metrics/[id]",
+                            params: {
+                              id: col?.seller?.id,
+                              idEvent: eventId,
+                            },
+                          })
                         }
                       >
                         {/* Header */}
@@ -310,13 +308,10 @@ export default function EventDetailPage() {
                             >
                               {sellerName}
                             </Text>
-                            <Text style={styles.collectionCode}>
-                              #{col.code}
-                            </Text>
                           </View>
                           <View style={styles.collectionBadge}>
                             <Text style={styles.collectionBadgeText}>
-                              {pct} ocupado
+                              {pct} progreso
                             </Text>
                           </View>
                         </View>
@@ -390,7 +385,7 @@ export default function EventDetailPage() {
         </View>
       </ScrollView>
 
-      {/* ── Barra inferior: Vender + Agregar Vendedor (solo admin) ── */}
+      {/* ── Barra inferior: Vender + Confirmar + Agregar Vendedor (solo admin) ── */}
       {showBottomBar && (
         <View style={styles.sellBar}>
           <TouchableOpacity
@@ -405,6 +400,23 @@ export default function EventDetailPage() {
           >
             <Text style={styles.sellButtonText}>Vender Tickets</Text>
             <Ionicons name="arrow-forward" size={18} color={WHITE} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.confirmTicketsButton}
+            activeOpacity={0.85}
+            onPress={() =>
+              router.push({
+                pathname: "/(app)/tickets/confirmar/[id]",
+                params: { id: eventId },
+              })
+            }
+          >
+            <Ionicons
+              name="checkmark-done-outline"
+              size={22}
+              color={GREEN_900}
+            />
           </TouchableOpacity>
 
           {isAdmin && (
@@ -506,6 +518,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
     paddingBottom: 16,
+    height: "100%",
   },
   titleRow: {
     flexDirection: "row",
@@ -517,7 +530,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: Typography.sizes["2xl"],
     fontWeight: Typography.weights.extrabold,
-    color: GREEN_900,
+    color: "#0000",
     lineHeight: 30,
   },
   editButton: {
@@ -756,5 +769,15 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: BLUE_500,
+  },
+  confirmTicketsButton: {
+    width: 52,
+    height: 52,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: GREEN_50,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: GREEN_900,
   },
 });

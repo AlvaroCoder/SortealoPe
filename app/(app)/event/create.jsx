@@ -82,24 +82,37 @@ export default function CreateEventStepper() {
     setLoading(true);
 
     try {
-      // 1. Subir imagen primero
-      const multipart = new FormData();
-      multipart.append("file", formData.image); // { uri, type, name }
+      // 1. Resolve image URL — either upload a local file or use sample URL directly
+      let imageUrl;
+      if (typeof formData.image === "string") {
+        // Sample image selected — URL is already hosted, use it directly
+        imageUrl = formData.image;
+        console.log("imagen : ", imageUrl);
+      } else {
+        // Local file object ({ uri, type, name }) — upload to server first
+        const multipart = new FormData();
+        multipart.append("file", formData.image);
 
-      const uploadRes = await UploadImage(multipart);
-      if (!uploadRes.ok) {
-        Alert.alert("Error", "No se pudo subir la imagen. Inténtalo de nuevo.");
-        return;
-      }
+        const uploadRes = await UploadImage(multipart);
+        if (!uploadRes.ok) {
+          Alert.alert(
+            "Error",
+            "No se pudo subir la imagen. Inténtalo de nuevo.",
+          );
+          setLoading(false);
+          return;
+        }
 
-      const uploadJson = await uploadRes.json();
-      const imageUrl = uploadJson?.url;
+        const uploadJson = await uploadRes.json();
+        imageUrl = uploadJson?.url;
 
-      console.log("Respuesta imagen : ", imageUrl);
+        console.log("Respuesta imagen : ", imageUrl);
 
-      if (!imageUrl) {
-        Alert.alert("Error", "No se recibió la URL de la imagen subida.");
-        return;
+        if (!imageUrl) {
+          Alert.alert("Error", "No se recibió la URL de la imagen subida.");
+          setLoading(false);
+          return;
+        }
       }
 
       // 2. Construir payload con tipos correctos

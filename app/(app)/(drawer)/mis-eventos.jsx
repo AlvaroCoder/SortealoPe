@@ -31,7 +31,7 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const BASE_URL = ENDPOINTS_EVENTS.GET_BY_USER;
 
 const TABS = [
-  { key: "1", label: "En Espera", icon: "time-outline" },
+  { key: "1", label: "En espera", icon: "time-outline" },
   { key: "2", label: "Activos", icon: "play-circle-outline" },
   { key: "3", label: "Finalizados", icon: "flag-outline" },
 ];
@@ -119,7 +119,7 @@ function EventItem({ item }) {
 // ── Pantalla principal ───────────────────────────────────────────────────────
 
 export default function MisEventos() {
-  const [activeTab, setActiveTab] = useState("1");
+  const [activeTab, setActiveTab] = useState("2");
   const [refreshing, setRefreshing] = useState(false);
   const { userData, loading: loadingAuth } = useAuthContext();
 

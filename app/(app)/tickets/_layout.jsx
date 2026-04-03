@@ -33,6 +33,12 @@ export default function RootLayout() {
           header: () => <HeaderBackNav title="Escanear QR" />,
         }}
       />
+      <Stack.Screen
+        name="confirmar/[id]"
+        options={{
+          header: () => <HeaderBackNav title="Confirmar Tickets" />,
+        }}
+      />
     </Stack>
   );
 }

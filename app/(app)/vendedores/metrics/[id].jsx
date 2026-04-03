@@ -4,7 +4,10 @@ import { useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ENDPOINTS_USERS } from "../../../../Connections/APIURLS";
+import {
+  ENDPOINTS_EVENTS,
+  ENDPOINTS_USERS,
+} from "../../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../../constants/theme";
 import { useFetch } from "../../../../lib/useFetch";
 import LoadingScreen from "../../../../screens/LoadingScreen";
@@ -64,10 +67,14 @@ function InfoRow({ icon, label, value, last = false }) {
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function VendorMetricsPage() {
-  const { id: vendedorId } = useLocalSearchParams();
+  const { id: vendedorId, idEvent } = useLocalSearchParams();
 
   const { data: vendor, loading } = useFetch(
     `${ENDPOINTS_USERS.GET_BY_ID}${vendedorId}`,
+  );
+
+  const { data: event, loading: loadingEvent } = useFetch(
+    `${ENDPOINTS_EVENTS.GET_BY_ID}${idEvent}?eventStatus=2`,
   );
 
   // ── Derived display values ────────────────────────────────────────────────
@@ -90,20 +97,25 @@ export default function VendorMetricsPage() {
   // ── Ticket metrics ────────────────────────────────────────────────────────
   const { soldTickets, reservedTickets, availableTickets, assignedTickets } =
     useMemo(() => {
-      const sold = vendor?.soldTickets ?? 0;
-      const assigned = vendor?.assignedTickets ?? 0;
-      const reserved = vendor?.reservedTickets ?? 0;
+      const coleccion = event?.collections?.filter(
+        (c) => c?.seller?.id === Number(vendedorId),
+      )[0];
+      console.log("Coleccion encontrada ", coleccion);
+
+      const sold = coleccion?.soldTickets ?? 0;
+      const assigned = coleccion?.availableTickets ?? 0;
+      const reserved = coleccion?.onHoldTickets ?? 0;
       // availableTickets = assigned - sold - reserved (floor at 0)
-      const available = Math.max(0, assigned - sold - reserved);
+      const available = coleccion?.availableTickets ?? 0;
       return {
         soldTickets: sold,
         reservedTickets: reserved,
         availableTickets: available,
         assignedTickets: assigned,
       };
-    }, [vendor]);
+    }, [event, vendedorId]);
 
-  if (loading) return <LoadingScreen />;
+  if (loading || loadingEvent) return <LoadingScreen />;
 
   const profileImageSource = vendor?.photo ?? null;
 
@@ -149,18 +161,13 @@ export default function VendorMetricsPage() {
 
           {/* Role badge */}
           <View style={styles.roleBadge}>
-            <Ionicons
-              name="storefront-outline"
-              size={13}
-              color={WHITE}
-            />
+            <Ionicons name="storefront-outline" size={13} color={WHITE} />
             <Text style={styles.roleBadgeText}>Vendedor</Text>
           </View>
         </View>
 
         {/* ── Content area ───────────────────────────────────── */}
         <View style={styles.content}>
-
           {/* ── Contact / account info ─────────────────────── */}
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Información</Text>
@@ -220,12 +227,6 @@ export default function VendorMetricsPage() {
                 value={availableTickets.toLocaleString()}
                 color={NEUTRAL_700}
                 icon="ticket-outline"
-              />
-              <MetricCard
-                label="Asignados"
-                value={assignedTickets.toLocaleString()}
-                color={GREEN_900}
-                icon="layers-outline"
               />
             </View>
           </View>

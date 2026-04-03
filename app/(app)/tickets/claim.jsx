@@ -58,44 +58,22 @@ export default function ClaimTicketScreen() {
           <View style={styles.successIconRing}>
             <Ionicons name="checkmark-circle" size={52} color={WHITE} />
           </View>
-          <Text style={styles.successTitle}>¡Tickets comprados!</Text>
+          <Text style={styles.successTitle}>¡Tickets reservados!</Text>
           <Text style={styles.successSubtitle}>
-            Tu compra fue confirmada. Guarda este QR para presentarlo al
-            ingresar al sorteo.
+            Tu reserva fue confirmada. En breves el vendedor confirmará la
+            compra.
           </Text>
         </View>
 
         {/* ── QR de presentación ── */}
         <View style={styles.qrCard}>
-          <View style={styles.qrWrapper}>
-            <QRCode
-              value={reservationCode}
-              size={220}
-              color={GREEN_900}
-              backgroundColor={WHITE}
-              quietZone={16}
-            />
-          </View>
-
-          {/* Instrucción */}
-          <View style={styles.instructionRow}>
-            <Ionicons
-              name="scan-outline"
-              size={18}
-              color={GREEN_500}
-            />
-            <Text style={styles.instructionText}>
-              Presenta este QR al ingresar al sorteo
-            </Text>
-          </View>
-
-          {/* Código de reserva textual */}
-          <View style={styles.codeBox}>
-            <Text style={styles.codeLabel}>Código de reserva</Text>
-            <Text style={styles.codeValue} numberOfLines={1} adjustsFontSizeToFit>
-              {reservationCode}
-            </Text>
-          </View>
+          <QRCode
+            value={reservationCode}
+            size={220}
+            color={GREEN_900}
+            backgroundColor={WHITE}
+            quietZone={16}
+          />
         </View>
 
         {/* ── Info box ── */}

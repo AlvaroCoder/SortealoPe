@@ -136,19 +136,6 @@ function QRCard({ reservationCode, tickets }) {
         {tickets.length} ticket{tickets.length !== 1 ? "s" : ""} incluido
         {tickets.length !== 1 ? "s" : ""}
       </Text>
-
-      <View style={styles.ticketPillList}>
-        {tickets.map((t) => (
-          <View key={t.code} style={styles.ticketPill}>
-            <Text style={styles.ticketPillSerial}>
-              N.° {t.serialNumber ?? t.id}
-            </Text>
-            <Text style={styles.ticketPillCode} numberOfLines={1}>
-              {t.code}
-            </Text>
-          </View>
-        ))}
-      </View>
     </View>
   );
 }
@@ -184,7 +171,7 @@ export default function SellTicketScreen() {
         const res = await GetCollectionsByEvent(eventId);
         if (!res.ok) throw new Error("No se pudieron cargar las colecciones.");
         const body = await res.json();
-        const collections = Array.isArray(body) ? body : body?.content ?? [];
+        const collections = Array.isArray(body) ? body : (body?.content ?? []);
 
         const mine =
           collections.find(
@@ -224,7 +211,7 @@ export default function SellTicketScreen() {
   // Response is Page<TicketDto> — extract content
   const tickets = Array.isArray(ticketsData)
     ? ticketsData
-    : ticketsData?.content ?? [];
+    : (ticketsData?.content ?? []);
 
   // ── Toggle selection ────────────────────────────────────────────────────────
   const toggleTicket = useCallback((ticket) => {
@@ -319,9 +306,7 @@ export default function SellTicketScreen() {
         <View style={styles.legend}>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: GREEN_500 }]} />
-            <Text style={styles.legendText}>
-              Disponible ({tickets.length})
-            </Text>
+            <Text style={styles.legendText}>Disponible ({tickets.length})</Text>
           </View>
         </View>
 
@@ -394,7 +379,7 @@ export default function SellTicketScreen() {
               <Text style={styles.ticketListBadgeText}>{t.serialNumber}</Text>
             </View>
             <Text style={styles.ticketListCode} numberOfLines={1}>
-              {t.code}
+              Ticket # {t.id}
             </Text>
           </View>
         ))}
@@ -431,7 +416,9 @@ export default function SellTicketScreen() {
           <Ionicons name="qr-code-outline" size={20} color={WHITE} />
         )}
         <Text style={styles.btnPrimaryText}>
-          {submitting ? "Procesando…" : `Confirmar y generar QR (${selectedTickets.length})`}
+          {submitting
+            ? "Procesando…"
+            : `Confirmar y generar QR (${selectedTickets.length})`}
         </Text>
       </TouchableOpacity>
 

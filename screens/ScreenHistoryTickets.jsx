@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +15,9 @@ import EventListItem from "../components/common/Card/EventListItem";
 import { Colors, Typography } from "../constants/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const IMAGE_SORTEALO_TRISTE =
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1775246084/mascota_sortealo_triste.png";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_50 = Colors.principal.green[50];
@@ -39,8 +43,9 @@ export default function ScreenHistoryTickets({
   tabs = [],
   onRefresh,
   refreshing = false,
+  initialTab = 0,
 }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialTab);
   const scrollRef = useRef(null);
 
   const goToTab = (index) => {
@@ -149,15 +154,18 @@ export default function ScreenHistoryTickets({
                   <View style={styles.footerSpacer} />
                 ) : tab.items.length > 0 ? (
                   <Text style={styles.footerEnd}>
-                    · {tab.total}{" "}
-                    {tab.total === 1 ? "evento" : "eventos"} en total ·
+                    · {tab.total} {tab.total === 1 ? "evento" : "eventos"} en
+                    total ·
                   </Text>
                 ) : null
               }
               ListEmptyComponent={
                 !tab.loading ? (
                   <View style={styles.emptyContainer}>
-                    <Text style={styles.emptyIcon}>📋</Text>
+                    <Image
+                      source={IMAGE_SORTEALO_TRISTE}
+                      style={{ width: 120, height: 150, marginBottom: 20 }}
+                    />
                     <Text style={styles.emptyText}>
                       No hay eventos en este estado
                     </Text>

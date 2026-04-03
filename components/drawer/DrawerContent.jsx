@@ -16,7 +16,6 @@ const GREEN_700 = Colors.principal.green[700];
 const GREEN_500 = Colors.principal.green[500];
 const GREEN_100 = Colors.principal.green[100];
 const GREEN_50 = Colors.principal.green[50];
-const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const WHITE = "#FFFFFF";
@@ -33,19 +32,14 @@ const NAV_ITEMS = [
     label: "Eventos Asignados",
   },
   {
-    route: "/(app)/metricas/eventos",
-    icon: "analytics-outline",
-    label: "Métricas",
-  },
-  {
     route: "/(app)/vendedores/scan",
     icon: "qr-code-outline",
-    label: "Escanear QR",
+    label: "Escanear Vendedor",
   },
   {
     route: "/(app)/tickets/scan",
     icon: "qr-code-outline",
-    label: "Escanear QR Comprador",
+    label: "Escanear Talonario",
   },
 ];
 

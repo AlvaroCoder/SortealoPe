@@ -82,5 +82,18 @@
 - `expo-image` `<Image>` used for photo display (`contentFit="cover"`, `transition={200}`)
 - Camera badge: `position:absolute, bottom:6, right:6` inside `overflow:"hidden"` avatar ring
 
+## Image Picker Flow (event creation Step 4)
+- `lib/imageCropStore.js` — module-level store; `storePickedImage(value)` / `consumePickedImage()`
+- `app/(app)/event/subirImagen.jsx` — full-screen picker (custom header, 16:9 preview, 3-col grid, sample images, local pick)
+  - Registered in `app/(app)/event/_layout.jsx` with `headerShown: false`
+  - Accepts `currentImageUri` param to restore selection state on re-entry
+  - Calls `storePickedImage` then `router.back()` — consumer reads via `useFocusEffect`
+- `components/steps/Step3Content.jsx` — consumes store in `useFocusEffect(useCallback(..., [setForm]))`
+  - No longer imports ButtonUploadImage; uses inline image preview card + navigation
+  - Preview card: 16:9 `aspectRatio` with "Cambiar imagen" overlay; placeholder: dashed area with camera icon
+- `create.jsx handleSubmit` — branched: `typeof formData.image === 'string'` → use URL directly; else upload via UploadImage
+- Sample images array stored in subirImagen.jsx (two Cloudinary URLs)
+- Image picker options: `aspect:[16,9]`, `allowsEditing:true`, `quality:0.9`
+
 ## File References
 - See `patterns.md` for deeper architectural notes (linked from here)

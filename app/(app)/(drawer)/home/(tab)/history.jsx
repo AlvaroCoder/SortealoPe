@@ -50,9 +50,10 @@ export default function History() {
         <LoadingScreen />
       ) : (
         <ScreenHistoryTickets
+          initialTab={1}
           tabs={[
             {
-              label: "Espera",
+              label: "En espera",
               items: espera.items,
               loading: espera.loading,
               hasMore: espera.hasMore,
@@ -60,7 +61,7 @@ export default function History() {
               loadMore: espera.loadMore,
             },
             {
-              label: "Creada",
+              label: "Creados",
               items: creada.items,
               loading: creada.loading,
               hasMore: creada.hasMore,

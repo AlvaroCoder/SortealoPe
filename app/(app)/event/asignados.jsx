@@ -81,7 +81,12 @@ function EventItem({ item }) {
 
         <View style={styles.cardRow}>
           <Ionicons name="pricetag-outline" size={13} color={GREEN_500} />
-          <Text style={[styles.cardRowText, { color: GREEN_500, fontWeight: Typography.weights.bold }]}>
+          <Text
+            style={[
+              styles.cardRowText,
+              { color: GREEN_500, fontWeight: Typography.weights.bold },
+            ]}
+          >
             S/ {(item.ticketPrice ?? 0).toFixed(2)} por ticket
           </Text>
         </View>
@@ -107,6 +112,8 @@ export default function Asignados() {
 
   const { items, loading, hasMore, totalElements, fetched, loadMore, refresh } =
     usePaginatedFetch(shouldFetch ? EVENTS_URL : null);
+
+  console.log("Items eventos asignados : ", items);
 
   // Búsqueda cliente sobre los ítems ya cargados
   const filtered = useMemo(() => {
@@ -204,9 +211,7 @@ export default function Asignados() {
                 />
               </View>
               <Text style={styles.emptyTitle}>
-                {query.trim()
-                  ? "Sin resultados"
-                  : "Sin eventos asignados"}
+                {query.trim() ? "Sin resultados" : "Sin eventos asignados"}
               </Text>
               <Text style={styles.emptyText}>
                 {query.trim()

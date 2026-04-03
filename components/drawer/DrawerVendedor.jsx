@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../constants/theme";
 import { useAuthContext } from "../../context/AuthContext";
 import { useRaffleContext } from "../../context/RaffleContext";
@@ -18,9 +18,24 @@ const NAV_ITEMS = [
 
 export default function DrawerVendedorContent({ navigation }) {
   const router = useRouter();
-  const { userData } = useAuthContext();
+  const { userData, signout } = useAuthContext();
   const { userRole } = useRaffleContext();
   const userName = userData?.username || userData?.email || "Vendedor";
+
+  const handleSignout = () => {
+    Alert.alert("Cerrar sesión", "¿Estás seguro que deseas salir?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Salir",
+        style: "destructive",
+        onPress: async () => {
+          navigation.closeDrawer();
+          await signout();
+          router.replace("/(auth)/login");
+        },
+      },
+    ]);
+  };
 
   const navigate = (route) => {
     router.push(route);
@@ -53,6 +68,10 @@ export default function DrawerVendedorContent({ navigation }) {
           userRole={userRole}
           onPress={() => navigation.navigate("profile")}
         />
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleSignout}>
+          <Ionicons name="log-out-outline" size={20} color="#D52941" />
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -98,4 +117,15 @@ const styles = StyleSheet.create({
     borderTopColor: NEUTRAL_100,
     backgroundColor: WHITE,
   },
+  logoutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: "#FFF0F2",
+  },
+  logoutText: { fontSize: 15, fontWeight: "600", color: "#D52941" },
 });

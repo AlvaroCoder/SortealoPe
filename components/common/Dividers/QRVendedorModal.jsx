@@ -164,22 +164,6 @@ const Step2Content = ({ collectionCode, ticketQuantity, onClose }) => {
         />
       </View>
 
-      {/* Código textual */}
-      <View style={styles.codeBox}>
-        <Ionicons name="key-outline" size={14} color={GREEN_500} />
-        <Text style={styles.codeText} numberOfLines={1}>
-          {collectionCode}
-        </Text>
-      </View>
-
-      {/* Deep link hint */}
-      <View style={styles.linkBox}>
-        <Ionicons name="link-outline" size={14} color={GREEN_500} />
-        <Text style={styles.linkText} numberOfLines={2}>
-          {deepLink}
-        </Text>
-      </View>
-
       <View style={styles.row}>
         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
           <Ionicons name="share-outline" size={18} color={GREEN_900} />

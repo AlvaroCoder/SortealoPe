@@ -56,12 +56,10 @@ export default function VendedorEventoDetalle() {
     ) ??
     allCollections[0] ??
     null;
-  console.log("my collection : ", myCollection);
-
   const colSold = myCollection?.soldTickets ?? 0;
   const colReserved = myCollection?.reservedTickets ?? 0;
   const colAvailable = myCollection?.availableTickets ?? 0;
-  const colTotal = colSold + colReserved + colAvailable;
+  const colTotal = colSold + colReserved + colAvailable || 0;
   console.log("col Available ", colAvailable);
   console.log("total : ", colTotal);
 
@@ -177,7 +175,7 @@ export default function VendedorEventoDetalle() {
 
           {/* Barra de progreso global */}
           <View style={styles.progressBarWrapper}>
-            <ProgressBar available={colAvailable} total={colTotal} />
+            <ProgressBar soldTickets={colSold} total={colTotal} />
           </View>
         </View>
       </ScrollView>
@@ -197,6 +195,18 @@ export default function VendedorEventoDetalle() {
           <Ionicons name="ticket-outline" size={20} color={WHITE} />
           <Text style={styles.sellButtonText}>Vender Tickets</Text>
           <Ionicons name="arrow-forward" size={18} color={WHITE} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.confirmTicketsButton}
+          activeOpacity={0.85}
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/tickets/confirmar/[id]",
+              params: { id: eventId },
+            })
+          }
+        >
+          <Ionicons name="checkmark-done-outline" size={22} color={GREEN_900} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -484,6 +494,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
+    gap: 8,
     paddingVertical: 12,
     backgroundColor: WHITE,
     borderTopWidth: 1,
@@ -503,5 +514,15 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.base,
     fontWeight: Typography.weights.bold,
     color: WHITE,
+  },
+  confirmTicketsButton: {
+    width: 52,
+    height: 52,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: GREEN_50,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: GREEN_900,
   },
 });

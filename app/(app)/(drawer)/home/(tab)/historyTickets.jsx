@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -78,7 +79,7 @@ function TicketDetailModal({ ticket, visible, onClose }) {
                 {/* Event title banner */}
                 <View style={styles.ticketBanner}>
                   <Text style={styles.ticketBannerText} numberOfLines={2}>
-                    {ticket.eventTitle ?? "Evento"}
+                    {ticket.title ?? "Evento"}
                   </Text>
                 </View>
 
@@ -122,7 +123,10 @@ function TicketDetailModal({ ticket, visible, onClose }) {
 
                 {/* Icon placeholder */}
                 <View style={styles.ticketImageBox}>
-                  <Ionicons name="gift-outline" size={52} color={NEUTRAL_500} />
+                  <Image
+                    source={ticket?.image}
+                    style={{ width: 384, height: 216 }}
+                  />
                 </View>
               </View>
 
@@ -137,17 +141,7 @@ function TicketDetailModal({ ticket, visible, onClose }) {
               <View style={styles.ticketBottom}>
                 <View style={styles.stubRow}>
                   <View style={styles.stubInfo}>
-                    <Text style={styles.stubLabel}>Nombre y Apellido</Text>
-                    <Text style={styles.stubValue} numberOfLines={2}>
-                      {ticket.buyerName ?? "—"}
-                    </Text>
-
-                    <Text style={[styles.stubLabel, { marginTop: 10 }]}>
-                      Celular
-                    </Text>
-                    <Text style={styles.stubValue}>
-                      {ticket.buyerPhone ?? "—"}
-                    </Text>
+                    <Text style={styles.stubValue}>{ticket.phone ?? "—"}</Text>
 
                     <Text style={[styles.stubLabel, { marginTop: 10 }]}>
                       Fecha
@@ -250,6 +244,8 @@ export default function HistoryTickets() {
     `${ENDPOINTS_EVENTS.GET_BY_USER}?role=BUYER&eventStatus=2`,
   );
 
+  console.log(events);
+
   useEffect(() => {
     if (!fetched) return;
 
@@ -258,8 +254,6 @@ export default function HistoryTickets() {
       setTickets([]);
       return;
     }
-
-    console.log(evList);
 
     let cancelled = false;
     setLoadingTickets(true);
@@ -340,6 +334,7 @@ export default function HistoryTickets() {
   }
 
   const isLoading = loadingEvents || loadingTickets;
+  console.log("Ticket seleccionado : ", selectedTicket);
 
   return (
     <SafeAreaView style={styles.screen} edges={["bottom"]}>
@@ -620,7 +615,7 @@ const styles = StyleSheet.create({
   },
   ticketImageBox: {
     marginHorizontal: 20,
-    marginTop: 16,
+    marginTop: 30,
     height: 180,
     borderRadius: 12,
     backgroundColor: NEUTRAL_100,

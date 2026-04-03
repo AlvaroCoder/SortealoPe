@@ -24,13 +24,6 @@ export default function RootLayout() {
       />
 
       <Stack.Screen
-        name="mis-eventos/vendedor"
-        options={{
-          header: () => <HeaderBackNav title="Mis Eventos" />,
-        }}
-      />
-
-      <Stack.Screen
         name="asignados"
         options={{
           header: () => <HeaderBackNav title="Eventos Asignados" />,
@@ -43,6 +36,8 @@ export default function RootLayout() {
           header: () => <HeaderBackNav title="Detalle del Evento" />,
         }}
       />
+
+      <Stack.Screen name="subirImagen" options={{ headerShown: false }} />
     </Stack>
   );
 }

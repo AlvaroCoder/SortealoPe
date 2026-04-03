@@ -136,7 +136,7 @@ export default function PageScanQR() {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.message ?? "No se pudo aceptar la invitación.");
       }
-      router.push("/(app)/event/asignados");
+      router.replace("/(app)/(drawer)/home");
     } catch (err) {
       Alert.alert("Error", err.message);
     } finally {

@@ -10,10 +10,8 @@ import {
   Text,
   View,
 } from "react-native";
-import ButtonLoginGoogle from "../../components/common/Buttons/ButtonLoginGoogle";
 import OutlineTextField from "../../components/common/TextFields/OutlineTextField";
 import TextPrevAccount from "../../components/common/Texts/TextPrevAccount";
-import { Colors } from "../../constants/theme";
 import { useAuthContext } from "../../context/AuthContext";
 import { isValidEmail } from "../../lib/validate";
 import LoadingScreen from "../../screens/LoadingScreen";
@@ -33,15 +31,17 @@ export default function Login() {
     if (!formData.email || !formData.password) {
       return Alert.alert(
         "Información incompleta",
-        "Ingresa tus datos para continuar"
+        "Ingresa tus datos para continuar",
       );
     }
     if (!isValidEmail(formData.email)) {
       return Alert.alert(
         "Correo no válido",
-        "Ingresa un correo electrónico válido"
+        "Ingresa un correo electrónico válido",
       );
     }
+    console.log("Data form data : ", formData);
+
     const result = await signin(formData);
     if (result?.error) {
       return Alert.alert("Error", result.error);
@@ -88,16 +88,6 @@ export default function Login() {
           />
         </FormInitial>
 
-        <View style={styles.dividerContainer}>
-          <View style={styles.line} />
-          <Text style={styles.dividerText}>o continúa con</Text>
-          <View style={styles.line} />
-        </View>
-
-        <View style={styles.googleContainer}>
-          <ButtonLoginGoogle onSuccess={() => router.replace(HOME_ROUTE)} />
-        </View>
-
         <TextPrevAccount type="login" />
 
         <View style={styles.containerBottom}>
@@ -121,26 +111,6 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 20,
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 28,
-    marginBottom: 16,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.principal.neutral[200],
-  },
-  dividerText: {
-    marginHorizontal: 12,
-    color: Colors.principal.neutral[500],
-    fontSize: 14,
-  },
-  googleContainer: {
-    paddingHorizontal: 28,
-    marginBottom: 8,
   },
   image: {
     width: 200,

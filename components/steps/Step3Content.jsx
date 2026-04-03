@@ -1,4 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -7,13 +11,41 @@ import {
   View,
 } from "react-native";
 import { Colors, Typography } from "../../constants/theme";
+import { consumePickedImage } from "../../lib/imageCropStore";
 import ButtonGradiend from "../common/Buttons/ButtonGradiendt";
-import ButtonUploadImage from "../common/Buttons/ButtonUploadImage";
 import Title from "../common/Titles/Title";
 
+// --- Color constants ---
+const GREEN_900 = Colors.principal.green[900];
+const GREEN_50 = Colors.principal.green[50];
+const GREEN_200 = Colors.principal.green[200];
+const NEUTRAL_700 = Colors.principal.neutral[700];
+const WHITE = "#FFFFFF";
+
+const URL_IMAGEN_RIFA =
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1775154006/RIFA_1_krstjg.png";
+
 export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
-  const handleImageSelected = (imageType, uri) => {
-    setForm((prev) => ({ ...prev, [imageType]: uri }));
+  const router = useRouter();
+
+  // When the user returns from subirImagen, consume the stored pick
+  useFocusEffect(
+    useCallback(() => {
+      const picked = consumePickedImage();
+      if (picked) {
+        setForm((prev) => ({ ...prev, image: picked }));
+      }
+    }, [setForm]),
+  );
+
+  // Resolve the displayable URI from either a file object or a URL string
+  const imageUri = form.image?.uri ?? form.image ?? null;
+
+  const handleNavigateToImagePicker = () => {
+    router.push({
+      pathname: "/(app)/event/subirImagen",
+      params: { currentImageUri: imageUri ?? "" },
+    });
   };
 
   const handleFinalSubmit = () => {
@@ -26,28 +58,59 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
 
       <Text style={styles.stepSubtitleText}>
         Sube las piezas gráficas de tu evento. Recuerda que deben cumplir con el
-        tamaño de 1620 x 1080 px para asegurar la calidad.
+        tamaño de 1920 x 1080 px para asegurar la calidad.
       </Text>
 
-      <Text style={styles.inputLabel}>Diseño Visual del Ticket (*)</Text>
+      {/* Static ticket design sample */}
+      <Text style={styles.inputLabel}>Ejemplo visual del Ticket </Text>
+      <View style={{ width: "100%", alignItems: "center", marginBottom: 15 }}>
+        <Image
+          source={URL_IMAGEN_RIFA}
+          style={{ width: 320, height: 180, borderRadius: 20 }}
+        />
+      </View>
 
-      <Text style={styles.inputLabel}>
-        Imagen Principal de la Rifa (Banner)
-      </Text>
-      <ButtonUploadImage
-        title="Subir Banner Promocional"
-        subtitle="Requerido: 1620 x 1080 px"
-        requiredWidth={1620}
-        requiredHeight={1080}
-        image={form.image}
-        onImageSelected={(uri) => handleImageSelected("image", uri)}
-      />
+      {/* Banner image picker */}
+      <Text style={styles.inputLabel}>Imagen Principal de la Rifa (*)</Text>
+
+      {imageUri ? (
+        // ── Image is set: show 16:9 preview card with "Cambiar" overlay ──
+        <View style={styles.previewCard}>
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.previewImage}
+            contentFit="cover"
+            transition={200}
+          />
+          <TouchableOpacity
+            style={styles.changeButton}
+            onPress={handleNavigateToImagePicker}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="camera-outline" size={14} color={WHITE} />
+            <Text style={styles.changeButtonText}>Cambiar imagen</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        // ── No image: dashed placeholder that opens the picker ──
+        <TouchableOpacity
+          style={styles.uploadPlaceholderArea}
+          onPress={handleNavigateToImagePicker}
+          activeOpacity={0.75}
+        >
+          <View style={styles.uploadIconWrapper}>
+            <Ionicons name="camera-outline" size={32} color={GREEN_900} />
+          </View>
+          <Text style={styles.uploadTitle}>Subir imagen del evento</Text>
+          <Text style={styles.uploadSubtitle}>1920 × 1080 px</Text>
+        </TouchableOpacity>
+      )}
 
       <View style={styles.infoBox}>
         <Ionicons
           name="information-circle-outline"
           size={18}
-          color={Colors.principal.neutral[700]}
+          color={NEUTRAL_700}
         />
         <Text style={styles.hintText}>
           Las imágenes que no cumplan con las dimensiones exactas serán
@@ -59,7 +122,7 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Ionicons
             name="arrow-back-outline"
-            style={{ color: Colors.principal.green[900] }}
+            style={{ color: GREEN_900 }}
             size={24}
           />
         </TouchableOpacity>
@@ -73,62 +136,93 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
 }
 
 const styles = StyleSheet.create({
-  appContainer: {
-    flex: 1,
-    backgroundColor: Colors.principal.white,
-  },
   stepContent: {
     flex: 1,
   },
-  simulatedTitle: {
-    fontSize: Typography.sizes.xl,
-    fontWeight: Typography.weights.extrabold,
-    color: Colors.principal.green[900],
-    marginBottom: 10,
-  },
   stepSubtitleText: {
     fontSize: Typography.sizes.base,
-    color: Colors.principal.neutral[700],
+    color: NEUTRAL_700,
     marginBottom: 15,
     lineHeight: 22,
   },
   inputLabel: {
-    fontSize: Typography.sizes.md,
+    fontSize: Typography.sizes.sm,
     fontWeight: "bold",
     marginTop: 10,
     marginBottom: 8,
-    color: Colors.principal.green[900],
+    color: GREEN_900,
   },
-  uploadContainer: {
+
+  // ── Image preview card (when image is set) ──────────────────────────────
+  previewCard: {
     width: "100%",
-    height: 200,
-    backgroundColor: Colors.principal.green[50],
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.principal.green[200],
-    borderStyle: "dashed",
-    justifyContent: "center",
-    alignItems: "center",
+    aspectRatio: 16 / 9,
+    borderRadius: 14,
     overflow: "hidden",
+    backgroundColor: GREEN_50,
+    borderWidth: 1,
+    borderColor: GREEN_200,
   },
-  uploadPlaceholder: {
-    alignItems: "center",
-  },
-  uploadTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: Colors.principal.green[900],
-    marginTop: 8,
-  },
-  uploadSubtitle: {
-    fontSize: 12,
-    color: Colors.principal.green[900],
-    opacity: 0.7,
-  },
-  uploadedImage: {
+  previewImage: {
     width: "100%",
     height: "100%",
   },
+  // "Cambiar imagen" overlay button at bottom-left of the preview
+  changeButton: {
+    position: "absolute",
+    bottom: 10,
+    left: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.55)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 5,
+  },
+  changeButtonText: {
+    color: WHITE,
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.semibold,
+  },
+
+  // ── Upload placeholder (when no image) ──────────────────────────────────
+  uploadPlaceholderArea: {
+    width: "100%",
+    height: 160,
+    backgroundColor: GREEN_50,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: GREEN_200,
+    borderStyle: "dashed",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+  },
+  uploadIconWrapper: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: WHITE,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  uploadTitle: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+  },
+  uploadSubtitle: {
+    fontSize: Typography.sizes.xs,
+    color: GREEN_900,
+    opacity: 0.65,
+  },
+
+  // ── Info box ────────────────────────────────────────────────────────────
   infoBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -139,10 +233,12 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: Typography.sizes.xs,
-    color: Colors.principal.neutral[700],
+    color: NEUTRAL_700,
     marginLeft: 8,
     flex: 1,
   },
+
+  // ── Action row ──────────────────────────────────────────────────────────
   actionRow: {
     flexDirection: "row",
     gap: 5,
@@ -150,22 +246,8 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     width: "100%",
   },
-  simulatedGradientButton: {
-    flex: 1,
-    backgroundColor: Colors.principal.green[900],
-    borderRadius: 12,
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 10,
-  },
-  simulatedGradientButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
   backButton: {
-    borderColor: Colors.principal.green[900],
+    borderColor: GREEN_900,
     borderRadius: 25,
     width: 50,
     height: 50,

@@ -13,10 +13,13 @@ import {
   View,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import { captureRef } from "react-native-view-shot";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { captureRef } from "react-native-view-shot";
 import { ENDPOINTS_EVENTS } from "../../../../../Connections/APIURLS";
-import { CreateReservation, GetTickets } from "../../../../../Connections/tickets";
+import {
+  CreateReservation,
+  GetTickets,
+} from "../../../../../Connections/tickets";
 import { Colors, Typography } from "../../../../../constants/theme";
 import { createTicketClaimURL } from "../../../../../lib/deepLinks";
 import { useFetch } from "../../../../../lib/useFetch";
@@ -219,10 +222,16 @@ export default function VendedorSellTicketScreen() {
     setSubmitting(true);
     try {
       // 1. Fetch available tickets to get their codes
-      const ticketsRes = await GetTickets(eventId, collectionId, 1, 0, quantity);
+      const ticketsRes = await GetTickets(
+        eventId,
+        collectionId,
+        1,
+        0,
+        quantity,
+      );
       if (!ticketsRes.ok) throw new Error("No se pudieron cargar los tickets.");
       const page = await ticketsRes.json();
-      const availTickets = Array.isArray(page) ? page : page?.content ?? [];
+      const availTickets = Array.isArray(page) ? page : (page?.content ?? []);
 
       if (availTickets.length < quantity) {
         throw new Error(
