@@ -18,12 +18,6 @@ const TABS = [
     iconActive: "calendar",
   },
   {
-    name: "team",
-    label: "Equipo",
-    icon: "people-outline",
-    iconActive: "people",
-  },
-  {
     name: "profile",
     label: "Perfil",
     icon: "person-outline",

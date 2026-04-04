@@ -5,6 +5,7 @@ export default function RootLayoutEvents() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="[id]" />
       <Stack.Screen name="create" />
+      <Stack.Screen name="edit" />
     </Stack>
   );
 }

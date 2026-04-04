@@ -51,11 +51,6 @@ export default function AdminDashboard() {
     userId ? `${ENDPOINTS_USERS.GET_BY_ID}${userId}` : null,
   );
 
-  // Single-page fetch for total event count metric (size=1 is enough for totalElements)
-  const { data: allEventsData } = useFetch(
-    `${ENDPOINTS_EVENTS.GET_BY_USER}?role=HOST&page=0&size=1`,
-  );
-
   // Paginated active events list (eventStatus=2)
   const {
     items: recentEvents,
@@ -68,11 +63,7 @@ export default function AdminDashboard() {
   );
 
   // ── Derived metrics ─────────────────────────────────────────────────────────
-  const totalEvents = allEventsData?.totalElements ?? 0;
-
-  const totalSoldTickets = recentEvents.reduce((sum, ev) => {
-    return sum + (ev.soldTickets ?? ev.ticketsSold ?? 0);
-  }, 0);
+  const totalEvents = recentEvents?.length ?? 0;
 
   // ── User display name ───────────────────────────────────────────────────────
   const firstName =
@@ -118,22 +109,6 @@ export default function AdminDashboard() {
 
       {/* ── Metric cards ─────────────────────────────────────────────────── */}
       <View style={styles.metricsSection}>
-        {/* Full-width: Tickets vendidos hoy */}
-        <View style={styles.metricCardFull}>
-          <View style={styles.metricCardRow}>
-            <View style={styles.metricIconBox}>
-              <Ionicons name="ticket-outline" size={20} color={GREEN_900} />
-            </View>
-            <View style={styles.metricGrowthBadge}>
-              <Text style={styles.metricGrowthText}>+12%</Text>
-            </View>
-          </View>
-          <Text style={styles.metricLabel}>Tickets hoy</Text>
-          <Text style={styles.metricValueLarge}>
-            {totalSoldTickets.toLocaleString()}
-          </Text>
-        </View>
-
         {/* Half-width row: Eventos + Ingresos */}
         <View style={styles.metricRow}>
           <View style={[styles.metricCardHalf, { flex: 1, marginRight: 10 }]}>
@@ -302,7 +277,7 @@ export default function AdminDashboard() {
       {/* ── FAB ──────────────────────────────────────────────────────────── */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push("/(app)/event/create")}
+        onPress={() => router.push("/(app)/(admin)/events/create")}
         activeOpacity={0.85}
       >
         <Ionicons name="add" size={28} color={WHITE} />

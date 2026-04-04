@@ -9,7 +9,9 @@ const WHITE = '#FFFFFF';
 
 export default function HeaderBackNav({
     title = "Registrar evento",
-    showBackButton = true
+    showBackButton = true,
+    rightIcon = null,
+    onPressRight = null,
 }) {
   const router = useRouter()
 
@@ -22,19 +24,25 @@ export default function HeaderBackNav({
   return (
     <View style={styles.container}>
       {showBackButton && (
-        <TouchableOpacity 
-          style={styles.backButton} 
+        <TouchableOpacity
+          style={styles.backButton}
           onPress={handleBack}
         >
           <Ionicons name='arrow-back-outline' color={WHITE} size={24}/>
         </TouchableOpacity>
       )}
-      
+
       <Text style={styles.title} numberOfLines={1}>
         {title}
       </Text>
-      
-      {showBackButton && <View style={styles.placeholder} />}
+
+      {rightIcon && onPressRight ? (
+        <TouchableOpacity style={styles.backButton} onPress={onPressRight}>
+          <Ionicons name={rightIcon} color={WHITE} size={22}/>
+        </TouchableOpacity>
+      ) : (
+        showBackButton && <View style={styles.placeholder} />
+      )}
     </View>
   )
 }

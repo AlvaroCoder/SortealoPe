@@ -72,6 +72,8 @@ export default function AdminEventDetailPage() {
   );
   const event = data;
 
+  console.log("Data evento ", data);
+
   // ── Ticket metric aggregations ──────────────────────────────────────────
   const availableTickets =
     data?.collections
@@ -146,6 +148,21 @@ export default function AdminEventDetailPage() {
           </Text>
         </View>
         <Text style={styles.eventIdText}>ID: #EV-{eventId}</Text>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/(admin)/events/edit",
+              params: { id: eventId, eventStatus },
+            })
+          }
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons
+            name="settings-outline"
+            size={20}
+            color={Colors.principal.neutral[500]}
+          />
+        </TouchableOpacity>
       </View>
     );
   }
@@ -174,6 +191,7 @@ export default function AdminEventDetailPage() {
         <Text style={styles.eventDescription} numberOfLines={3}>
           {event?.description ?? "Sin descripción."}
         </Text>
+        <Text>Precio : S/. {ticketPrice.toFixed(2)}</Text>
       </View>
     );
   }
@@ -206,7 +224,6 @@ export default function AdminEventDetailPage() {
     const metrics = [
       { label: "Vendidos", value: soldTickets, color: GREEN_500 },
       { label: "En espera", value: reservedTickets, color: BLUE_500 },
-      { label: "Disponibles", value: availableTickets, color: NEUTRAL_700 },
     ];
     return (
       <View style={styles.metricsRow}>
@@ -485,8 +502,12 @@ export default function AdminEventDetailPage() {
           activeOpacity={0.85}
           onPress={() =>
             router.push({
-              pathname: "/(app)/tickets/sell/[id]",
-              params: { id: eventId },
+              pathname: "/(app)/(admin)/tickets/vender",
+              params: {
+                eventId,
+                ticketPrice: String(ticketPrice),
+                eventTitle: event?.title ?? "",
+              },
             })
           }
         >
@@ -515,7 +536,7 @@ export default function AdminEventDetailPage() {
             activeOpacity={0.85}
             onPress={() =>
               router.push({
-                pathname: "/vendedores/agregar",
+                pathname: "/(app)/(admin)/vendedores/agregar",
                 params: { eventId },
               })
             }

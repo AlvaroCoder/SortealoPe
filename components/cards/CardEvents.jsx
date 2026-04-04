@@ -40,12 +40,8 @@ export default function CardEvents({ item, selectedStatus }) {
   const router = useRouter();
 
   const statusCfg = getStatus({ eventStatus: selectedStatus });
-  console.log("Status config : ", statusCfg);
 
-  const statusValue = item.eventStatus ?? item.status ?? 1;
-
-  console.log("Item ", item);
-  console.log("Valor estado : ", statusValue);
+  const statusValue = selectedStatus;
 
   const sold = item.soldTickets ?? 0;
   const total = item.ticketsPerCollection ?? item.totalTickets ?? 0;

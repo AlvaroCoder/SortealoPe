@@ -201,7 +201,7 @@ export default function EventsTab() {
     <View style={styles.footerWrapper}>
       <TouchableOpacity
         style={styles.createCard}
-        onPress={() => router.push("/(app)/event/create")}
+        onPress={() => router.push("/(app)/(admin)/events/create")}
         activeOpacity={0.8}
       >
         <View style={styles.createIconCircle}>
@@ -252,7 +252,7 @@ export default function EventsTab() {
       {/* FAB */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push("/(app)/event/create")}
+        onPress={() => router.push("/(app)/(admin)/events/create")}
         activeOpacity={0.85}
       >
         <Ionicons name="add" size={28} color={WHITE} />
