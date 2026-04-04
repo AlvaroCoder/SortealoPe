@@ -5,9 +5,14 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -27,23 +32,34 @@ const GREEN_500 = Colors.principal.green[500];
 const GREEN_50 = Colors.principal.green[50];
 const GREEN_100 = Colors.principal.green[100];
 const WHITE = "#FFFFFF";
-const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
+
+// Payment methods with their API modalityId values
+const PAYMENT_METHODS = [
+  { id: 1, label: "Yape", icon: "phone-portrait-outline" },
+  { id: 2, label: "Transferencia", icon: "swap-horizontal-outline" },
+  { id: 3, label: "Efectivo", icon: "cash-outline" },
+  { id: 4, label: "Plin", icon: "phone-portrait-outline" },
+];
 
 export default function ConfirmarTicketsScreen() {
   const { id: eventId } = useLocalSearchParams();
   const { userData } = useAuthContext();
   const { isAdmin } = useRaffleContext();
   const userId = userData?.userId;
-  console.log("Event ID, ", eventId);
-  console.log("Data user ", userData);
 
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [confirmingIds, setConfirmingIds] = useState(new Set());
+
+  // Modal state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [pendingTicket, setPendingTicket] = useState(null);
+  const [selectedModality, setSelectedModality] = useState(1);
+  const [operationNumber, setOperationNumber] = useState("");
 
   const fetchPendingTickets = useCallback(async () => {
     if (!eventId || !userId) return;
@@ -105,15 +121,42 @@ export default function ConfirmarTicketsScreen() {
     setRefreshing(false);
   };
 
-  const handleConfirm = async (ticket) => {
+  // Opens the modal instead of calling ConfirmTicket directly
+  const handleConfirm = (ticket) => {
+    setPendingTicket(ticket);
+    setSelectedModality(1);
+    setOperationNumber("");
+    setModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    setPendingTicket(null);
+  };
+
+  // Called when user taps "Confirmar" inside the modal
+  const handleModalConfirm = async () => {
+    if (!pendingTicket) return;
+
+    const ticket = pendingTicket;
     const ticketKey = ticket.code ?? String(ticket.id);
+    const resolvedOperationNumber = selectedModality === 3 ? "" : operationNumber;
+
+    // Close modal immediately so UX is snappy; spinner shows on the card button
+    setModalVisible(false);
+    setPendingTicket(null);
+
     setConfirmingIds((prev) => new Set([...prev, ticketKey]));
     try {
-      const res = await ConfirmTicket(eventId, ticket.code, {});
+      const res = await ConfirmTicket(eventId, ticket.code, {
+        modalityId: selectedModality,
+        operationNumber: resolvedOperationNumber,
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.message ?? "No se pudo confirmar el ticket.");
       }
+      // Remove confirmed ticket from the list
       setTickets((prev) =>
         prev.filter((t) => (t.code ?? String(t.id)) !== ticketKey),
       );
@@ -131,10 +174,6 @@ export default function ConfirmarTicketsScreen() {
   const renderItem = ({ item }) => {
     const ticketKey = item.code ?? String(item.id);
     const isConfirming = confirmingIds.has(ticketKey);
-    const buyerName = item.buyer?.firstName
-      ? `${item.buyer.firstName} ${item.buyer.lastName ?? ""}`.trim()
-      : (item.buyerName ?? null);
-    const buyerPhone = item.buyer?.phone ?? item.buyerPhone ?? null;
     const shortCode = item.code
       ? `${item.code.substring(0, 8)}…`
       : `#${item.id}`;
@@ -151,28 +190,12 @@ export default function ConfirmarTicketsScreen() {
 
         {/* Info */}
         <View style={styles.cardInfo}>
-          <Text style={styles.codeText}>{shortCode}</Text>
-          {buyerName ? (
-            <View style={styles.metaRow}>
-              <Ionicons name="person-outline" size={12} color={NEUTRAL_500} />
-              <Text style={styles.metaText}>{buyerName}</Text>
-            </View>
-          ) : null}
-          {buyerPhone ? (
-            <View style={styles.metaRow}>
-              <Ionicons name="call-outline" size={12} color={NEUTRAL_500} />
-              <Text style={styles.metaText}>{buyerPhone}</Text>
-            </View>
-          ) : null}
-          {isAdmin && item._collectionCode ? (
-            <View style={styles.metaRow}>
-              <Ionicons name="layers-outline" size={12} color={NEUTRAL_500} />
-              <Text style={styles.metaText}>#{item._collectionCode}</Text>
-            </View>
-          ) : null}
+          <View style={styles.metaRow}>
+            <Text>#{item?.id}</Text>
+          </View>
         </View>
 
-        {/* Confirm button */}
+        {/* Confirm button — now opens modal */}
         <TouchableOpacity
           style={[styles.confirmBtn, isConfirming && styles.confirmBtnDisabled]}
           onPress={() => handleConfirm(item)}
@@ -192,6 +215,143 @@ export default function ConfirmarTicketsScreen() {
     );
   };
 
+  // ── Payment confirmation modal ──────────────────────────────────────────────
+  const renderModal = () => {
+    const isEfectivo = selectedModality === 3;
+    // Lay out pills in two rows of two
+    const row1 = PAYMENT_METHODS.slice(0, 2);
+    const row2 = PAYMENT_METHODS.slice(2, 4);
+
+    return (
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleModalClose}
+        statusBarTranslucent
+      >
+        {/* Semi-transparent backdrop — tap outside to dismiss */}
+        <Pressable style={styles.backdrop} onPress={handleModalClose}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.modalWrapper}
+          >
+            {/* Card — stop backdrop press from propagating through it */}
+            <Pressable style={styles.modalCard} onPress={() => {}}>
+              {/* Header */}
+              <View style={styles.modalHeader}>
+                <View style={styles.modalTitleRow}>
+                  <Ionicons
+                    name="card-outline"
+                    size={20}
+                    color={GREEN_900}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.modalTitle}>Confirmar Pago</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={handleModalClose}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="close" size={22} color={NEUTRAL_500} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.modalDivider} />
+
+              {/* Payment method label */}
+              <Text style={styles.sectionLabel}>Método de pago</Text>
+
+              {/* Pills — 2 × 2 grid */}
+              <View style={styles.pillGrid}>
+                {[row1, row2].map((row, rowIdx) => (
+                  <View key={rowIdx} style={styles.pillRow}>
+                    {row.map((method) => {
+                      const isSelected = selectedModality === method.id;
+                      return (
+                        <TouchableOpacity
+                          key={method.id}
+                          style={[
+                            styles.pill,
+                            isSelected
+                              ? styles.pillSelected
+                              : styles.pillUnselected,
+                          ]}
+                          onPress={() => setSelectedModality(method.id)}
+                          activeOpacity={0.75}
+                        >
+                          <Ionicons
+                            name={method.icon}
+                            size={15}
+                            color={isSelected ? WHITE : NEUTRAL_700}
+                            style={{ marginRight: 5 }}
+                          />
+                          <Text
+                            style={[
+                              styles.pillText,
+                              isSelected
+                                ? styles.pillTextSelected
+                                : styles.pillTextUnselected,
+                            ]}
+                          >
+                            {method.label}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                ))}
+              </View>
+
+              {/* Operation number input — hidden for Efectivo */}
+              {!isEfectivo && (
+                <View style={styles.inputSection}>
+                  <Text style={styles.sectionLabel}>Número de operación</Text>
+                  <TextInput
+                    style={styles.operationInput}
+                    placeholder="Ej. 123456789"
+                    placeholderTextColor={NEUTRAL_500}
+                    value={operationNumber}
+                    onChangeText={setOperationNumber}
+                    keyboardType="default"
+                    autoCapitalize="none"
+                    returnKeyType="done"
+                  />
+                </View>
+              )}
+
+              {/* Action buttons */}
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.cancelBtn}
+                  onPress={handleModalClose}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.cancelBtnText}>Cancelar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.modalConfirmBtn}
+                  onPress={handleModalConfirm}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={16}
+                    color={WHITE}
+                    style={{ marginRight: 5 }}
+                  />
+                  <Text style={styles.modalConfirmBtnText}>Confirmar</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+      </Modal>
+    );
+  };
+  // ───────────────────────────────────────────────────────────────────────────
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={["bottom"]}>
@@ -205,6 +365,9 @@ export default function ConfirmarTicketsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
+      {/* Payment confirmation modal */}
+      {renderModal()}
+
       {/* Count header */}
       <View style={styles.countBar}>
         <View style={styles.countLeft}>
@@ -269,7 +432,7 @@ const styles = StyleSheet.create({
     color: NEUTRAL_500,
   },
 
-  // Count bar
+  // ── Count bar ──────────────────────────────────────────────────────────────
   countBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -313,10 +476,10 @@ const styles = StyleSheet.create({
     color: Colors.principal.yellow[700] ?? "#B45309",
   },
 
-  // List
+  // ── List ───────────────────────────────────────────────────────────────────
   listContent: { padding: 16, paddingBottom: 32 },
 
-  // Ticket card
+  // ── Ticket card ────────────────────────────────────────────────────────────
   card: {
     flexDirection: "row",
     alignItems: "center",
@@ -362,7 +525,7 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: { fontSize: Typography.sizes.xs, color: NEUTRAL_500 },
 
-  // Confirm button
+  // ── Confirm button (on card) ───────────────────────────────────────────────
   confirmBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -382,7 +545,7 @@ const styles = StyleSheet.create({
     fontWeight: Typography.weights.bold,
   },
 
-  // Empty state
+  // ── Empty state ────────────────────────────────────────────────────────────
   emptyContainer: {
     flex: 1,
     alignItems: "center",
@@ -410,5 +573,148 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
     paddingHorizontal: 32,
+  },
+
+  // ── Modal ──────────────────────────────────────────────────────────────────
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "flex-end",
+  },
+  modalWrapper: {
+    // Sits at the bottom; KeyboardAvoidingView pushes it up on iOS
+    justifyContent: "flex-end",
+  },
+  modalCard: {
+    backgroundColor: WHITE,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: Platform.OS === "ios" ? 36 : 24,
+    // Subtle shadow for depth
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+  modalTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: Typography.sizes.lg,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: NEUTRAL_200,
+    marginBottom: 18,
+  },
+
+  // Section label shared by method selector and input
+  sectionLabel: {
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.semibold,
+    color: NEUTRAL_500,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: 10,
+  },
+
+  // ── Payment method pills ───────────────────────────────────────────────────
+  pillGrid: {
+    gap: 10,
+    marginBottom: 20,
+  },
+  pillRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  pill: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 11,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    borderWidth: 1.5,
+  },
+  pillSelected: {
+    backgroundColor: GREEN_900,
+    borderColor: GREEN_900,
+  },
+  pillUnselected: {
+    backgroundColor: WHITE,
+    borderColor: NEUTRAL_200,
+  },
+  pillText: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.semibold,
+  },
+  pillTextSelected: {
+    color: WHITE,
+  },
+  pillTextUnselected: {
+    color: NEUTRAL_700,
+  },
+
+  // ── Operation number input ─────────────────────────────────────────────────
+  inputSection: {
+    marginBottom: 22,
+  },
+  operationInput: {
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: NEUTRAL_200,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    fontSize: Typography.sizes.base,
+    color: NEUTRAL_700,
+    backgroundColor: WHITE,
+  },
+
+  // ── Modal action buttons ───────────────────────────────────────────────────
+  modalActions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  cancelBtn: {
+    flex: 1,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: NEUTRAL_200,
+    backgroundColor: WHITE,
+  },
+  cancelBtnText: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.semibold,
+    color: NEUTRAL_700,
+  },
+  modalConfirmBtn: {
+    flex: 2,
+    height: 50,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 14,
+    backgroundColor: GREEN_900,
+  },
+  modalConfirmBtnText: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+    color: WHITE,
   },
 });

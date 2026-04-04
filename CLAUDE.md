@@ -55,15 +55,17 @@ app/_layout.jsx                    ← ROOT: RaffleProvider > AuthProvider > Sta
     │   └── profile.jsx
     │
     ├── event/
-    │   ├── [id].jsx               ← Detalle de evento (métricas, progreso tickets)
+    │   ├── [id].jsx               ← Detalle de evento (métricas, progreso tickets, botón confirmar tickets)
     │   ├── create.jsx             ← Stepper 4 pasos para crear evento
     │   ├── edit.jsx               ← Edición de evento (precarga con useFetch)
     │   ├── asignados.jsx
+    │   ├── subirImagen.jsx        ← Selector de imagen (headerShown:false, usa imageCropStore)
     │   └── vendedores/[id].jsx
     │
     ├── tickets/
     │   ├── index.jsx
-    │   └── sell/[id].jsx          ← Flujo de venta de ticket
+    │   ├── sell/[id].jsx          ← Flujo de venta de ticket (admin)
+    │   └── confirmar/[id].jsx     ← Lista tickets status=3 + modal de pago → ConfirmTicket
     │
     ├── vendedores/                ← Gestión de vendedores (aún con mock data)
     │   ├── index.jsx
@@ -160,6 +162,20 @@ const { data, loading, error } = useFetch(`${URL}${id}`);
 const { userData, token, loading } = useUser();
 ```
 > **Nota:** Duplica funcionalidad de `AuthContext`. Preferir `useAuthContext()` cuando ya estés dentro del árbol de proveedores. Usar `useUser()` solo cuando necesites el token raw para llamadas directas a la API (como en `create.jsx` y `edit.jsx`).
+
+### `imageCropStore.js` — Store modular para pasar imágenes entre pantallas
+```js
+import { storePickedImage, consumePickedImage } from '@/lib/imageCropStore';
+// En subirImagen.jsx al confirmar:
+storePickedImage(imageValue); // string (URL Cloudinary) o { uri, type, name } (local)
+router.back();
+// En Step3Content.jsx al recibir foco:
+useFocusEffect(useCallback(() => {
+  const picked = consumePickedImage();
+  if (picked) setForm(prev => ({ ...prev, image: picked }));
+}, [setForm]));
+```
+> Necesario porque los parámetros de navegación no pueden serializar objetos File/URI locales.
 
 ### Otros
 - `dateFormatter.js` → `useDateFormatter()` (formateo a español) + `formatterDateToISO()`
@@ -293,12 +309,66 @@ create.jsx (estado formData compartido)
 │   fetch de categorías desde API
 │
 └── Step 4 — Diseño y Archivos
-    campos: image (file picker)
-    onSubmit:
-      1. UploadImage(image, token) → obtiene URL
+    campos: image (via subirImagen.jsx)
+    - Step3Content navega a event/subirImagen; al volver, useFocusEffect + consumePickedImage
+    - imageValue puede ser: string (URL Cloudinary) o { uri, type, name } (local)
+    onSubmit en create.jsx:
+      1a. Si typeof image === 'string' → usar URL directamente (imagen de muestra)
+      1b. Si object → FormData.append("file", image) → UploadImage(multipart) → obtiene URL
       2. CreateEvent({ ...formData, hostId: userData.userId, date: ISO }, token)
-      3. router.push('/(app)/(drawer)')
+      3. router.replace('/(app)/(drawer)')
 ```
+
+---
+
+## Flujo de Confirmación de Tickets (`tickets/confirmar/[id].jsx`)
+
+Pantalla accesible desde el botón `checkmark-done-outline` en el bottom bar de `event/[id].jsx`.
+
+```
+event/[id].jsx (bottom bar)
+     ↓ router.push('/(app)/tickets/confirmar/${eventId}')
+confirmar/[id].jsx
+  1. Fetch colecciones del evento (ENDPOINTS_COLLECTIONS.GET_BY_EVENT)
+     - Admin: todas las colecciones
+     - Vendedor: solo su colección (filtra c.seller?.id === userId)
+  2. Por cada colección, fetch tickets con ticketStatus=3 (comprado, pendiente)
+  3. Muestra lista con FlatList + pull-to-refresh
+  4. Al pulsar "Confirmar" en un ticket → abre Modal de pago
+     Modal:
+       - Selector de medio de pago (pills 2x2):
+           Yape (modalityId=1), Transferencia (2), Efectivo (3), Plin (4)
+       - TextInput "Número de operación" — SOLO si modalityId ≠ 3 (no Efectivo)
+       - Botón "Confirmar" → ConfirmTicket(eventId, ticket.code, { modalityId, operationNumber })
+         - Efectivo: operationNumber = ""
+       - Botón "Cancelar" → cierra modal
+  5. Confirmación exitosa → ticket desaparece de la lista
+```
+
+**Endpoint:** `PATCH /tickets/confirmTicket?eventId=&ticketCode=`
+**Body:** `{ "modalityId": 1, "operationNumber": "654321" }`
+
+---
+
+## Pantalla de Imagen (`event/subirImagen.jsx`)
+
+Pantalla sin header (`headerShown: false`) para seleccionar/tomar imagen del evento.
+
+```
+Step3Content.jsx
+  → router.push('/(app)/event/subirImagen')
+       subirImagen.jsx:
+         - Preview 16:9 (SCREEN_WIDTH × 9/16)
+         - Grid 3 columnas: [cámara/galería] + [muestra 1] + [muestra 2]
+         - Imágenes de muestra en Cloudinary (URLs string)
+         - Imagen custom vía expo-image-picker (aspect [16,9], allowsEditing)
+         - Al pulsar "Usar": storePickedImage(value) + router.back()
+  ← Step3Content: useFocusEffect + consumePickedImage() → setForm({ image: picked })
+```
+
+**Tipos de `formData.image`:**
+- `string` → URL de Cloudinary (muestra), usar directamente en `CreateEvent`
+- `{ uri, type: "image/jpeg", name: "banner.jpg" }` → archivo local, subir con `UploadImage`
 
 ---
 

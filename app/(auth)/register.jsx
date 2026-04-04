@@ -22,7 +22,7 @@ import FormInitial from "../../views/Form/FormInitial";
 const URL_LOGO_IMAGE =
   "https://res.cloudinary.com/dabyqnijl/image/upload/v1730493843/laztvzw7ytanqrdj161e.png";
 
-const HOME_ROUTE = "/(app)/(drawer)/home";
+const HOME_ROUTE = "/(auth)/welcome";
 
 export default function Register() {
   const router = useRouter();
@@ -37,19 +37,19 @@ export default function Register() {
     if (!formData.username || !formData.email || !formData.password) {
       return Alert.alert(
         "Información incompleta",
-        "Ingresa tus datos para continuar"
+        "Ingresa tus datos para continuar",
       );
     }
     if (!isValidEmail(formData.email)) {
       return Alert.alert(
         "Correo no válido",
-        "Ingresa un correo electrónico válido"
+        "Ingresa un correo electrónico válido",
       );
     }
     if (!isStrongPassword(formData.password)) {
       return Alert.alert(
         "Contraseña débil",
-        "La contraseña debe tener mínimo 6 caracteres"
+        "La contraseña debe tener mínimo 6 caracteres",
       );
     }
     const result = await signUp(formData);

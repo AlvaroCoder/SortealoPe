@@ -5,18 +5,19 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-
 import "react-native-reanimated";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { RaffleProvider } from "@/context/RaffleContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <RaffleProvider>
-      <AuthProvider>
+    // FIX: Auth primero, Raffle adentro — RaffleContext puede leer userData
+    <AuthProvider>
+      <RaffleProvider>
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
@@ -26,7 +27,7 @@ export default function RootLayout() {
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
-      </AuthProvider>
-    </RaffleProvider>
+      </RaffleProvider>
+    </AuthProvider>
   );
 }

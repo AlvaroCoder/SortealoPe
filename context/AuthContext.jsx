@@ -160,7 +160,7 @@ export function AuthProvider({ children }) {
   const signout = async () => {
     try {
       setLoading(true);
-      await AsyncStorage.removeItem("token");
+      await AsyncStorage.multiRemove(["token", "userRole"]); // FIX: limpia ambos
       setIsLogged(false);
       setUserData(null);
       setAccessToken(null);

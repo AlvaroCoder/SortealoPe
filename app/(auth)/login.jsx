@@ -20,7 +20,7 @@ import FormInitial from "../../views/Form/FormInitial";
 const URL_LOGO_IMAGE =
   "https://res.cloudinary.com/dabyqnijl/image/upload/v1730493843/laztvzw7ytanqrdj161e.png";
 
-const HOME_ROUTE = "/(app)/(drawer)/home";
+const HOME_ROUTE = "/(auth)/welcome";
 
 export default function Login() {
   const router = useRouter();
@@ -40,7 +40,6 @@ export default function Login() {
         "Ingresa un correo electrónico válido",
       );
     }
-    console.log("Data form data : ", formData);
 
     const result = await signin(formData);
     if (result?.error) {

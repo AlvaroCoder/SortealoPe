@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Redirect, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
 import {
   SafeAreaView,
@@ -23,23 +23,49 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 
 const { height } = Dimensions.get("window");
 const IMAGE_HEIGHT = height * 0.3;
+const SPLASH_DURATION = 3000;
 
-export default function WelcomeScreen() {
+export default function SplashScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [loading, setLoading] = useState(true);
-  const { loading: loadingvalidacion, isLogged } = useAuthContext();
+  const { loading: authLoading, isLogged } = useAuthContext();
 
+  // FIX: dos flags independientes que deben cumplirse ambas
+  const [timerDone, setTimerDone] = useState(false);
+  const [authDone, setAuthDone] = useState(false);
+  const hasNavigated = useRef(false); // evita doble navegación
+
+  // Flag del timer
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setTimerDone(true), SPLASH_DURATION);
+    return () => clearTimeout(t);
   }, []);
 
-  if (loading || loadingvalidacion) return <AnimationHome />;
+  // Flag del auth — se activa cuando authLoading pasa a false
+  useEffect(() => {
+    if (!authLoading) setAuthDone(true);
+  }, [authLoading]);
 
-  if (isLogged) {
-    return <Redirect href={"/(app)/(drawer)/home"} />;
-  }
+  // Solo navega cuando AMBOS están listos
+  useEffect(() => {
+    if (!timerDone || !authDone) return;
+    if (hasNavigated.current) return;
+    hasNavigated.current = true;
+
+    if (isLogged) {
+      router.replace("/(auth)/welcome");
+    }
+    // Si no está logueado, simplemente muestra los botones (no navega)
+  }, [timerDone, authDone, isLogged]);
+
+  // Muestra la animación mientras cualquiera de los dos no esté listo
+  const showSplash = !timerDone || !authDone;
+
+  if (showSplash) return <AnimationHome />;
+
+  // Si está logueado y la navegación aún no ocurrió (edge case muy raro)
+  // evita mostrar la pantalla de login/register brevemente
+  if (isLogged) return <AnimationHome />;
 
   return (
     <LinearGradient
@@ -62,14 +88,7 @@ export default function WelcomeScreen() {
           />
         </View>
 
-        <View
-          style={[
-            styles.content,
-            {
-              paddingBottom: insets.bottom + 30,
-            },
-          ]}
-        >
+        <View style={[styles.content, { paddingBottom: insets.bottom + 30 }]}>
           <Title styleTitle={styles.title}>Gestiona tus rifas</Title>
 
           <Text style={styles.subtitle}>
@@ -98,18 +117,14 @@ export default function WelcomeScreen() {
 
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
-  safeArea: {
-    flex: 1,
-  },
+  safeArea: { flex: 1 },
   header: {
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
     paddingHorizontal: 40,
   },
-  image: {
-    width: "100%",
-  },
+  image: { width: "100%" },
   content: {
     backgroundColor: WHITE,
     borderTopLeftRadius: 28,
