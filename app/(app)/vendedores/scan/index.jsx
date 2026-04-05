@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -86,7 +86,7 @@ export default function PageScanQR() {
     );
     loop.start();
     return () => loop.stop();
-  }, []);
+  }, [scanLine]);
 
   const scanLineY = scanLine.interpolate({
     inputRange: [0, 1],
@@ -178,11 +178,7 @@ export default function PageScanQR() {
 
   // ── Frame border color ───────────────────────────────────────────────────
   const frameColor =
-    status === "success"
-      ? GREEN_500
-      : status === "error"
-        ? RED_500
-        : WHITE;
+    status === "success" ? GREEN_500 : status === "error" ? RED_500 : WHITE;
 
   return (
     <View style={styles.root}>
@@ -195,10 +191,7 @@ export default function PageScanQR() {
       />
 
       {/* Cutout overlay — 4 dark rectangles around the scan frame */}
-      <View
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      >
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
         {/* Top */}
         <View style={[styles.overlay, { height: SCREEN_HEIGHT * 0.28 }]} />
         {/* Middle row */}
@@ -306,7 +299,10 @@ export default function PageScanQR() {
           <View style={[styles.sheetRow, { borderBottomWidth: 0 }]}>
             <Text style={styles.sheetRowLabel}>Código de colección</Text>
             <Text
-              style={[styles.sheetRowValue, { fontFamily: "monospace", flex: 1, textAlign: "right" }]}
+              style={[
+                styles.sheetRowValue,
+                { fontFamily: "monospace", flex: 1, textAlign: "right" },
+              ]}
               numberOfLines={1}
               adjustsFontSizeToFit
             >

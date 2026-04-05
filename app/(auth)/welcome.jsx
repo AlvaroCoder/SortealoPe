@@ -96,7 +96,7 @@ export default function Welcome() {
         router.replace("/(app)/(admin)");
         break;
       case USER_ROLES.SELLER:
-        router.replace("/(app)/(seller)/(tab)/index");
+        router.replace("/(app)/(seller)");
         break;
       case USER_ROLES.BUYER:
         router.replace("/(app)/(buyer)/(tab)/index");
