@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import HeaderBarCard from "../../../../components/common/Card/HeaderBarCard";
 import {
   ENDPOINTS_EVENTS,
   ENDPOINTS_USERS,
@@ -74,38 +75,18 @@ export default function AdminDashboard() {
   const lastName = profileData?.lastName ?? userData?.lastName ?? "";
   const fullName = [firstName, lastName].filter(Boolean).join(" ");
   const avatarUri = profileData?.photo ?? userData?.photo ?? null;
+  const initials = (firstName[0] ?? "V").toUpperCase();
 
   // ── Render helpers ──────────────────────────────────────────────────────────
   const renderHeader = () => (
     <View>
       {/* ── Page header ─────────────────────────────────────────────────── */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          {avatarUri ? (
-            <Image
-              source={{ uri: avatarUri }}
-              style={styles.avatar}
-              contentFit="cover"
-              transition={200}
-            />
-          ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarInitial}>
-                {firstName[0]?.toUpperCase() ?? "U"}
-              </Text>
-            </View>
-          )}
-          <View style={styles.headerName}>
-            <Text style={styles.headerWelcome}>Bienvenido</Text>
-            <Text style={styles.headerFullName} numberOfLines={1}>
-              {fullName}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.adminBadge}>
-          <Text style={styles.adminBadgeText}>ADMIN</Text>
-        </View>
-      </View>
+      <HeaderBarCard
+        avatarUri={avatarUri}
+        initials={initials}
+        fullName={fullName}
+        role={"ADMIN"}
+      />
 
       {/* ── Metric cards ─────────────────────────────────────────────────── */}
       <View style={styles.metricsSection}>
@@ -297,65 +278,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 100, // space above tab bar + FAB
-  },
-
-  // Header
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: WHITE,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: NEUTRAL_200,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    marginRight: 12,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-  avatarPlaceholder: {
-    backgroundColor: GREEN_900,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarInitial: {
-    color: WHITE,
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  headerName: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  headerWelcome: {
-    fontSize: 12,
-    color: NEUTRAL_500,
-    fontWeight: "400",
-  },
-  headerFullName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: GREEN_900,
-  },
-  adminBadge: {
-    backgroundColor: GREEN_900,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  adminBadgeText: {
-    color: WHITE,
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.5,
   },
 
   // Metrics

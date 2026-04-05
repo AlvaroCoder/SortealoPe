@@ -37,6 +37,8 @@ export function AuthProvider({ children }) {
       try {
         setLoading(true);
         const token = await AsyncStorage.getItem("token");
+        console.log("Token : ", token);
+
         if (!token) return;
         setAccessToken(token);
         setUserData(jwtDecode(token));
@@ -66,6 +68,8 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         throw new Error(json?.message || "Error en el inicio de sesión");
       }
+      console.log("Json de log : ", json);
+
       await _storeToken(String(json.accessToken));
     } catch (err) {
       console.log("Error Login:", err);

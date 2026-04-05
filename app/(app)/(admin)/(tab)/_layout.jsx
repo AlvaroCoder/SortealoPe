@@ -81,7 +81,6 @@ export default function AdminTabLayout() {
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="events" />
-      <Tabs.Screen name="team" />
       <Tabs.Screen name="profile" />
     </Tabs>
   );

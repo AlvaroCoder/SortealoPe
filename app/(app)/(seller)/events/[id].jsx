@@ -307,8 +307,12 @@ export default function SellerEventDetail() {
           activeOpacity={0.85}
           onPress={() =>
             router.push({
-              pathname: "/(app)/tickets/confirmar/[id]",
-              params: { id: eventId },
+              pathname: "/(app)/(seller)/tickets/confirmar",
+              params: {
+                eventId,
+                ticketPrice: String(ticketPrice),
+                collectionId: String(myCollectionId ?? ""),
+              },
             })
           }
         >
