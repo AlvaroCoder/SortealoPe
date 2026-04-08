@@ -154,7 +154,7 @@ export default function SellerDashboard() {
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Eventos Asignados</Text>
         <TouchableOpacity
-          onPress={() => router.push("/(app)/event/asignados")}
+          onPress={() => router.push("/(app)/(seller)/index")}
           activeOpacity={0.7}
         >
           <Text style={styles.sectionLink}>Ver todos</Text>

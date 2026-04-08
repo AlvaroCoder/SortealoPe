@@ -7,11 +7,11 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import AnimationHome from "../../components/cards/AnimationHome";
-import Button from "../../components/common/Buttons/Button";
-import Title from "../../components/common/Titles/Title";
-import { Colors, Typography } from "../../constants/theme";
-import { useAuthContext } from "../../context/AuthContext";
+import AnimationHome from "../components/cards/AnimationHome";
+import Button from "../components/common/Buttons/Button";
+import Title from "../components/common/Titles/Title";
+import { Colors, Typography } from "../constants/theme";
+import { useAuthContext } from "../context/AuthContext";
 
 const URL_IMAGEN =
   "https://res.cloudinary.com/dabyqnijl/image/upload/v1764234644/COSAI_LOGOS_1_1_dbzabh.png";
@@ -56,7 +56,7 @@ export default function SplashScreen() {
       router.replace("/(auth)/welcome");
     }
     // Si no está logueado, simplemente muestra los botones (no navega)
-  }, [timerDone, authDone, isLogged]);
+  }, [timerDone, authDone, isLogged, router]);
 
   // Muestra la animación mientras cualquiera de los dos no esté listo
   const showSplash = !timerDone || !authDone;

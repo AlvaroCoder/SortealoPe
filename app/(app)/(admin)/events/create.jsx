@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -25,7 +26,6 @@ import { useAuthContext } from "../../../../context/AuthContext";
 import { formatterDateToISO } from "../../../../lib/dateFormatter";
 import { useUser } from "../../../../lib/useUser";
 import LoadingScreen from "../../../../screens/LoadingScreen";
-
 // ── Color tokens ──────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
@@ -85,10 +85,8 @@ export default function AdminCreateEvent() {
   const router = useRouter();
   const { userData } = useAuthContext();
   const { userData: userDataRaw } = useUser(); // needed for userId in payload
-  const {
-    title: initialTitle = "",
-    description: initialDescription = "",
-  } = useLocalSearchParams();
+  const { title: initialTitle = "", description: initialDescription = "" } =
+    useLocalSearchParams();
 
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -177,22 +175,12 @@ export default function AdminCreateEvent() {
 
       const response = await CreateEvent(payload);
       if (response.ok) {
-        Alert.alert(
-          "Evento creado",
-          "Tu evento fue enviado y está pendiente de aprobación.",
-          [
-            {
-              text: "OK",
-              onPress: () => router.replace("/(app)/(admin)"),
-            },
-          ],
-        );
+        router.replace("/(app)/(admin)/events/success");
       } else {
         const errJson = await response.json().catch(() => null);
         Alert.alert(
           "Error",
-          errJson?.message ||
-            "No se pudo crear el evento. Inténtalo de nuevo.",
+          errJson?.message || "No se pudo crear el evento. Inténtalo de nuevo.",
         );
       }
     } catch {
@@ -478,9 +466,6 @@ const styles = StyleSheet.create({
   },
 
   // ── Step content wrapper ───────────────────────────────────────────────────
-  stepContent: {
-    marginBottom: 24,
-  },
 
   // ── Tip card ───────────────────────────────────────────────────────────────
   tipCard: {
@@ -489,6 +474,7 @@ const styles = StyleSheet.create({
     padding: 20,
     overflow: "hidden",
     gap: 0,
+    marginBottom: Constants.statusBarHeight,
   },
   tipDecorIcon: {
     position: "absolute",

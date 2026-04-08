@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import GuideStatusCard from "../../../../components/cards/GuideStatusCard";
 import { ENDPOINTS_EVENTS } from "../../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../../constants/theme";
 import { useRaffleContext } from "../../../../context/RaffleContext";
@@ -28,6 +29,7 @@ const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 const BG_PAGE = "#FFFFFF";
+const ORANGE = "#F59E0B";
 
 // ── Status map ───────────────────────────────────────────────────────────────
 const STATUS_MAP = {
@@ -61,18 +63,27 @@ const MAX_AVATARS = 4;
 export default function AdminEventDetailPage() {
   const router = useRouter();
   const { id: eventId, eventStatus } = useLocalSearchParams();
+  console.log("Event status :", eventStatus);
+
   const { isAdmin } = useRaffleContext();
 
   // Chart period toggle — visual only (no data change)
   const [chartPeriod, setChartPeriod] = useState("semanal");
+
+  // ── Countdown timer state ─────────────────────────────────────────────────
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    expired: false,
+  });
 
   // ── Data fetching (always as HOST for admin) ─────────────────────────────
   const { data, loading } = useFetch(
     `${ENDPOINTS_EVENTS.GET_BY_ID}${eventId}?eventStatus=${eventStatus}`,
   );
   const event = data;
-
-  console.log("Data evento ", data);
 
   // ── Ticket metric aggregations ──────────────────────────────────────────
   const availableTickets =
@@ -83,6 +94,9 @@ export default function AdminEventDetailPage() {
     data?.collections
       ?.map((c) => c.reservedTickets)
       .reduce((a, b) => a + b, 0) ?? 0;
+  const onHoldTickets =
+    data?.collections?.map((c) => c.onHoldTickets).reduce((a, b) => a + b, 0) ??
+    0;
   const soldTickets =
     data?.collections?.map((c) => c.soldTickets).reduce((a, b) => a + b, 0) ??
     0;
@@ -91,6 +105,35 @@ export default function AdminEventDetailPage() {
   const collected = soldTickets * ticketPrice;
   const activeSellers = (data?.collections ?? []).length;
   const progressPct = totalTickets > 0 ? soldTickets / totalTickets : 0;
+
+  // ── Countdown timer effect ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!event?.date) return;
+    const target = new Date(event.date).getTime();
+    const tick = () => {
+      const diff = target - Date.now();
+      if (diff <= 0) {
+        setCountdown({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          expired: true,
+        });
+        return;
+      }
+      setCountdown({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+        expired: false,
+      });
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [event?.date]);
 
   // ── Days until event end ────────────────────────────────────────────────
   const daysUntilEnd = (() => {
@@ -181,17 +224,108 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** Title, description, and download report button */
+  /** Title, description, price and place */
   function renderTitleSection() {
     return (
-      <View style={styles.titleSection}>
+      <View style={styles.card}>
         <Text style={styles.eventTitle} numberOfLines={2}>
           {event?.title ?? "—"}
         </Text>
-        <Text style={styles.eventDescription} numberOfLines={3}>
+        <Text style={styles.eventDescription}>
           {event?.description ?? "Sin descripción."}
         </Text>
-        <Text>Precio : S/. {ticketPrice.toFixed(2)}</Text>
+
+        <View style={styles.infoSeparator} />
+
+        <View style={styles.infoGrid}>
+          {/* Price */}
+          <View style={styles.infoItem}>
+            <View style={[styles.infoIconBox, { backgroundColor: GREEN_50 }]}>
+              <Ionicons name="pricetag-outline" size={15} color={GREEN_500} />
+            </View>
+            <View style={styles.infoTexts}>
+              <Text style={styles.infoLabel}>Precio</Text>
+              <Text style={styles.infoValue}>S/. {ticketPrice.toFixed(2)}</Text>
+            </View>
+          </View>
+
+          {/* Place */}
+          {!!event?.place && (
+            <View style={styles.infoItem}>
+              <View
+                style={[styles.infoIconBox, { backgroundColor: "#EFF6FF" }]}
+              >
+                <Ionicons name="location-outline" size={15} color={BLUE_500} />
+              </View>
+              <View style={styles.infoTexts}>
+                <Text style={styles.infoLabel}>Lugar</Text>
+                <Text style={styles.infoValue} numberOfLines={1}>
+                  {event.place}
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </View>
+    );
+  }
+
+  /** Countdown to event end date */
+  function renderCountdownCard() {
+    if (!event?.date) return null;
+    const pad = (n) => String(n).padStart(2, "0");
+    const formattedDate = new Date(event.date).toLocaleDateString("es-PE", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    return (
+      <View style={[styles.card, styles.countdownCard]}>
+        <View style={styles.countdownHeader}>
+          <Ionicons name="time-outline" size={15} color={GREEN_500} />
+          <Text style={styles.countdownHeaderText}>
+            {countdown.expired
+              ? "El evento ha finalizado"
+              : "El sorteo finaliza en"}
+          </Text>
+        </View>
+
+        {!countdown.expired && (
+          <View style={styles.countdownRow}>
+            <View style={styles.countdownBlock}>
+              <Text style={styles.countdownNumber}>{pad(countdown.days)}</Text>
+              <Text style={styles.countdownLabel}>DÍAS</Text>
+            </View>
+            <Text style={styles.countdownSep}>:</Text>
+            <View style={styles.countdownBlock}>
+              <Text style={styles.countdownNumber}>{pad(countdown.hours)}</Text>
+              <Text style={styles.countdownLabel}>HORAS</Text>
+            </View>
+            <Text style={styles.countdownSep}>:</Text>
+            <View style={styles.countdownBlock}>
+              <Text style={styles.countdownNumber}>
+                {pad(countdown.minutes)}
+              </Text>
+              <Text style={styles.countdownLabel}>MINS</Text>
+            </View>
+            <Text style={styles.countdownSep}>:</Text>
+            <View style={styles.countdownBlock}>
+              <Text style={styles.countdownNumber}>
+                {pad(countdown.seconds)}
+              </Text>
+              <Text style={styles.countdownLabel}>SEGS</Text>
+            </View>
+          </View>
+        )}
+
+        <View style={styles.countdownDateRow}>
+          <Ionicons name="calendar-outline" size={13} color={NEUTRAL_500} />
+          <Text style={styles.countdownDateText}>{formattedDate}</Text>
+        </View>
       </View>
     );
   }
@@ -223,7 +357,8 @@ export default function AdminEventDetailPage() {
   function renderMetricsGrid() {
     const metrics = [
       { label: "Vendidos", value: soldTickets, color: GREEN_500 },
-      { label: "En espera", value: reservedTickets, color: BLUE_500 },
+      { label: "En espera", value: onHoldTickets, color: ORANGE },
+      { label: "Reservados", value: reservedTickets, color: BLUE_500 },
     ];
     return (
       <View style={styles.metricsRow}>
@@ -470,8 +605,11 @@ export default function AdminEventDetailPage() {
         {/* Event image (framed card) */}
         {renderImageCard()}
 
-        {/* Title + description + download button */}
+        {/* Title + description + price + place */}
         {renderTitleSection()}
+
+        {/* Countdown to event end */}
+        {renderCountdownCard()}
 
         {/* Ventas Totales (bloqueado) */}
         {renderSalesCard()}
@@ -486,11 +624,14 @@ export default function AdminEventDetailPage() {
         {renderSellersCard()}
 
         {/* Ganadores */}
-        {renderWinnersCard()}
+        {eventStatus >= 3 && renderWinnersCard()}
 
         {/* Rendimiento de Ventas (bar chart) */}
         {renderChartCard()}
 
+        <View style={{ marginHorizontal: 20 }}>
+          <GuideStatusCard />
+        </View>
         <View style={{ height: 20 }} />
       </ScrollView>
 
@@ -617,10 +758,6 @@ const styles = StyleSheet.create({
   },
 
   // ── Title section ───────────────────────────────────────────────────────
-  titleSection: {
-    marginHorizontal: 20,
-    marginBottom: 14,
-  },
   eventTitle: {
     fontSize: Typography.sizes["2xl"],
     fontWeight: Typography.weights.extrabold,
@@ -995,6 +1132,110 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.70)",
     textAlign: "center",
     lineHeight: 17,
+  },
+
+  // ── Title info grid ───────────────────────────────────────────────────────
+  infoSeparator: {
+    height: 1,
+    backgroundColor: Colors.principal.neutral[200],
+    marginVertical: 14,
+  },
+  infoGrid: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  infoItem: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  infoIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  infoTexts: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: NEUTRAL_500,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+    marginBottom: 1,
+  },
+  infoValue: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.bold,
+    color: NEUTRAL_700,
+  },
+
+  // ── Countdown card ────────────────────────────────────────────────────────
+  countdownCard: {
+    backgroundColor: GREEN_900,
+  },
+  countdownHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 16,
+  },
+  countdownHeaderText: {
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.bold,
+    color: "rgba(255,255,255,0.75)",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  countdownRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 16,
+  },
+  countdownBlock: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.10)",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    minWidth: 58,
+  },
+  countdownNumber: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: WHITE,
+    letterSpacing: -0.5,
+  },
+  countdownLabel: {
+    fontSize: 9,
+    fontWeight: "700",
+    color: GREEN_500,
+    letterSpacing: 0.8,
+    marginTop: 2,
+  },
+  countdownSep: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "rgba(255,255,255,0.40)",
+    marginBottom: 14,
+  },
+  countdownDateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    justifyContent: "center",
+  },
+  countdownDateText: {
+    fontSize: Typography.sizes.xs,
+    color: "rgba(255,255,255,0.60)",
+    fontWeight: Typography.weights.medium,
   },
 
   // ── Metrics row ───────────────────────────────────────────────────────────

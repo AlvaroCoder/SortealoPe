@@ -220,9 +220,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 40,
-  },
   stepContent: {
     width: "100%",
   },

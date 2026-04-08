@@ -1,4 +1,4 @@
-export const BASE_URL = "http://192.168.0.177:8087/api/v1";
+export const BASE_URL = "https://sortealo-pe-backend.onrender.com/api/v1";
 
 export const ENDPOINTS_LOGIN = {
   LOGIN: `${BASE_URL}/auth/login`,
@@ -59,6 +59,8 @@ export const ENDPOINTS_TICKETS = {
   CONFIRM: `${BASE_URL}/tickets/confirmTicket`,
   // PATCH /tickets/releaseTicket?eventId=&ticketCode=
   RELEASE: `${BASE_URL}/tickets/releaseTicket`,
+  // GET /tickets/buyer?eventId=&ticketStatus=&page=&size=  (comprador, sin collectionId)
+  GET_BUYER: `${BASE_URL}/tickets/buyer`,
 };
 
 // ─── Users (protegidos) ───────────────────────────────────────────────────────

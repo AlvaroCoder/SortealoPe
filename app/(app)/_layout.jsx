@@ -15,14 +15,9 @@ export default function RootLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="(drawer)" />
       <Stack.Screen name="(admin)" />
       <Stack.Screen name="(seller)" />
       <Stack.Screen name="(buyer)" />
-      <Stack.Screen name="event" />
-      <Stack.Screen name="metricas" />
-      <Stack.Screen name="tickets" />
-      <Stack.Screen name="vendedores" />
     </Stack>
   );
 }

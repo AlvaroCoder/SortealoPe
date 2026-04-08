@@ -60,7 +60,7 @@ const ROLES = [
   {
     key: USER_ROLES.BUYER,
     label: "COMPRADOR",
-    badge: "PREMIUM",
+    badge: "COMPRAS",
     description: "Explora rifas y tus tickets",
     icon: "star-outline",
     iconBg: GREEN_500,
@@ -147,7 +147,7 @@ export default function Welcome() {
             ¿Con qué rol vas a{"\n"}operar hoy?
           </Text>
           <Text style={styles.subtitle}>
-            Selecciona tu perfil para comenzar a navegar.
+            Crea, gestiona y participa en rifas de forma fácil y divertida.
           </Text>
 
           {/* Role cards */}

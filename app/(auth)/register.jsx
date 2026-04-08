@@ -10,7 +10,6 @@ import {
   Text,
   View,
 } from "react-native";
-import ButtonLoginGoogle from "../../components/common/Buttons/ButtonLoginGoogle";
 import OutlineTextField from "../../components/common/TextFields/OutlineTextField";
 import TextPrevAccount from "../../components/common/Texts/TextPrevAccount";
 import { Colors } from "../../constants/theme";
@@ -113,13 +112,6 @@ export default function Register() {
           <View style={styles.line} />
           <Text style={styles.dividerText}>o continúa con</Text>
           <View style={styles.line} />
-        </View>
-
-        <View style={styles.googleContainer}>
-          <ButtonLoginGoogle
-            buttonText="Registrarse con Google"
-            onSuccess={() => router.replace(HOME_ROUTE)}
-          />
         </View>
 
         <TextPrevAccount type="register" />

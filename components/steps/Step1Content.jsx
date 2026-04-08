@@ -108,17 +108,16 @@ function PackCard({ item, tier, isSelected, onPress, index }) {
               color={isGold ? "#3D1C00" : WHITE}
             />
             <Text
-              style={[
-                styles.tierLabel,
-                { color: isGold ? "#3D1C00" : WHITE },
-              ]}
+              style={[styles.tierLabel, { color: isGold ? "#3D1C00" : WHITE }]}
             >
               {tier.label}
             </Text>
           </View>
 
           {isSelected && (
-            <View style={[styles.checkBadge, { backgroundColor: tier.checkBg }]}>
+            <View
+              style={[styles.checkBadge, { backgroundColor: tier.checkBg }]}
+            >
               <Ionicons
                 name="checkmark"
                 size={14}
@@ -138,11 +137,14 @@ function PackCard({ item, tier, isSelected, onPress, index }) {
 
         {/* Ticket count — hero number */}
         <View style={styles.ticketCountRow}>
-          <Text style={[styles.ticketNumber, { color: isGold ? "#FFD700" : WHITE }]}>
+          <Text
+            style={[styles.ticketNumber, { color: isGold ? "#FFD700" : WHITE }]}
+          >
             {item.maximumCapacity?.toLocaleString()}
           </Text>
           <Text style={[styles.ticketLabel, { color: tier.subColor }]}>
-            {" "}tickets
+            {" "}
+            tickets
           </Text>
         </View>
 
@@ -150,7 +152,11 @@ function PackCard({ item, tier, isSelected, onPress, index }) {
         <View
           style={[
             styles.divider,
-            { backgroundColor: isGold ? "rgba(61,28,0,0.25)" : "rgba(255,255,255,0.25)" },
+            {
+              backgroundColor: isGold
+                ? "rgba(61,28,0,0.25)"
+                : "rgba(255,255,255,0.25)",
+            },
           ]}
         />
 
@@ -194,7 +200,6 @@ export default function Step1Content({ form, setForm, onNext }) {
     setForm((prev) => ({
       ...prev,
       packId: parseInt(item?.id),
-      ticketsPerCollection: item?.maximumCapacity ?? 0,
     }));
   };
 
@@ -204,7 +209,8 @@ export default function Step1Content({ form, setForm, onNext }) {
     <View style={styles.container}>
       <Text style={styles.title}>1. Elige tu Plan</Text>
       <Text style={styles.subtitle}>
-        Selecciona el plan que mejor se adapte a tu sorteo. Desliza para ver más opciones.
+        Selecciona el plan que mejor se adapte a tu sorteo. Desliza para ver más
+        opciones.
       </Text>
 
       {/* Horizontal carousel */}

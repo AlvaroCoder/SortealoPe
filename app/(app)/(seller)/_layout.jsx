@@ -6,7 +6,7 @@ export default function LayoutSeller() {
       <Stack.Screen name="index" />
       <Stack.Screen name="profile" />
       <Stack.Screen name="scan/index" />
-      <Stack.Screen name="tickets/vender" />
+      <Stack.Screen name="tickets" />
     </Stack>
   );
 }

@@ -63,7 +63,7 @@ function FeaturedEventCard({ event }) {
       activeOpacity={0.85}
       onPress={() =>
         router.push({
-          pathname: "/(app)/event/[id]",
+          pathname: "/(app)/(buyer)/events/[id]",
           params: { id: event.id },
         })
       }
