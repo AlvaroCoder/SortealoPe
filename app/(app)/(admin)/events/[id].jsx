@@ -18,7 +18,6 @@ import { useRaffleContext } from "../../../../context/RaffleContext";
 import { useFetch } from "../../../../lib/useFetch";
 import LoadingScreen from "../../../../screens/LoadingScreen";
 
-// ── Color constants ──────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const GREEN_50 = Colors.principal.green[50];
@@ -38,13 +37,10 @@ const STATUS_MAP = {
   3: { label: "SORTEADO", bg: GREEN_900, text: WHITE },
 };
 
-// ── Bar chart configuration ──────────────────────────────────────────────────
 const BAR_DAYS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
-const BAR_HEIGHTS = [30, 45, 60, 38, 100, 70, 50]; // relative percentages
-// Map JS getDay() (0=Sun) to index 0=Mon…6=Sun
+const BAR_HEIGHTS = [30, 45, 60, 38, 100, 70, 50];
 const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
-// ── Mock winners (shown only when eventStatus == 3) ──────────────────────────
 const MOCK_WINNERS = [
   { rank: 1, name: "Elena Rodríguez", ticket: "#4521" },
   { rank: 2, name: "Marcos Silva", ticket: "#8902" },
@@ -56,21 +52,17 @@ const RANK_COLORS = {
   3: "#92400E",
 };
 
-// ── Avatar palette for the overlapping seller circles ───────────────────────
 const AVATAR_PALETTE = [GREEN_500, BLUE_500, GREEN_900, "#7C3AED"];
 const MAX_AVATARS = 4;
 
 export default function AdminEventDetailPage() {
   const router = useRouter();
   const { id: eventId, eventStatus } = useLocalSearchParams();
-  console.log("Event status :", eventStatus);
 
   const { isAdmin } = useRaffleContext();
 
-  // Chart period toggle — visual only (no data change)
   const [chartPeriod, setChartPeriod] = useState("semanal");
 
-  // ── Countdown timer state ─────────────────────────────────────────────────
   const [countdown, setCountdown] = useState({
     days: 0,
     hours: 0,
@@ -79,13 +71,11 @@ export default function AdminEventDetailPage() {
     expired: false,
   });
 
-  // ── Data fetching (always as HOST for admin) ─────────────────────────────
   const { data, loading } = useFetch(
     `${ENDPOINTS_EVENTS.GET_BY_ID}${eventId}?eventStatus=${eventStatus}`,
   );
   const event = data;
 
-  // ── Ticket metric aggregations ──────────────────────────────────────────
   const availableTickets =
     data?.collections
       ?.map((c) => c.availableTickets)
@@ -106,7 +96,6 @@ export default function AdminEventDetailPage() {
   const activeSellers = (data?.collections ?? []).length;
   const progressPct = totalTickets > 0 ? soldTickets / totalTickets : 0;
 
-  // ── Countdown timer effect ───────────────────────────────────────────────
   useEffect(() => {
     if (!event?.date) return;
     const target = new Date(event.date).getTime();
@@ -135,7 +124,6 @@ export default function AdminEventDetailPage() {
     return () => clearInterval(interval);
   }, [event?.date]);
 
-  // ── Days until event end ────────────────────────────────────────────────
   const daysUntilEnd = (() => {
     if (!event?.date) return null;
     const diff = new Date(event.date) - new Date();
@@ -143,17 +131,14 @@ export default function AdminEventDetailPage() {
     return days > 0 ? days : 0;
   })();
 
-  // ── Status config ───────────────────────────────────────────────────────
   const statusCfg = STATUS_MAP[Number(eventStatus)] ?? STATUS_MAP[1];
 
-  // ── Money formatter ─────────────────────────────────────────────────────
   const formatMoney = (n) => {
     if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
     if (n >= 1000) return `$${(n / 1000).toFixed(1)}k`;
     return `S/.${n.toFixed(0)}`;
   };
 
-  // ── Seller avatar stack ─────────────────────────────────────────────────
   const extraSellers =
     activeSellers > MAX_AVATARS ? activeSellers - MAX_AVATARS : 0;
   const sellerInitials = (data?.collections ?? [])
@@ -167,12 +152,8 @@ export default function AdminEventDetailPage() {
       return name[0]?.toUpperCase() ?? "?";
     });
 
-  // ── Bar chart max height anchor ─────────────────────────────────────────
-  const BAR_CONTAINER_HEIGHT = 80; // px, used as reference
+  const BAR_CONTAINER_HEIGHT = 80;
 
-  // ── Renders ─────────────────────────────────────────────────────────────
-
-  /** Top row: status chip + event ID */
   function renderStatusRow() {
     return (
       <View style={styles.statusRow}>
@@ -210,7 +191,6 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** White framed card with image inside */
   function renderImageCard() {
     return (
       <View style={styles.imageCard}>
@@ -224,7 +204,6 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** Title, description, price and place */
   function renderTitleSection() {
     return (
       <View style={styles.card}>
@@ -238,7 +217,6 @@ export default function AdminEventDetailPage() {
         <View style={styles.infoSeparator} />
 
         <View style={styles.infoGrid}>
-          {/* Price */}
           <View style={styles.infoItem}>
             <View style={[styles.infoIconBox, { backgroundColor: GREEN_50 }]}>
               <Ionicons name="pricetag-outline" size={15} color={GREEN_500} />
@@ -249,7 +227,6 @@ export default function AdminEventDetailPage() {
             </View>
           </View>
 
-          {/* Place */}
           {!!event?.place && (
             <View style={styles.infoItem}>
               <View
@@ -270,7 +247,6 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** Countdown to event end date */
   function renderCountdownCard() {
     if (!event?.date) return null;
     const pad = (n) => String(n).padStart(2, "0");
@@ -330,7 +306,6 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** Ventas Totales card */
   function renderSalesCard() {
     return (
       <View style={styles.card}>
@@ -353,7 +328,6 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** Métricas: Vendidos · En espera · Disponibles */
   function renderMetricsGrid() {
     const metrics = [
       { label: "Vendidos", value: soldTickets, color: GREEN_500 },
@@ -374,7 +348,6 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** Tickets Restantes card (dark green) */
   function renderRemainingTicketsCard() {
     return (
       <View style={[styles.card, styles.cardDark]}>

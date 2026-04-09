@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors, Typography } from "../../../constants/theme";
 
 const GREEN_500 = Colors.principal.green[500];
@@ -9,34 +10,62 @@ const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 const ORANGE = "#F59E0B";
 
+/** Single metric cell — tappable when onPress is provided */
+function MetricCell({ number, label, color, onPress }) {
+  return (
+    <TouchableOpacity
+      style={[styles.metricCard, onPress && styles.metricCardTappable]}
+      onPress={onPress}
+      activeOpacity={onPress ? 0.7 : 1}
+      disabled={!onPress}
+    >
+      <Text style={[styles.metricNumber, color && { color }]}>{number}</Text>
+      <View style={styles.metricFooter}>
+        <Text style={styles.metricLabel}>{label}</Text>
+        {onPress && (
+          <Ionicons name="chevron-forward" size={12} color={NEUTRAL_500} />
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 export default function MetricsCard({
   soldTickets,
   reservedTickets,
   onHold,
   availableTickets,
+  // Optional tap handlers — when provided the card becomes pressable
+  onPressVendidos,
+  onPressReservados,
+  onPressEnEspera,
+  onPressDisponibles,
 }) {
   return (
     <View style={styles.metricsGrid}>
-      <View style={styles.metricCard}>
-        <Text style={[styles.metricNumber, { color: GREEN_500 }]}>
-          {soldTickets}
-        </Text>
-        <Text style={styles.metricLabel}>Vendidos</Text>
-      </View>
-      <View style={styles.metricCard}>
-        <Text style={[styles.metricNumber, { color: BLUE_500 }]}>
-          {reservedTickets}
-        </Text>
-        <Text style={styles.metricLabel}>Reservado</Text>
-      </View>
-      <View style={styles.metricCard}>
-        <Text style={[styles.metricNumber, { color: ORANGE }]}>{onHold}</Text>
-        <Text style={styles.metricLabel}>En espera</Text>
-      </View>
-      <View style={styles.metricCard}>
-        <Text style={styles.metricNumber}>{availableTickets}</Text>
-        <Text style={styles.metricLabel}>Disponibles</Text>
-      </View>
+      <MetricCell
+        number={soldTickets}
+        label="Vendidos"
+        color={GREEN_500}
+        onPress={onPressVendidos}
+      />
+      <MetricCell
+        number={reservedTickets}
+        label="Reservados"
+        color={BLUE_500}
+        onPress={onPressReservados}
+      />
+      <MetricCell
+        number={onHold}
+        label="En espera"
+        color={ORANGE}
+        onPress={onPressEnEspera}
+      />
+      <MetricCell
+        number={availableTickets}
+        label="Disponibles"
+        onPress={onPressDisponibles}
+      />
     </View>
   );
 }
@@ -56,11 +85,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: NEUTRAL_200,
   },
+  metricCardTappable: {
+    // Subtle cue that the card is interactive
+    borderStyle: "solid",
+  },
   metricNumber: {
     fontSize: Typography.sizes.xl,
     fontWeight: Typography.weights.extrabold,
     color: NEUTRAL_700,
-    marginBottom: 2,
+    marginBottom: 4,
+  },
+  metricFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   metricLabel: {
     fontSize: Typography.sizes.xs,

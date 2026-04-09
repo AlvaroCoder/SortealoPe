@@ -21,7 +21,6 @@ import { useAuthContext } from "../../../../context/AuthContext";
 import { useFetch } from "../../../../lib/useFetch";
 import { usePaginatedFetch } from "../../../../lib/usePaginatedFetch";
 
-// ── Color constants ───────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const NEUTRAL_200 = Colors.principal.neutral[200];
@@ -31,7 +30,6 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 const BG_PAGE = "#F0F4F8";
 
-// ── Status config lookup ──────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   1: { label: "EN ESPERA", bg: "#E2E8F0", text: "#64748B" },
   2: { label: "ACTIVO", bg: "#D1FAE5", text: "#065F46" },
@@ -41,18 +39,15 @@ const STATUS_CONFIG = {
 
 const getStatusConfig = (status) => STATUS_CONFIG[status] ?? STATUS_CONFIG[1];
 
-// ── Dashboard screen ──────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const { userData } = useAuthContext();
   const userId = userData?.userId;
   const router = useRouter();
 
-  // User profile — avatar + display name
   const { data: profileData } = useFetch(
     userId ? `${ENDPOINTS_USERS.GET_BY_ID}${userId}` : null,
   );
 
-  // Paginated active events list (eventStatus=2)
   const {
     items: recentEvents,
     loading: loadingEvents,
@@ -63,10 +58,8 @@ export default function AdminDashboard() {
     `${ENDPOINTS_EVENTS.GET_BY_USER}?role=HOST&eventStatus=2`,
   );
 
-  // ── Derived metrics ─────────────────────────────────────────────────────────
   const totalEvents = recentEvents?.length ?? 0;
 
-  // ── User display name ───────────────────────────────────────────────────────
   const firstName =
     profileData?.firstName ??
     userData?.firstName ??
@@ -77,10 +70,8 @@ export default function AdminDashboard() {
   const avatarUri = profileData?.photo ?? userData?.photo ?? null;
   const initials = (firstName[0] ?? "V").toUpperCase();
 
-  // ── Render helpers ──────────────────────────────────────────────────────────
   const renderHeader = () => (
     <View>
-      {/* ── Page header ─────────────────────────────────────────────────── */}
       <HeaderBarCard
         avatarUri={avatarUri}
         initials={initials}
@@ -88,36 +79,12 @@ export default function AdminDashboard() {
         role={"ADMIN"}
       />
 
-      {/* ── Metric cards ─────────────────────────────────────────────────── */}
-      <View style={styles.metricsSection}>
-        {/* Half-width row: Eventos + Ingresos */}
-        <View style={styles.metricRow}>
-          <View style={[styles.metricCardHalf, { flex: 1, marginRight: 10 }]}>
-            <View
-              style={[styles.metricIconBox, { backgroundColor: "#DBEAFE" }]}
-            >
-              <Ionicons name="calendar-outline" size={20} color="#1E82D9" />
-            </View>
-            <Text style={styles.metricLabel}>Eventos</Text>
-            <Text style={styles.metricValue}>{totalEvents}</Text>
-          </View>
-          <View style={[styles.metricCardHalf, { flex: 1 }]}>
-            <View
-              style={[styles.metricIconBox, { backgroundColor: "#FEF3C7" }]}
-            >
-              <Ionicons name="cash-outline" size={20} color="#D97706" />
-            </View>
-            <Text style={styles.metricLabel}>Ingresos</Text>
-            <Text style={styles.metricValue}>—</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* ── Section title ────────────────────────────────────────────────── */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Mis eventos recientes</Text>
+        <Text style={styles.sectionTitle}>
+          Mis eventos recientes ({totalEvents})
+        </Text>
         <TouchableOpacity
-          onPress={() => router.push("/(app)/(drawer)/home")}
+          onPress={() => router.push("/(app)/(admin)/(tab)/events")}
           activeOpacity={0.7}
         >
           <Text style={styles.sectionLink}>Ver todos</Text>
@@ -143,7 +110,6 @@ export default function AdminDashboard() {
           })
         }
       >
-        {/* Image with status badge overlay */}
         <View style={styles.eventImageWrapper}>
           {item.image ? (
             <Image
@@ -162,7 +128,6 @@ export default function AdminDashboard() {
           </View>
         </View>
 
-        {/* Info section */}
         <View style={styles.eventInfo}>
           <View style={styles.eventInfoRow}>
             <Text style={styles.eventTitle} numberOfLines={2}>

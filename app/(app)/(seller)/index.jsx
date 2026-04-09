@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useMemo } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -12,8 +11,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Circle } from "react-native-svg";
 import EventCardAsigned from "../../../components/cards/EventCardAsigned";
+import ActiveColectionCard from "../../../components/common/Card/ActiveColectionCard";
 import HeaderBarCard from "../../../components/common/Card/HeaderBarCard";
 import {
   ENDPOINTS_EVENTS,
@@ -36,42 +35,6 @@ const BG_PAGE = "#F0F4F8";
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
-// ── Circular progress (SVG) ────────────────────────────────────────────────────
-const RADIUS = 54;
-const STROKE = 10;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const SVG_SIZE = 140;
-const CENTER = SVG_SIZE / 2;
-
-function CircularProgress({ percent }) {
-  const clampedPct = Math.min(Math.max(percent, 0), 100);
-  const offset = CIRCUMFERENCE - (clampedPct / 100) * CIRCUMFERENCE;
-  return (
-    <Svg width={SVG_SIZE} height={SVG_SIZE}>
-      <Circle
-        cx={CENTER}
-        cy={CENTER}
-        r={RADIUS}
-        fill="none"
-        stroke="rgba(255,255,255,0.12)"
-        strokeWidth={STROKE}
-      />
-      <Circle
-        cx={CENTER}
-        cy={CENTER}
-        r={RADIUS}
-        fill="none"
-        stroke={GREEN_500}
-        strokeWidth={STROKE}
-        strokeDasharray={String(CIRCUMFERENCE)}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        transform={`rotate(-90, ${CENTER}, ${CENTER})`}
-      />
-    </Svg>
-  );
-}
-
 // ── Main screen ────────────────────────────────────────────────────────────────
 export default function SellerDashboard() {
   const router = useRouter();
@@ -83,27 +46,9 @@ export default function SellerDashboard() {
     userId ? `${ENDPOINTS_USERS.GET_BY_ID}${userId}` : null,
   );
 
-  // Assigned active events (role=SELLER, eventStatus=2)
   const { items, loading, refresh } = usePaginatedFetch(
     userId ? `${ENDPOINTS_EVENTS.GET_BY_USER}?role=SELLER&eventStatus=2` : null,
   );
-
-  // ── Aggregated metrics ─────────────────────────────────────────────────────
-  const totalSold = useMemo(
-    () =>
-      items.reduce((sum, e) => sum + (e.soldTickets ?? e.ticketsSold ?? 0), 0),
-    [items],
-  );
-  const totalTickets = useMemo(
-    () =>
-      items.reduce(
-        (sum, e) => sum + (e.ticketsPerCollection ?? e.totalTickets ?? 0),
-        0,
-      ),
-    [items],
-  );
-  const percent =
-    totalTickets > 0 ? Math.round((totalSold / totalTickets) * 100) : 0;
 
   // ── Display name ───────────────────────────────────────────────────────────
   const firstName =
@@ -127,34 +72,13 @@ export default function SellerDashboard() {
         role={"VENDEDOR"}
       />
 
-      {/* ── Hero card ───────────────────────────────────────────────────── */}
-      <View style={styles.heroCard}>
-        {/* Decorative dots */}
-        <View style={styles.heroDotLarge} />
-        <View style={styles.heroDotSmall} />
-
-        <Text style={styles.heroTitle}>Mi colección activa</Text>
-
-        <Text style={styles.heroTickets}>
-          <Text style={styles.heroSold}>{totalSold}</Text>
-          <Text style={styles.heroTotal}> / {totalTickets} tickets</Text>
-        </Text>
-
-        {/* Circular gauge */}
-        <View style={styles.gaugeWrap}>
-          <CircularProgress percent={percent} />
-          <View style={styles.gaugeCenter}>
-            <Text style={styles.gaugePercent}>{percent}%</Text>
-            <Text style={styles.gaugeLabel}>VENDIDO</Text>
-          </View>
-        </View>
-      </View>
+      <ActiveColectionCard items={items} />
 
       {/* ── Section header ──────────────────────────────────────────────── */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Eventos Asignados</Text>
         <TouchableOpacity
-          onPress={() => router.push("/(app)/(seller)/index")}
+          onPress={() => router.push("/(app)/(seller)/events")}
           activeOpacity={0.7}
         >
           <Text style={styles.sectionLink}>Ver todos</Text>

@@ -95,5 +95,13 @@
 - Sample images array stored in subirImagen.jsx (two Cloudinary URLs)
 - Image picker options: `aspect:[16,9]`, `allowsEditing:true`, `quality:0.9`
 
+## Event Creation Stepper — formData contract (create.jsx)
+- ALL fields consumed by the payload MUST be in the initial `useState` — JS won't crash if missing but parseFloat(undefined)=NaN, Number(undefined)=NaN
+- Required initial state fields: `title, description, date, place, collectionsQuantity, ticketsPerCollection, ticketPrice, packId, hostId, image, eventCategoryId, status`
+- `ticketPrice` was historically missing from initial state — now fixed; always keep it there
+- `date` validation must occur in BOTH Step2 `handleNext` AND `handleSubmit` (double guard)
+- `parsedPrice` should be computed once before the payload and reused (avoid calling parseFloat twice)
+- `ButtonDatePicker` delivers a JavaScript `Date` object to `onChange` (not a string) — `formatterDateToISO` handles it correctly via `new Date(dateValue)`
+
 ## File References
 - See `patterns.md` for deeper architectural notes (linked from here)

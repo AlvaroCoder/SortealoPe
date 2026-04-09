@@ -98,7 +98,7 @@ export default function Step3CategoryContent({
       return;
     }
 
-    onNext({});
+    onNext(); // Bug fix: was calling onNext({}) passing a spurious argument; handleNext expects no args
   };
 
   return (

@@ -54,7 +54,7 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
 
   return (
     <ScrollView style={styles.stepContent} showsVerticalScrollIndicator={false}>
-      <Title>3. Diseño y Archivos Promocionales</Title>
+      <Title>4. Diseño y Archivos Promocionales</Title>{/* Bug fix: was labeled "3." but this is step 4 of 4 */}
 
       <Text style={styles.stepSubtitleText}>
         Sube las piezas gráficas de tu evento. Recuerda que deben cumplir con el

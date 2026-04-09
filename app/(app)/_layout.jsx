@@ -18,6 +18,7 @@ export default function RootLayout() {
       <Stack.Screen name="(admin)" />
       <Stack.Screen name="(seller)" />
       <Stack.Screen name="(buyer)" />
+      <Stack.Screen name="event/subirImagen" />
     </Stack>
   );
 }

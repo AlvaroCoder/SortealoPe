@@ -205,6 +205,54 @@ export default function SellerEventDetail() {
             reservedTickets={reservedTickets}
             onHold={onHoldTickets}
             availableTickets={availableTickets}
+            onPressVendidos={() =>
+              router.push({
+                pathname: "/(app)/(seller)/tickets/list",
+                params: {
+                  eventId,
+                  collectionId: String(myCollectionId ?? ""),
+                  ticketStatus: "4",
+                  statusLabel: "Vendidos",
+                  accentColor: "#16CD91",
+                },
+              })
+            }
+            onPressReservados={() =>
+              router.push({
+                pathname: "/(app)/(seller)/tickets/list",
+                params: {
+                  eventId,
+                  collectionId: String(myCollectionId ?? ""),
+                  ticketStatus: "2",
+                  statusLabel: "Reservados",
+                  accentColor: "#1E82D9",
+                },
+              })
+            }
+            onPressEnEspera={() =>
+              router.push({
+                pathname: "/(app)/(seller)/tickets/list",
+                params: {
+                  eventId,
+                  collectionId: String(myCollectionId ?? ""),
+                  ticketStatus: "3",
+                  statusLabel: "En espera",
+                  accentColor: "#F59E0B",
+                },
+              })
+            }
+            onPressDisponibles={() =>
+              router.push({
+                pathname: "/(app)/(seller)/tickets/list",
+                params: {
+                  eventId,
+                  collectionId: String(myCollectionId ?? ""),
+                  ticketStatus: "1",
+                  statusLabel: "Disponibles",
+                  accentColor: "#334155",
+                },
+              })
+            }
           />
 
           {/* ── Mi Talonario ──────────────────────────────────────────────── */}

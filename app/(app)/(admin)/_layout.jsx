@@ -1,10 +1,8 @@
-// app/(app)/(admin)/_layout.jsx
 import { useRaffleContext } from "@/context/RaffleContext";
-import { Redirect, Stack, useRouter } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 
 export default function AdminLayout() {
   const { isAdmin, roleLoading } = useRaffleContext();
-  const router = useRouter();
 
   // Espera a que el rol se restaure desde AsyncStorage
   if (roleLoading) return null;

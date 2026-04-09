@@ -15,7 +15,7 @@ import { Colors, Typography } from "../../../../constants/theme";
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const WHITE = "#FFFFFF";
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
+const { width: SCREEN_W } = Dimensions.get("window");
 
 const MASCOT_URI =
   "https://res.cloudinary.com/dabyqnijl/image/upload/v1775620710/SuperTicket.png";
@@ -30,7 +30,6 @@ export default function EventSuccessScreen() {
   const bounceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Mascot entrance
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -64,10 +63,10 @@ export default function EventSuccessScreen() {
             duration: 800,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
     });
-  }, []);
+  }, [bounceAnim, fadeAnim, scaleAnim, slideAnim]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -88,7 +87,7 @@ export default function EventSuccessScreen() {
                 },
               ]}
             />
-          )
+          ),
         )}
       </View>
 
@@ -119,12 +118,11 @@ export default function EventSuccessScreen() {
         <Text style={styles.emoji}>🎉</Text>
         <Text style={styles.headline}>¡Tu evento está en camino!</Text>
         <Text style={styles.tagline}>
-          Acabas de encender la chispa.{"\n"}
-          Pronto tu sorteo será la comidilla de todos.
+          Gracias por confiar en Rifalope para organizar tu evento.
         </Text>
         <Text style={styles.subtext}>
           Está pendiente de aprobación. Te avisaremos cuando esté listo para
-          volar.
+          vender tickets.
         </Text>
       </Animated.View>
 
@@ -135,7 +133,7 @@ export default function EventSuccessScreen() {
           activeOpacity={0.85}
           onPress={() => router.replace("/(app)/(admin)")}
         >
-          <Text style={styles.ctaText}>¡A vender tickets! 🚀</Text>
+          <Text style={styles.ctaText}>¡A vender tickets!</Text>
         </TouchableOpacity>
       </Animated.View>
     </SafeAreaView>

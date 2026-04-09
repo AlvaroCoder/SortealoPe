@@ -77,6 +77,9 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
       errors.description = "La descripción es obligatoria.";
     if (!form.place) errors.place = "El lugar es obligatorio.";
 
+    // Bug fix: date was not validated → user could reach submit with formData.date="" → API receives date:null
+    if (!form.date) errors.date = "La fecha de cierre es obligatoria.";
+
     // Validamos usando tipos numéricos
     if (typeof form.ticketPrice !== "number" || form.ticketPrice <= 0)
       errors.ticketPrice = "Ingresa un precio válido (> 0).";
@@ -198,6 +201,8 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
             })
           }
         />
+        {/* Bug fix: date error message was missing even though date is required */}
+        <ErrorMessage error={validationErrors.date} />
 
         <View style={styles.actionRow}>
           <TouchableOpacity onPress={onBack} style={styles.backButton}>
@@ -219,6 +224,10 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  // Bug fix: scrollContent was referenced in contentContainerStyle but never defined → added missing style
+  scrollContent: {
+    paddingBottom: 40,
   },
   stepContent: {
     width: "100%",

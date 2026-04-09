@@ -41,7 +41,6 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
 function ProfileSection({ title, children }) {
   return (
     <View style={styles.section}>
@@ -67,25 +66,31 @@ function ProfileRow({ icon, label, value, last = false }) {
   );
 }
 
-// ── Main screen ────────────────────────────────────────────────────────────────
 export default function AdminProfileTab() {
   const { signout, loading, userData: userStorage } = useAuthContext();
   const router = useRouter();
 
-  const { data: userData, loading: loadingFetch, refetch } = useFetch(
-    userStorage?.userId ? `${ENDPOINTS_USERS.GET_BY_ID}${userStorage.userId}` : null,
+  const {
+    data: userData,
+    loading: loadingFetch,
+    refetch,
+  } = useFetch(
+    userStorage?.userId
+      ? `${ENDPOINTS_USERS.GET_BY_ID}${userStorage.userId}`
+      : null,
   );
 
-  // Avatar state
   const [avatarUri, setAvatarUri] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Edit profile modal state
   const [editVisible, setEditVisible] = useState(false);
-  const [editForm, setEditForm] = useState({ firstName: "", lastName: "", phone: "" });
+  const [editForm, setEditForm] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+  });
   const [saving, setSaving] = useState(false);
 
-  // ── Derived values ───────────────────────────────────────────────────────────
   const displayName =
     userData?.firstName && userData?.lastName
       ? `${userData.firstName} ${userData.lastName}`
@@ -102,24 +107,29 @@ export default function AdminProfileTab() {
 
   const profileImageSource = avatarUri ?? userData?.photo ?? null;
 
-  // ── Logout ───────────────────────────────────────────────────────────────────
   const handleLogout = async () => {
     await signout();
     router.replace("/(auth)/login");
   };
 
-  // ── Image picker ─────────────────────────────────────────────────────────────
   const launchPicker = async (useCamera) => {
     if (useCamera) {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permisos necesarios", "Necesitamos acceso a tu cámara para tomar una foto.");
+        Alert.alert(
+          "Permisos necesarios",
+          "Necesitamos acceso a tu cámara para tomar una foto.",
+        );
         return;
       }
     } else {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permisos necesarios", "Necesitamos acceso a tu galería para seleccionar una foto.");
+        Alert.alert(
+          "Permisos necesarios",
+          "Necesitamos acceso a tu galería para seleccionar una foto.",
+        );
         return;
       }
     }
@@ -153,7 +163,10 @@ export default function AdminProfileTab() {
 
       const res = await UploadUserImage(formData);
       if (!res.ok) {
-        Alert.alert("Error", "No se pudo actualizar la foto. Intenta de nuevo.");
+        Alert.alert(
+          "Error",
+          "No se pudo actualizar la foto. Intenta de nuevo.",
+        );
         return;
       }
       const resJson = await res.json();
@@ -175,7 +188,10 @@ export default function AdminProfileTab() {
     if (uploading) return;
     if (Platform.OS === "ios") {
       ActionSheetIOS.showActionSheetWithOptions(
-        { options: ["Cancelar", "Tomar foto", "Elegir de galería"], cancelButtonIndex: 0 },
+        {
+          options: ["Cancelar", "Tomar foto", "Elegir de galería"],
+          cancelButtonIndex: 0,
+        },
         (index) => {
           if (index === 1) launchPicker(true);
           else if (index === 2) launchPicker(false);
@@ -210,7 +226,10 @@ export default function AdminProfileTab() {
       };
       const res = await UpdateUser(payload);
       if (!res.ok) {
-        Alert.alert("Error", "No se pudo guardar los cambios. Intenta de nuevo.");
+        Alert.alert(
+          "Error",
+          "No se pudo guardar los cambios. Intenta de nuevo.",
+        );
         return;
       }
       setEditVisible(false);
@@ -230,7 +249,10 @@ export default function AdminProfileTab() {
     <View style={styles.root}>
       <SafeAreaView style={styles.safeTop} edges={["top"]} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* ── Banner ───────────────────────────────────────────────────────── */}
         <View style={styles.banner}>
           {/* Decorative circle */}
@@ -280,21 +302,26 @@ export default function AdminProfileTab() {
 
           {/* Admin role badge */}
           <View style={styles.roleBadge}>
-            <Ionicons name="shield-checkmark-outline" size={13} color={GREEN_900} />
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={13}
+              color={GREEN_900}
+            />
             <Text style={styles.roleBadgeText}>Administrador</Text>
           </View>
         </View>
 
         {/* ── Content ──────────────────────────────────────────────────────── */}
         <View style={styles.content}>
-
           {/* Datos personales */}
           <ProfileSection title="Datos personales">
             <ProfileRow
               icon="person-outline"
               label="Nombre completo"
               value={
-                [userData?.firstName, userData?.lastName].filter(Boolean).join(" ") || "No registrado"
+                [userData?.firstName, userData?.lastName]
+                  .filter(Boolean)
+                  .join(" ") || "No registrado"
               }
             />
             <ProfileRow
@@ -323,21 +350,39 @@ export default function AdminProfileTab() {
           </ProfileSection>
 
           {/* Edit profile button */}
-          <TouchableOpacity style={styles.editButton} onPress={openEdit} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={openEdit}
+            activeOpacity={0.8}
+          >
             <View style={styles.editIconContainer}>
               <Ionicons name="create-outline" size={20} color={GREEN_900} />
             </View>
             <Text style={styles.editButtonText}>Editar perfil</Text>
-            <Ionicons name="chevron-forward" size={18} color={NEUTRAL_700} style={{ marginLeft: "auto" }} />
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={NEUTRAL_700}
+              style={{ marginLeft: "auto" }}
+            />
           </TouchableOpacity>
 
           {/* Logout */}
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
             <View style={styles.logoutIconContainer}>
               <Ionicons name="log-out-outline" size={20} color={RED_500} />
             </View>
             <Text style={styles.logoutText}>Cerrar sesión</Text>
-            <Ionicons name="chevron-forward" size={18} color={RED_500} style={{ marginLeft: "auto" }} />
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={RED_500}
+              style={{ marginLeft: "auto" }}
+            />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -365,14 +410,19 @@ export default function AdminProfileTab() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
               <View style={styles.modalBody}>
                 {/* First name */}
                 <Text style={styles.fieldLabel}>Nombre</Text>
                 <TextInput
                   style={styles.fieldInput}
                   value={editForm.firstName}
-                  onChangeText={(v) => setEditForm((p) => ({ ...p, firstName: v }))}
+                  onChangeText={(v) =>
+                    setEditForm((p) => ({ ...p, firstName: v }))
+                  }
                   placeholder="Nombre"
                   placeholderTextColor={NEUTRAL_500}
                   autoCapitalize="words"
@@ -383,7 +433,9 @@ export default function AdminProfileTab() {
                 <TextInput
                   style={styles.fieldInput}
                   value={editForm.lastName}
-                  onChangeText={(v) => setEditForm((p) => ({ ...p, lastName: v }))}
+                  onChangeText={(v) =>
+                    setEditForm((p) => ({ ...p, lastName: v }))
+                  }
                   placeholder="Apellido"
                   placeholderTextColor={NEUTRAL_500}
                   autoCapitalize="words"

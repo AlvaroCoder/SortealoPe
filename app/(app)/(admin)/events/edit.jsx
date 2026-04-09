@@ -4,31 +4,30 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DatePickerInput from "../../../../components/common/Buttons/ButtonDatePicker";
 import { ENDPOINTS_EVENTS } from "../../../../Connections/APIURLS";
 import {
-    UpdateEvent,
-    UpdateEventTickets,
+  UpdateEvent,
+  UpdateEventTickets,
 } from "../../../../Connections/events";
 import { UploadImage } from "../../../../Connections/images";
 import { Colors, Typography } from "../../../../constants/theme";
 import { useFetch } from "../../../../lib/useFetch";
 import LoadingScreen from "../../../../screens/LoadingScreen";
 
-// ── Color tokens ──────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_700 = Colors.principal.green[700];
 const GREEN_500 = Colors.principal.green[500];
@@ -40,7 +39,6 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 const BG_PAGE = "#F0F4F8";
 
-// ── Main screen ───────────────────────────────────────────────────────────────
 export default function AdminEditEventPage() {
   const router = useRouter();
   const { id: eventId, eventStatus } = useLocalSearchParams();
@@ -64,7 +62,6 @@ export default function AdminEditEventPage() {
 
   const originalData = useRef(null);
 
-  // ── Pre-fill form from API data ──────────────────────────────────────────
   useEffect(() => {
     if (data && !initialized) {
       setFormData({
@@ -83,7 +80,6 @@ export default function AdminEditEventPage() {
   const updateForm = (key, value) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
-  // ── Banner image picker ──────────────────────────────────────────────────
   const handlePickBanner = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -106,7 +102,6 @@ export default function AdminEditEventPage() {
     }
   };
 
-  // ── Save ─────────────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!formData.title || !formData.ticketPrice) {
       Alert.alert("Error", "El título y el precio son obligatorios.");
@@ -179,7 +174,6 @@ export default function AdminEditEventPage() {
     }
   };
 
-  // ── Aumentar tickets ─────────────────────────────────────────────────────
   const handleAumentarTickets = async () => {
     const qty = Number(additionalTickets);
     if (!qty || qty <= 0 || !Number.isInteger(qty)) {
@@ -228,12 +222,10 @@ export default function AdminEditEventPage() {
         ? { label: "SORTEADO", color: "#F59E0B" }
         : { label: "EN ESPERA", color: NEUTRAL_400 };
 
-  // ── Main render ──────────────────────────────────────────────────────────
   return (
     <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
       {loading && <LoadingScreen />}
 
-      {/* ── Top nav ──────────────────────────────────────────────────────── */}
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.navBtn}
@@ -259,7 +251,6 @@ export default function AdminEditEventPage() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* ── Banner image ───────────────────────────────────────────── */}
           <TouchableOpacity
             style={styles.bannerWrap}
             activeOpacity={0.9}
@@ -283,7 +274,6 @@ export default function AdminEditEventPage() {
             </View>
           </TouchableOpacity>
 
-          {/* ── Información General ────────────────────────────────────── */}
           <View style={styles.sectionHeader}>
             <View style={styles.sectionAccent} />
             <Text style={styles.sectionTitle}>Información General</Text>
@@ -312,8 +302,6 @@ export default function AdminEditEventPage() {
               textAlignVertical="top"
             />
           </View>
-
-          {/* ── Configuración del Sorteo ───────────────────────────────── */}
           <View style={styles.sectionHeader}>
             <View style={styles.sectionAccent} />
             <Text style={styles.sectionTitle}>Configuración del Sorteo</Text>
@@ -364,13 +352,11 @@ export default function AdminEditEventPage() {
             </View>
           </View>
 
-          {/* ── Capacidad y Paquete ────────────────────────────────────── */}
           <View style={styles.sectionHeader}>
             <View style={styles.sectionAccent} />
             <Text style={styles.sectionTitle}>Capacidad y Paquete</Text>
           </View>
           <View style={styles.capacityCard}>
-            {/* Decorative circle */}
             <View style={styles.capacityCircle} />
             <Text style={styles.capacityLabel}>TICKETS MAXIMOS: </Text>
             <View style={styles.capacityCountRow}>
@@ -393,7 +379,6 @@ export default function AdminEditEventPage() {
             </TouchableOpacity>
           </View>
 
-          {/* ── Cancelar ──────────────────────────────────────────────── */}
           <TouchableOpacity
             style={styles.cancelBtn}
             onPress={() => router.back()}
@@ -404,7 +389,6 @@ export default function AdminEditEventPage() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* ── Modal: Aumentar Tickets ────────────────────────────────────────── */}
       <Modal
         visible={showTicketsModal}
         transparent
@@ -453,14 +437,12 @@ export default function AdminEditEventPage() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: BG_PAGE,
   },
 
-  // ── Top nav ────────────────────────────────────────────────────────────────
   topBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -497,7 +479,6 @@ const styles = StyleSheet.create({
     color: WHITE,
   },
 
-  // ── Scroll ─────────────────────────────────────────────────────────────────
   scroll: {
     flex: 1,
   },
@@ -505,7 +486,6 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
 
-  // ── Banner ─────────────────────────────────────────────────────────────────
   bannerWrap: {
     height: 200,
     backgroundColor: NEUTRAL_200,
@@ -540,7 +520,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // ── Section headers ────────────────────────────────────────────────────────
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -561,7 +540,6 @@ const styles = StyleSheet.create({
     color: GREEN_900,
   },
 
-  // ── White card ─────────────────────────────────────────────────────────────
   card: {
     backgroundColor: WHITE,
     marginHorizontal: 16,

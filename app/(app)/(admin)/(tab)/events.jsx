@@ -21,7 +21,6 @@ import { usePaginatedFetch } from "../../../../lib/usePaginatedFetch";
 import EmptyEvents from "../../../../screens/EmptyEvents";
 import LoadingScreen from "../../../../screens/LoadingScreen";
 
-// ── Color constants ────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const NEUTRAL_200 = Colors.principal.neutral[200];
@@ -31,31 +30,24 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 const BG_PAGE = "#F0F4F8";
 
-// ── Filter tabs config ─────────────────────────────────────────────────────────
 const FILTER_TABS = [
   { label: "En espera", value: 1 },
   { label: "Creados", value: 2 },
   { label: "Sorteados", value: 3 },
 ];
 
-// ── Main screen ───────────────────────────────────────────────────────────────
 export default function EventsTab() {
   const router = useRouter();
   const { userData } = useAuthContext();
 
-  const [selectedStatus, setSelectedStatus] = useState(1); // null = Todos
+  const [selectedStatus, setSelectedStatus] = useState(1);
   const [searchText, setSearchText] = useState("");
 
-  // User info for header
   const firstName = userData?.sub?.split("@")[0] ?? "Usuario";
   const avatarUri = userData?.photo ?? null;
 
-  // Build paginated URL — usePaginatedFetch appends &page=N&size=10 automatically
   const baseUrl = `${ENDPOINTS_EVENTS.GET_BY_USER}?role=HOST`;
 
-  // ── Todos los estados juntos (filtro = null) ───────────────────────────
-
-  // ── Un estado específico ───────────────────────────────────────────────
   const filteredUrl =
     selectedStatus !== null ? `${baseUrl}&eventStatus=${selectedStatus}` : null;
 
@@ -70,7 +62,6 @@ export default function EventsTab() {
   const loading = loadingPaged;
   const refresh = refreshPaged;
 
-  // Client-side search filter
   const filteredItems = searchText.trim()
     ? sourceItems.filter(
         (ev) =>
@@ -79,11 +70,9 @@ export default function EventsTab() {
       )
     : sourceItems;
 
-  // ── Render: header bar ──────────────────────────────────────────────────────
   const renderHeaderBar = () => (
     <View style={styles.headerBar}>
       <View style={styles.headerLeft}>
-        {/* Avatar */}
         {avatarUri ? (
           <Image
             source={{ uri: avatarUri }}
@@ -106,10 +95,8 @@ export default function EventsTab() {
     </View>
   );
 
-  // ── Render: FlatList header (title + search + filter tabs) ──────────────────
   const renderHeader = () => (
     <View>
-      {/* Title block */}
       <View style={styles.titleBlock}>
         <Text style={styles.pageTitle}>Mis Sorteos</Text>
         <Text style={styles.pageSubtitle}>
@@ -117,7 +104,6 @@ export default function EventsTab() {
         </Text>
       </View>
 
-      {/* Search bar */}
       <View style={styles.searchContainer}>
         <Ionicons
           name="search-outline"
@@ -146,7 +132,6 @@ export default function EventsTab() {
         )}
       </View>
 
-      {/* Filter tabs */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -185,7 +170,6 @@ export default function EventsTab() {
         })}
       </ScrollView>
 
-      {/* Events list label */}
       <View style={styles.listLabelRow}>
         <Text style={styles.listLabel}>
           {filteredItems.length > 0
@@ -196,7 +180,6 @@ export default function EventsTab() {
     </View>
   );
 
-  // ── Render: "Crear Nuevo Sorteo" footer card ────────────────────────────────
   const renderFooter = () => (
     <View style={styles.footerWrapper}>
       <TouchableOpacity
@@ -212,16 +195,13 @@ export default function EventsTab() {
           Configura premios, fechas y tickets.
         </Text>
       </TouchableOpacity>
-      {/* Extra bottom space so FAB never overlaps last card */}
       <View style={{ height: 24 }} />
     </View>
   );
 
-  // ── Main render ─────────────────────────────────────────────────────────────
   return (
     <View style={styles.screen}>
       {loading && <LoadingScreen />}
-      {/* Header bar sits above safe area */}
       <SafeAreaView edges={["top"]} style={{ backgroundColor: WHITE }}>
         {renderHeaderBar()}
       </SafeAreaView>
@@ -249,7 +229,6 @@ export default function EventsTab() {
         ListEmptyComponent={!loading ? <EmptyEvents /> : null}
       />
 
-      {/* FAB */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => router.push("/(app)/(admin)/events/create")}
@@ -261,7 +240,6 @@ export default function EventsTab() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -270,8 +248,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 120,
   },
-
-  // Header bar
   headerBar: {
     flexDirection: "row",
     alignItems: "center",

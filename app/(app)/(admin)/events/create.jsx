@@ -26,7 +26,7 @@ import { useAuthContext } from "../../../../context/AuthContext";
 import { formatterDateToISO } from "../../../../lib/dateFormatter";
 import { useUser } from "../../../../lib/useUser";
 import LoadingScreen from "../../../../screens/LoadingScreen";
-// ── Color tokens ──────────────────────────────────────────────────────────────
+
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const NEUTRAL_200 = Colors.principal.neutral[200];
@@ -36,7 +36,6 @@ const BG_PAGE = "#F0F4F8";
 
 const TOTAL_STEPS = 4;
 
-// ── Per-step metadata (title, description, tip card) ─────────────────────────
 const STEP_META = [
   {
     title: "Paquete de\nTickets",
@@ -80,11 +79,10 @@ const STEP_META = [
   },
 ];
 
-// ── Main screen ───────────────────────────────────────────────────────────────
 export default function AdminCreateEvent() {
   const router = useRouter();
   const { userData } = useAuthContext();
-  const { userData: userDataRaw } = useUser(); // needed for userId in payload
+  const { userData: userDataRaw } = useUser();
   const { title: initialTitle = "", description: initialDescription = "" } =
     useLocalSearchParams();
 
@@ -98,6 +96,7 @@ export default function AdminCreateEvent() {
     place: "",
     collectionsQuantity: 1,
     ticketsPerCollection: 0,
+    ticketPrice: 0,
     packId: 1,
     hostId: 1,
     image: "",
@@ -105,13 +104,11 @@ export default function AdminCreateEvent() {
     status: 1,
   });
 
-  // ── Header display info ──────────────────────────────────────────────────
   const firstName = userData?.sub?.split("@")[0] ?? "Admin";
   const avatarUri = userData?.photo ?? null;
 
   const meta = STEP_META[currentStep - 1];
 
-  // ── Step navigation ──────────────────────────────────────────────────────
   const handleNext = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setCurrentStep((prev) => (prev < TOTAL_STEPS ? prev + 1 : prev));
@@ -122,12 +119,28 @@ export default function AdminCreateEvent() {
     setCurrentStep((prev) => (prev > 1 ? prev - 1 : prev));
   };
 
-  // ── Submit ───────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!formData.image) {
       Alert.alert(
         "Imagen requerida",
         "Debes subir una imagen de banner para el evento.",
+      );
+      return;
+    }
+
+    if (!formData.date) {
+      Alert.alert(
+        "Fecha requerida",
+        "Debes seleccionar la fecha de cierre del sorteo.",
+      );
+      return;
+    }
+
+    const parsedPrice = parseFloat(formData.ticketPrice);
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      Alert.alert(
+        "Precio inválido",
+        "Debes ingresar un precio de ticket válido mayor a cero.",
       );
       return;
     }
@@ -164,8 +177,8 @@ export default function AdminCreateEvent() {
         date: formatterDateToISO(formData.date),
         place: formData.place,
         ticketsPerCollection: Number(formData.ticketsPerCollection),
-        collectionsQuantity: 1,
-        ticketPrice: parseFloat(formData.ticketPrice),
+        collectionsQuantity: formData.collectionsQuantity,
+        ticketPrice: parsedPrice,
         packId: Number(formData.packId),
         image: imageUrl,
         hostId: userDataRaw?.userId ?? userData?.userId,
@@ -190,7 +203,6 @@ export default function AdminCreateEvent() {
     }
   };
 
-  // ── Step content switch ──────────────────────────────────────────────────
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -239,12 +251,10 @@ export default function AdminCreateEvent() {
     }
   };
 
-  // ── Main render ──────────────────────────────────────────────────────────
   return (
     <SafeAreaView style={styles.root} edges={["top"]}>
       {loading && <LoadingScreen />}
 
-      {/* ── Header bar ──────────────────────────────────────────────────── */}
       <View style={styles.headerBar}>
         <View style={styles.headerLeft}>
           {avatarUri ? (
@@ -283,13 +293,11 @@ export default function AdminCreateEvent() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* ── Step label ────────────────────────────────────────────── */}
           <Text style={styles.stepLabel}>
             PASO {String(currentStep).padStart(2, "0")} DE{" "}
             {String(TOTAL_STEPS).padStart(2, "0")}
           </Text>
 
-          {/* ── Title + progress dashes ───────────────────────────────── */}
           <View style={styles.titleRow}>
             <Text style={styles.stepTitle}>{meta.title}</Text>
             <View style={styles.progressDashes}>
@@ -311,15 +319,11 @@ export default function AdminCreateEvent() {
             </View>
           </View>
 
-          {/* ── Step description ─────────────────────────────────────── */}
           <Text style={styles.stepDescription}>{meta.description}</Text>
 
-          {/* ── Step content (existing Step components) ───────────────── */}
           <View style={styles.stepContent}>{renderStepContent()}</View>
 
-          {/* ── Tip card "¿Sabías que?" ───────────────────────────────── */}
           <View style={styles.tipCard}>
-            {/* Decorative ticket */}
             <Ionicons
               name="ticket-outline"
               size={90}
@@ -346,14 +350,12 @@ export default function AdminCreateEvent() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: BG_PAGE,
   },
 
-  // ── Header bar ─────────────────────────────────────────────────────────────
   headerBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -402,7 +404,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // ── Scroll ─────────────────────────────────────────────────────────────────
   scroll: {
     flex: 1,
   },
@@ -411,8 +412,6 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 40,
   },
-
-  // ── Step label ─────────────────────────────────────────────────────────────
   stepLabel: {
     fontSize: 12,
     fontWeight: "700",
@@ -420,8 +419,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     marginBottom: 8,
   },
-
-  // ── Title row ──────────────────────────────────────────────────────────────
   titleRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -457,17 +454,12 @@ const styles = StyleSheet.create({
     backgroundColor: NEUTRAL_200,
   },
 
-  // ── Step description ───────────────────────────────────────────────────────
   stepDescription: {
     fontSize: Typography.sizes.sm,
     color: NEUTRAL_500,
     lineHeight: 21,
     marginBottom: 24,
   },
-
-  // ── Step content wrapper ───────────────────────────────────────────────────
-
-  // ── Tip card ───────────────────────────────────────────────────────────────
   tipCard: {
     backgroundColor: GREEN_900,
     borderRadius: 20,
