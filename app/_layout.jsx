@@ -5,6 +5,7 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
 import { AuthProvider } from "@/context/AuthContext";
@@ -15,20 +16,22 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    // FIX: Auth primero, Raffle adentro — RaffleContext puede leer userData
-    <AuthProvider>
-      <RaffleProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(app)" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </RaffleProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* FIX: Auth primero, Raffle adentro — RaffleContext puede leer userData */}
+      <AuthProvider>
+        <RaffleProvider>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(app)" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </RaffleProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

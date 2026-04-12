@@ -3,26 +3,23 @@ import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    FlatList,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TicketCell from "../../../../components/cards/TicketCell";
+import QRModalVender from "../../../../components/common/Modal/QRModalVender";
 import { ENDPOINTS_TICKETS } from "../../../../Connections/APIURLS";
 import { GetCollectionsByEvent } from "../../../../Connections/collections";
 import { CreateReservation } from "../../../../Connections/tickets";
 import { Colors, Typography } from "../../../../constants/theme";
 import { useAuthContext } from "../../../../context/AuthContext";
-import { createTicketClaimURL } from "../../../../lib/deepLinks";
 import { useFetch } from "../../../../lib/useFetch";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
@@ -34,8 +31,6 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_400 = Colors.principal.neutral[400];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
-
-const SCREEN_W = Dimensions.get("window").width;
 
 // ── Legend item ────────────────────────────────────────────────────────────────
 function LegendItem({ color, borderStyle, label, strikethrough }) {
@@ -51,74 +46,6 @@ function LegendItem({ color, borderStyle, label, strikethrough }) {
       </View>
       <Text style={styles.legendLabel}>{label}</Text>
     </View>
-  );
-}
-
-// ── QR Modal ──────────────────────────────────────────────────────────────────
-function QRModal({
-  visible,
-  reservationCode,
-  ticketCount,
-  onSellMore,
-  onClose,
-}) {
-  const deepLink = reservationCode ? createTicketClaimURL(reservationCode) : "";
-  const QR_SIZE = SCREEN_W * 0.55;
-
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalSheet}>
-          {/* Handle */}
-          <View style={styles.modalHandle} />
-
-          {/* Success header */}
-          <View style={styles.qrSuccessIcon}>
-            <Ionicons name="checkmark-circle" size={36} color={WHITE} />
-          </View>
-          <Text style={styles.qrTitle}>QR listo</Text>
-          <Text style={styles.qrSubtitle}>
-            {ticketCount} ticket{ticketCount !== 1 ? "s" : ""} reservado
-            {ticketCount !== 1 ? "s" : ""}.{"\n"}
-            El comprador escanea el QR con la app Sortealo.
-          </Text>
-
-          {/* QR code */}
-          {deepLink ? (
-            <View style={styles.qrWrapper}>
-              <QRCode
-                value={deepLink}
-                size={QR_SIZE}
-                color={GREEN_900}
-                backgroundColor={WHITE}
-                quietZone={12}
-              />
-            </View>
-          ) : null}
-
-          {/* Buttons */}
-          <TouchableOpacity
-            style={styles.btnSellMore}
-            onPress={onSellMore}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.btnSellMoreText}>Vender más tickets</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.btnClose}
-            onPress={onClose}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.btnCloseText}>Volver al evento</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
   );
 }
 
@@ -168,12 +95,11 @@ export default function VenderTickets() {
   const { data: availableData, loading: loadingAvailable } =
     useFetch(availableUrl);
 
-  // ── Fetch sold tickets (status=3) — for greyed-out display ──────────────────
-  const soldUrl =
+  const reservedUrl =
     collectionId && eventId
-      ? `${ENDPOINTS_TICKETS.GET}?eventId=${eventId}&collectionId=${collectionId}&ticketStatus=3&page=0&size=500`
+      ? `${ENDPOINTS_TICKETS.GET}?eventId=${eventId}&collectionId=${collectionId}&ticketStatus=2&page=0&size=500`
       : null;
-  const { data: soldData, loading: loadingSold } = useFetch(soldUrl);
+  const { data: reservedData, loading: loadingSold } = useFetch(reservedUrl);
 
   const availableTickets = useMemo(
     () =>
@@ -183,18 +109,33 @@ export default function VenderTickets() {
     [availableData],
   );
   const soldTickets = useMemo(
-    () => (Array.isArray(soldData) ? soldData : (soldData?.content ?? [])),
-    [soldData],
+    () =>
+      Array.isArray(reservedData)
+        ? reservedData
+        : (reservedData?.content ?? []),
+    [reservedData],
   );
 
-  // Combine + sort by serialNumber
+  // ── Tickets reservados en esta sesión (no deben reaparecer como disponibles) ─
+  // Debe declararse ANTES del useMemo que lo referencia
+  const [bookedCodes, setBookedCodes] = useState(new Set());
+
+  // Combine + sort; excluir bookedCodes de disponibles y mostrarlos como reservados
   const allTickets = useMemo(() => {
-    const available = availableTickets.map((t) => ({ ...t, _available: true }));
-    const sold = soldTickets.map((t) => ({ ...t, _sold: true }));
-    return [...available, ...sold].sort(
+    const available = availableTickets
+      .filter((t) => !bookedCodes.has(t.code))
+      .map((t) => ({ ...t, _available: true }));
+
+    const serverSold = soldTickets.map((t) => ({ ...t, _sold: true }));
+
+    const locallyBooked = availableTickets
+      .filter((t) => bookedCodes.has(t.code))
+      .map((t) => ({ ...t, _sold: true }));
+
+    return [...available, ...serverSold, ...locallyBooked].sort(
       (a, b) => (a.serialNumber ?? a.id ?? 0) - (b.serialNumber ?? b.id ?? 0),
     );
-  }, [availableTickets, soldTickets]);
+  }, [availableTickets, soldTickets, bookedCodes]);
 
   // ── Search ──────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
@@ -250,17 +191,29 @@ export default function VenderTickets() {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.message ?? "No se pudo crear la reserva.");
       }
-      const data = await res.json();
-      setReservationCode(data.id);
+
+      // Parsear body de forma segura — puede ser vacío en algunos entornos
+      const data = await res.json().catch(() => ({}));
+      const resCode = data?.id ?? data?.reservationCode ?? data?.code ?? null;
+
+      // Marcar como reservados para que no reaparezcan en el grid
+      setBookedCodes((prev) => {
+        const next = new Set(prev);
+        ticketCodes.forEach((c) => next.add(c));
+        return next;
+      });
+
+      setReservationCode(resCode);
       setQrVisible(true);
     } catch (err) {
-      Alert.alert("Error", err.message);
+      Alert.alert("Error", err.message ?? "Ocurrió un error inesperado.");
     } finally {
       setSubmitting(false);
     }
   }, [eventId, selectedCodes, selectedTickets]);
 
   const resetSelection = useCallback(() => {
+    // bookedCodes se mantiene para que los tickets reservados no reaparezcan
     setSelectedCodes(new Set());
     setReservationCode(null);
     setQrVisible(false);
@@ -319,6 +272,11 @@ export default function VenderTickets() {
       <View style={styles.legend}>
         <LegendItem color={WHITE} borderStyle="solid" label="DISPONIBLE" />
         <LegendItem color={GREEN_500} label="SELECCIONADO" />
+        <LegendItem
+          color={Colors.principal.neutral[100]}
+          label="RESERVADO"
+          strikethrough
+        />
       </View>
 
       {/* ── Ticket grid ──────────────────────────────────────────────────────── */}
@@ -383,8 +341,8 @@ export default function VenderTickets() {
         </SafeAreaView>
       )}
 
-      {/* ── QR Modal ─────────────────────────────────────────────────────────── */}
-      <QRModal
+      {/* ── QR Modal (componente compartido con branding RIFALOPE) ───────────── */}
+      <QRModalVender
         visible={qrVisible}
         reservationCode={reservationCode}
         ticketCount={selectedCodes.size}
@@ -433,14 +391,6 @@ const styles = StyleSheet.create({
     fontWeight: Typography.weights.extrabold,
     color: GREEN_900,
     flex: 1,
-  },
-  navAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    overflow: "hidden",
-    alignItems: "center",
-    justifyContent: "center",
   },
 
   // ── Search ──────────────────────────────────────────────────────────────────
@@ -574,93 +524,6 @@ const styles = StyleSheet.create({
     fontWeight: Typography.weights.extrabold,
     textAlign: "center",
     lineHeight: 20,
-  },
-
-  // ── QR Modal ────────────────────────────────────────────────────────────────
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  modalSheet: {
-    backgroundColor: WHITE,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 28,
-    paddingBottom: 40,
-    alignItems: "center",
-  },
-  modalHandle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: NEUTRAL_200,
-    marginTop: 14,
-    marginBottom: 24,
-  },
-  qrSuccessIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: GREEN_500,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 14,
-    shadowColor: GREEN_500,
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  qrTitle: {
-    fontSize: Typography.sizes.xl,
-    fontWeight: Typography.weights.extrabold,
-    color: GREEN_900,
-    marginBottom: 6,
-  },
-  qrSubtitle: {
-    fontSize: Typography.sizes.sm,
-    color: NEUTRAL_500,
-    textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  qrWrapper: {
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: NEUTRAL_200,
-    backgroundColor: WHITE,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  btnSellMore: {
-    width: "100%",
-    borderWidth: 2,
-    borderColor: GREEN_900,
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  btnSellMoreText: {
-    fontSize: Typography.sizes.base,
-    fontWeight: Typography.weights.bold,
-    color: GREEN_900,
-  },
-  btnClose: {
-    width: "100%",
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  btnCloseText: {
-    fontSize: Typography.sizes.base,
-    fontWeight: Typography.weights.medium,
-    color: NEUTRAL_500,
   },
 
   // ── States ──────────────────────────────────────────────────────────────────

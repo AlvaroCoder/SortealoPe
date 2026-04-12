@@ -4,14 +4,14 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import ImportExcelModal from "../../../../components/common/Dividers/ImportExcelModal";
-import QRVendedorModal from "../../../../components/common/Dividers/QRVendedorModal";
+import QRVendedorModal from "../../../../components/common/Modal/QRVendedorModal";
 import { Colors, Typography } from "../../../../constants/theme";
 
 const URL_IMAGEN =
@@ -83,7 +83,7 @@ export default function AgregarVendedor() {
             <Text style={styles.heroTitle}>Agregar{"\n"}Vendedor</Text>
             <Text style={styles.heroSubtitle}>
               Solo puedes agregar vendedores que ya estén registrados en la
-              aplicación Sortealo.
+              aplicación RIFALOPE.
             </Text>
           </View>
           {/* Decorative mascot placeholder */}
@@ -100,8 +100,8 @@ export default function AgregarVendedor() {
         {/* ── Action cards ───────────────────────────────────────────────── */}
         <ActionCard
           icon="qr-code-outline"
-          title="Escanear Código QR"
-          description="Escanea el código del perfil del vendedor para añadirlo instantáneamente."
+          title="Agregar por Código QR"
+          description="Genera un código QR para que el vendedor lo escanee y se agregue automáticamente al evento."
           onPress={() => setIsQrModalVisible(true)}
         />
 

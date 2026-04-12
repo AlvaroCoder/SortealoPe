@@ -3,22 +3,24 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Modal,
-    Platform,
-    Pressable,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  Platform,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import QRCode from "react-native-qrcode-svg";
+import { runOnJS } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-    ENDPOINTS_EVENTS,
-    ENDPOINTS_TICKETS,
+  ENDPOINTS_EVENTS,
+  ENDPOINTS_TICKETS,
 } from "../../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../../constants/theme";
 import { fetchWithAuth } from "../../../../lib/fetchWithAuth";
@@ -38,6 +40,9 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const AMBER_BG = "#FEF3C7";
 const AMBER_TEXT = "#92400E";
 const AMBER_BORDER = "#FDE68A";
+
+const MASCOT_STATUS_URI =
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1775314294/mascotas_zlqjn5.png";
 
 // Ticket status config
 const STATUS_CONFIG = {
@@ -60,10 +65,28 @@ function fmtDate(dateStr) {
   });
 }
 
+// Returns the number of calendar days remaining until the event date.
+// Returns 0 if the date is in the past or missing.
+function getDaysLeft(dateStr) {
+  if (!dateStr) return 0;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr);
+  target.setHours(0, 0, 0, 0);
+  const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0;
+}
+
+// Formats a numeric amount as "S/ X.XX" (Peruvian sol).
+function formatCurrency(amount) {
+  const value = Number(amount) || 0;
+  return `S/ ${value.toFixed(2)}`;
+}
+
 // ── QR Modal ──────────────────────────────────────────────────────────────────
 function QRModal({ ticket, visible, onClose }) {
   if (!ticket) return null;
-  const status = STATUS_CONFIG[ticket.ticketStatus] ?? STATUS_CONFIG[4];
+  const status = STATUS_CONFIG[ticket.status?.id] ?? STATUS_CONFIG[4];
   const serialLabel =
     ticket.serialNumber != null
       ? `N.° ${String(ticket.serialNumber).padStart(4, "0")}`
@@ -111,13 +134,6 @@ function QRModal({ ticket, visible, onClose }) {
             Muestra este QR para validar tu ticket
           </Text>
 
-          {/* Code */}
-          <View style={styles.codeBox}>
-            <Text style={styles.codeText} numberOfLines={1}>
-              {ticket.code ?? "—"}
-            </Text>
-          </View>
-
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
             <Text style={styles.closeBtnText}>Cerrar</Text>
           </TouchableOpacity>
@@ -129,7 +145,7 @@ function QRModal({ ticket, visible, onClose }) {
 
 // ── Ticket list item ──────────────────────────────────────────────────────────
 function TicketItem({ ticket, onPress }) {
-  const status = STATUS_CONFIG[ticket.ticketStatus] ?? STATUS_CONFIG[4];
+  const status = STATUS_CONFIG[ticket.status?.id] ?? STATUS_CONFIG[4];
   const serialLabel =
     ticket.serialNumber != null
       ? `N.° ${String(ticket.serialNumber).padStart(4, "0")}`
@@ -152,11 +168,6 @@ function TicketItem({ ticket, onPress }) {
 
       {/* Code */}
       <View style={styles.ticketCodeWrap}>
-        <Text style={styles.ticketCode} numberOfLines={1}>
-          {ticket.code
-            ? `${ticket.code.substring(0, 16)}…`
-            : `ID: ${ticket.id}`}
-        </Text>
         <View
           style={[
             styles.statusPill,
@@ -190,10 +201,17 @@ export default function BuyerEventDetail() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [qrVisible, setQrVisible] = useState(false);
 
-  // Fetch event info
-  const { data: event, loading: loadingEvent } = useFetch(
+  // Fetch event info (returns Page<EventDto> — extract matching event)
+  const {
+    data: eventsPage,
+    loading: loadingEvent,
+    refetch,
+  } = useFetch(
     eventId ? `${ENDPOINTS_EVENTS.GET_BY_USER}?role=BUYER&eventStatus=2` : null,
   );
+
+  const event =
+    eventsPage?.content?.find((e) => String(e.id) === String(eventId)) ?? null;
 
   // Fetch tickets for the active tab
   const fetchTickets = useCallback(async () => {
@@ -238,6 +256,16 @@ export default function BuyerEventDetail() {
   };
 
   const isLoading = loadingEvent || loadingTickets;
+
+  // Swipe right → Comprados (4), swipe left → En espera (3)
+  const changeTab = (value) => setActiveTab(value);
+  const swipeGesture = Gesture.Pan()
+    .activeOffsetX([-30, 30])
+    .failOffsetY([-20, 20])
+    .onEnd((e) => {
+      if (Math.abs(e.translationX) < 40) return;
+      runOnJS(changeTab)(e.translationX > 0 ? 4 : 3);
+    });
 
   return (
     <View style={styles.root}>
@@ -331,72 +359,143 @@ export default function BuyerEventDetail() {
         })}
       </View>
 
-      {/* ── Ticket list ──────────────────────────────────────────────────── */}
-      {isLoading && tickets.length === 0 ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={GREEN_500} />
+      {/* ── Stats row ────────────────────────────────────────────────────── */}
+      <View style={styles.statsRow}>
+        {/* Días restantes */}
+        <View style={styles.statCell}>
+          <Text style={styles.statValue}>{getDaysLeft(event?.date)}</Text>
+          <Text style={styles.statLabel}>días restantes</Text>
         </View>
-      ) : (
-        <FlatList
-          data={tickets}
-          keyExtractor={(item, i) =>
-            item.code ?? item.id?.toString() ?? String(i)
-          }
-          renderItem={({ item }) => (
-            <TicketItem ticket={item} onPress={() => openQR(item)} />
-          )}
-          contentContainerStyle={[
-            styles.listContent,
-            tickets.length === 0 && { flex: 1 },
+
+        <View style={styles.statDivider} />
+
+        {/* Precio por ticket */}
+        <View style={styles.statCell}>
+          <Text style={styles.statValue}>
+            {formatCurrency(event?.ticketPrice)}
+          </Text>
+          <Text style={styles.statLabel}>por ticket</Text>
+        </View>
+
+        <View style={styles.statDivider} />
+
+        {/* Total pagado */}
+        <View style={styles.statCell}>
+          <Text style={styles.statValue}>
+            {formatCurrency((event?.ticketPrice ?? 0) * tickets.length)}
+          </Text>
+          <Text style={styles.statLabel}>
+            {tickets.length} ticket{tickets.length !== 1 ? "s" : ""}
+          </Text>
+        </View>
+      </View>
+
+      {/* ── Status banner ─────────────────────────────────────────────────── */}
+      {(activeTab === 3 || activeTab === 4) && (
+        <View
+          style={[
+            styles.statusBanner,
+            {
+              backgroundColor: activeTab === 3 ? AMBER_BG : GREEN_50,
+              borderColor: activeTab === 3 ? AMBER_BORDER : GREEN_100,
+            },
           ]}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={GREEN_500}
-              colors={[GREEN_900]}
-            />
-          }
-          ListHeaderComponent={
-            tickets.length > 0 ? (
-              <View style={styles.listHeader}>
-                <Ionicons name="ticket-outline" size={14} color={GREEN_500} />
-                <Text style={styles.listHeaderText}>
-                  {tickets.length} ticket{tickets.length !== 1 ? "s" : ""}
-                </Text>
-              </View>
-            ) : null
-          }
-          ListEmptyComponent={
-            !isLoading ? (
-              <View style={styles.emptyContainer}>
-                <View style={styles.emptyIconBox}>
-                  <Ionicons
-                    name={
-                      activeTab === 4
-                        ? "checkmark-circle-outline"
-                        : "time-outline"
-                    }
-                    size={44}
-                    color={NEUTRAL_200}
-                  />
-                </View>
-                <Text style={styles.emptyTitle}>
-                  {activeTab === 4
-                    ? "Sin tickets comprados"
-                    : "Sin tickets en espera"}
-                </Text>
-                <Text style={styles.emptyText}>
-                  {activeTab === 4
-                    ? "Aquí aparecerán tus tickets confirmados."
-                    : "Aquí aparecerán los tickets pendientes de confirmación."}
-                </Text>
-              </View>
-            ) : null
-          }
-        />
+        >
+          <Image
+            source={{ uri: MASCOT_STATUS_URI }}
+            style={styles.bannerMascot}
+            contentFit="contain"
+            transition={200}
+          />
+          <View style={styles.bannerTextWrap}>
+            <Text
+              style={[
+                styles.bannerTitle,
+                { color: activeTab === 3 ? AMBER_TEXT : GREEN_900 },
+              ]}
+            >
+              {activeTab === 3 ? "Compra en espera" : "¡Compra confirmada!"}
+            </Text>
+            <Text style={styles.bannerSubtitle}>
+              {activeTab === 3
+                ? "Tus tickets están reservados. El vendedor validará tu pago para confirmarlos."
+                : "El vendedor ya validó tu pago. Tus tickets están activos y listos para el sorteo."}
+            </Text>
+          </View>
+        </View>
       )}
+
+      {/* ── Ticket list ──────────────────────────────────────────────────── */}
+      <GestureDetector gesture={swipeGesture}>
+        <View style={{ flex: 1 }}>
+          {isLoading && tickets.length === 0 ? (
+            <View style={styles.centered}>
+              <ActivityIndicator size="large" color={GREEN_500} />
+            </View>
+          ) : (
+            <FlatList
+              data={tickets}
+              keyExtractor={(item, i) =>
+                item.code ?? item.id?.toString() ?? String(i)
+              }
+              renderItem={({ item }) => (
+                <TicketItem ticket={item} onPress={() => openQR(item)} />
+              )}
+              contentContainerStyle={[
+                styles.listContent,
+                tickets.length === 0 && { flex: 1 },
+              ]}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
+                  tintColor={GREEN_500}
+                  colors={[GREEN_900]}
+                />
+              }
+              ListHeaderComponent={
+                tickets.length > 0 ? (
+                  <View style={styles.listHeader}>
+                    <Ionicons
+                      name="ticket-outline"
+                      size={14}
+                      color={GREEN_500}
+                    />
+                    <Text style={styles.listHeaderText}>
+                      {tickets.length} ticket{tickets.length !== 1 ? "s" : ""}
+                    </Text>
+                  </View>
+                ) : null
+              }
+              ListEmptyComponent={
+                !isLoading ? (
+                  <View style={styles.emptyContainer}>
+                    <View style={styles.emptyIconBox}>
+                      <Image
+                        source={
+                          "https://res.cloudinary.com/dabyqnijl/image/upload/v1775246084/mascota_sortealo_triste.png"
+                        }
+                        style={{ width: 80, height: 100 }}
+                      />
+                    </View>
+                    <Text style={styles.emptyTitle}>
+                      {activeTab === 4
+                        ? "Sin tickets comprados"
+                        : "Sin tickets en espera"}
+                    </Text>
+                    <Text style={styles.emptyText}>
+                      {activeTab === 4
+                        ? "Aquí aparecerán tus tickets confirmados."
+                        : "Aquí aparecerán los tickets pendientes de confirmación."}
+                    </Text>
+                  </View>
+                ) : null
+              }
+            />
+          )}
+        </View>
+      </GestureDetector>
     </View>
   );
 }
@@ -548,14 +647,16 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   ticketBadge: {
-    width: 54,
+    width: 100,
     paddingVertical: 14,
     alignItems: "center",
+    flexDirection: "row",
     gap: 4,
     flexShrink: 0,
+    marginRight: 5,
   },
   ticketBadgeSerial: {
-    fontSize: 9,
+    fontSize: 15,
     fontWeight: Typography.weights.extrabold,
     color: GREEN_900,
     textAlign: "center",
@@ -605,8 +706,6 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   emptyIconBox: {
-    width: 80,
-    height: 80,
     borderRadius: 20,
     backgroundColor: WHITE,
     alignItems: "center",
@@ -614,6 +713,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     borderWidth: 1,
     borderColor: NEUTRAL_200,
+    padding: 4,
   },
   emptyTitle: {
     fontSize: Typography.sizes.base,
@@ -716,5 +816,68 @@ const styles = StyleSheet.create({
     color: WHITE,
     fontSize: Typography.sizes.base,
     fontWeight: Typography.weights.bold,
+  },
+
+  // ── Stats row ─────────────────────────────────────────────────────────────────
+  statsRow: {
+    flexDirection: "row",
+    backgroundColor: WHITE,
+    borderBottomWidth: 1,
+    borderBottomColor: NEUTRAL_200,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+  },
+  statCell: {
+    flex: 1,
+    alignItems: "center",
+    gap: 3,
+  },
+  statValue: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.extrabold,
+    color: GREEN_900,
+  },
+  statLabel: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_500,
+    fontWeight: Typography.weights.medium,
+    textAlign: "center",
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: NEUTRAL_200,
+    marginVertical: 4,
+  },
+
+  // ── Status banner ─────────────────────────────────────────────────────────────
+  statusBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginHorizontal: 14,
+    marginTop: 12,
+    marginBottom: 2,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  bannerMascot: {
+    width: 52,
+    height: 52,
+    flexShrink: 0,
+  },
+  bannerTextWrap: {
+    flex: 1,
+    gap: 4,
+  },
+  bannerTitle: {
+    fontSize: Typography.sizes.sm,
+    fontWeight: Typography.weights.bold,
+  },
+  bannerSubtitle: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_700,
+    lineHeight: 17,
   },
 });

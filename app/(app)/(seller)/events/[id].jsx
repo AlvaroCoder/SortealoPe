@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,7 +18,6 @@ import { useDateFormatter } from "../../../../lib/dateFormatter";
 import { useFetch } from "../../../../lib/useFetch";
 import LoadingScreen from "../../../../screens/LoadingScreen";
 
-// ── Color constants ────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const GREEN_50 = Colors.principal.green[50];
@@ -29,13 +29,16 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
-// ── Main screen ────────────────────────────────────────────────────────────────
 export default function SellerEventDetail() {
   const { formatDateToSpanish } = useDateFormatter();
   const router = useRouter();
   const { id: eventId } = useLocalSearchParams();
 
-  const { data: event, loading } = useFetch(
+  const {
+    data: event,
+    loading,
+    refetch,
+  } = useFetch(
     eventId
       ? `${ENDPOINTS_EVENTS.GET_BY_ID}${eventId}?role=SELLER&eventStatus=2`
       : null,
@@ -68,7 +71,9 @@ export default function SellerEventDetail() {
   // Seller's own collection (first one when fetched with role=SELLER)
   // The collection object uses .collectionId when coming from event+role=SELLER response
   const myCollection = collections[0] ?? null;
-  const myCollectionId = myCollection?.collectionId ?? myCollection?.id ?? null;
+  console.log("Mi coleccion : ", myCollection);
+
+  const myCollectionId = myCollection?.id ?? null;
 
   // ── Loading / error states ───────────────────────────────────────────────────
   if (loading) return <LoadingScreen />;
@@ -93,6 +98,14 @@ export default function SellerEventDetail() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refetch}
+            tintColor={GREEN_900}
+            colors={[GREEN_900]}
+          />
+        }
       >
         {/* ── Hero image ──────────────────────────────────────────────────── */}
         <View style={styles.hero}>
@@ -121,7 +134,6 @@ export default function SellerEventDetail() {
           </SafeAreaView>
         </View>
 
-        {/* ── Content card ────────────────────────────────────────────────── */}
         <View style={styles.card}>
           {/* Title */}
           <Text style={styles.title} numberOfLines={2}>
@@ -177,7 +189,6 @@ export default function SellerEventDetail() {
           </Text>
           <View style={styles.divider} />
 
-          {/* ── Ventas totales card ──────────────────────────────────────── */}
           <View style={styles.salesCard}>
             <Text style={styles.cardLabel}>VENTAS TOTALES</Text>
             <View style={styles.salesTopRow}>
@@ -199,7 +210,7 @@ export default function SellerEventDetail() {
           <View style={styles.divider} />
 
           {/* ── Métricas ──────────────────────────────────────────────────── */}
-          <Text style={styles.sectionLabel}>Métricas</Text>
+          <Text style={styles.sectionLabel}>Métricas de TICKETS</Text>
           <MetricsCard
             soldTickets={soldTickets}
             reservedTickets={reservedTickets}
@@ -212,8 +223,22 @@ export default function SellerEventDetail() {
                   eventId,
                   collectionId: String(myCollectionId ?? ""),
                   ticketStatus: "4",
+                  reservationStatus: "3",
                   statusLabel: "Vendidos",
                   accentColor: "#16CD91",
+                },
+              })
+            }
+            onPressEnEspera={() =>
+              router.push({
+                pathname: "/(app)/(seller)/tickets/list",
+                params: {
+                  eventId,
+                  collectionId: String(myCollectionId ?? ""),
+                  ticketStatus: "1",
+                  reservationStatus: "1",
+                  statusLabel: "En espera",
+                  accentColor: "#F59E0B",
                 },
               })
             }
@@ -224,20 +249,9 @@ export default function SellerEventDetail() {
                   eventId,
                   collectionId: String(myCollectionId ?? ""),
                   ticketStatus: "2",
+                  reservationStatus: "2",
                   statusLabel: "Reservados",
                   accentColor: "#1E82D9",
-                },
-              })
-            }
-            onPressEnEspera={() =>
-              router.push({
-                pathname: "/(app)/(seller)/tickets/list",
-                params: {
-                  eventId,
-                  collectionId: String(myCollectionId ?? ""),
-                  ticketStatus: "3",
-                  statusLabel: "En espera",
-                  accentColor: "#F59E0B",
                 },
               })
             }
@@ -248,6 +262,7 @@ export default function SellerEventDetail() {
                   eventId,
                   collectionId: String(myCollectionId ?? ""),
                   ticketStatus: "1",
+                  reservationStatus: "0",
                   statusLabel: "Disponibles",
                   accentColor: "#334155",
                 },
@@ -398,11 +413,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 5,
   },
   title: {
     fontSize: Typography.sizes["2xl"],

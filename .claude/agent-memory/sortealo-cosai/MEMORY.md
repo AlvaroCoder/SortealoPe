@@ -54,7 +54,8 @@
 - `Colors.principal.yellow[100]` and `[700]` exist (EVENT_STATUS Pendiente bg/color)
 - `Colors.principal.green[100]` exists (EVENT_STATUS Activo background)
 - `Colors.principal.blue[50]` exists (info box background)
-- `Colors.principal.green[50]` and `[100]` exist (ticket badge background/border)
+- `Colors.principal.green[50]`, `[100]`, `[200]` exist (`#F0FFF4`, `#C6F6D5`, `#9AE6B4`)
+- Full green scale: 50→900 confirmed in theme.ts
 
 ## EVENT_STATUS constant pattern (event/[id].jsx)
 - Always derive statusConfig from `EVENT_STATUS[event?.status] ?? EVENT_STATUS[1]`

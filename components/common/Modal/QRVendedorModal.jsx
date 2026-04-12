@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { File, Paths } from "expo-file-system/next";
+import { Image } from "expo-image";
+import * as Sharing from "expo-sharing";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
   Modal,
-  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -14,19 +14,26 @@ import {
   View,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import ViewShot from "react-native-view-shot";
 import { CreateCollection } from "../../../Connections/collections";
 import { Colors, Typography } from "../../../constants/theme";
-import ButtonGradiend from "../../common/Buttons/ButtonGradiendt";
+import ButtonGradiend from "../Buttons/ButtonGradiendt";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const GREEN_50 = Colors.principal.green[50];
-const RED_500 = Colors.principal.red[500];
 const WHITE = "#FFFFFF";
 const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
+
+const SCREEN_W = Dimensions.get("window").width;
+const CARD_W = SCREEN_W - 56;
+const QR_SIZE = CARD_W * 0.58;
+
+const MASCOT_URI =
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1764234644/COSAI_LOGOS_1_1_dbzabh.png";
 
 // Deep link que el vendedor va a escanear: contiene el code de la colección
 function buildInviteLink(code) {
@@ -34,7 +41,12 @@ function buildInviteLink(code) {
 }
 
 // ── Step 1: enter ticket quantity + call API ───────────────────────────────────
-const Step1Content = ({ ticketQuantity, setTicketQuantity, eventId, onNext }) => {
+const Step1Content = ({
+  ticketQuantity,
+  setTicketQuantity,
+  eventId,
+  onNext,
+}) => {
   const [loading, setLoading] = useState(false);
 
   const handleContinue = async () => {
@@ -115,29 +127,26 @@ const Step1Content = ({ ticketQuantity, setTicketQuantity, eventId, onNext }) =>
   );
 };
 
-// ── Step 2: show QR + share ───────────────────────────────────────────────────
+// ── Step 2: show branded QR + share ──────────────────────────────────────────
 const Step2Content = ({ collectionCode, ticketQuantity, onClose }) => {
-  const qrRef = useRef(null);
+  const viewShotRef = useRef(null);
+  const [sharing, setSharing] = useState(false);
   const deepLink = buildInviteLink(collectionCode);
-  const QR_SIZE = Dimensions.get("window").width * 0.55;
 
-  const handleShare = () => {
-    if (!qrRef.current) return;
-    qrRef.current.toDataURL(async (base64) => {
-      try {
-        const file = new File(
-          Paths.cache,
-          `sortealo-vendor-qr-${Date.now()}.png`,
-        );
-        file.write(base64, { encoding: "base64" });
-        await Share.share({
-          message: `Invitación de vendedor — Sortealo\n${deepLink}`,
-          url: file.uri,
-        });
-      } catch {
-        Alert.alert("Error", "No se pudo compartir el QR.");
-      }
-    });
+  const handleShare = async () => {
+    if (!deepLink || !viewShotRef.current) return;
+    try {
+      setSharing(true);
+      const uri = await viewShotRef.current.capture();
+      await Sharing.shareAsync(uri, {
+        mimeType: "image/png",
+        dialogTitle: "Compartir QR de vendedor",
+      });
+    } catch (_err) {
+      // sharing cancelled or failed
+    } finally {
+      setSharing(false);
+    }
   };
 
   return (
@@ -151,29 +160,68 @@ const Step2Content = ({ collectionCode, ticketQuantity, onClose }) => {
         Comparte el QR para que el vendedor se una.
       </Text>
 
-      {/* QR */}
-      <View style={styles.qrWrapper}>
-        <QRCode
-          value={deepLink}
-          size={QR_SIZE}
-          color={GREEN_900}
-          backgroundColor={WHITE}
-          getRef={(c) => {
-            qrRef.current = c;
-          }}
-        />
-      </View>
+      {/* ── Branded QR card (captured by ViewShot) ── */}
+      <ViewShot
+        ref={viewShotRef}
+        options={{ format: "png", quality: 1 }}
+        style={styles.brandedCard}
+      >
+        <View style={styles.brandedCardInner} collapsable={false}>
+          {/* Header: mascot + brand */}
+          <View style={styles.brandHeader}>
+            <Image
+              source={{ uri: MASCOT_URI }}
+              style={styles.mascot}
+              contentFit="contain"
+            />
+            <Text style={styles.brandName}>RIFALOPE</Text>
+            <Text style={styles.brandTagline}>Invitación de Vendedor</Text>
+          </View>
 
-      <View style={styles.row}>
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Ionicons name="share-outline" size={18} color={GREEN_900} />
-          <Text style={styles.shareButtonText}>Compartir</Text>
-        </TouchableOpacity>
+          {/* QR on white card */}
+          <View style={styles.qrInnerCard}>
+            <QRCode
+              value={deepLink}
+              size={QR_SIZE}
+              color={GREEN_900}
+              backgroundColor={WHITE}
+              quietZone={10}
+            />
+          </View>
 
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text style={styles.closeButtonText}>Cerrar</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Footer info */}
+          <Text style={styles.cardTicketCount}>
+            {parseInt(ticketQuantity, 10).toLocaleString()} tickets asignados
+          </Text>
+          <Text style={styles.cardScanHint}>
+            Escanea con la app RIFALOPE
+          </Text>
+
+          {/* Bottom stripe */}
+          <View style={styles.cardStripe} />
+        </View>
+      </ViewShot>
+
+      {/* Buttons */}
+      <TouchableOpacity
+        style={[styles.shareButton, sharing && { opacity: 0.6 }]}
+        onPress={handleShare}
+        disabled={sharing}
+        activeOpacity={0.8}
+      >
+        {sharing ? (
+          <ActivityIndicator size="small" color={WHITE} />
+        ) : (
+          <>
+            <Ionicons name="share-outline" size={18} color={WHITE} />
+            <Text style={styles.shareButtonText}>Compartir QR</Text>
+          </>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+        <Text style={styles.closeButtonText}>Cerrar</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -311,90 +359,106 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
-  // Step 2
-  qrWrapper: {
-    padding: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: NEUTRAL_200,
-    backgroundColor: WHITE,
-    marginBottom: 12,
+  // ── Branded card (ViewShot target) ──────────────────────────────────────────
+  brandedCard: {
+    width: CARD_W,
+    borderRadius: 20,
+    overflow: "hidden",
+    marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
   },
-  codeBox: {
-    flexDirection: "row",
+  brandedCardInner: {
+    backgroundColor: GREEN_900,
     alignItems: "center",
-    gap: 6,
-    backgroundColor: Colors.principal.green[50],
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 0,
+  },
+  brandHeader: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  mascot: {
+    width: 72,
+    height: 72,
     marginBottom: 8,
-    width: "100%",
-    borderWidth: 1,
-    borderColor: Colors.principal.green[100],
   },
-  codeText: {
-    flex: 1,
-    fontSize: Typography.sizes.sm,
-    color: GREEN_900,
-    fontWeight: Typography.weights.semibold,
-    fontFamily: "monospace",
+  brandName: {
+    fontSize: Typography.sizes["2xl"],
+    fontWeight: Typography.weights.extrabold,
+    color: GREEN_500,
+    letterSpacing: 3,
   },
-  linkBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: GREEN_50,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 20,
-    width: "100%",
-    borderWidth: 1,
-    borderColor: Colors.principal.green[100],
-  },
-  linkText: {
-    flex: 1,
+  brandTagline: {
     fontSize: Typography.sizes.xs,
-    color: GREEN_900,
+    color: "rgba(255,255,255,0.6)",
+    fontWeight: Typography.weights.medium,
+    letterSpacing: 0.5,
+    marginTop: 2,
   },
-  row: {
-    flexDirection: "row",
-    gap: 12,
+  qrInnerCard: {
+    backgroundColor: WHITE,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  cardTicketCount: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+    color: WHITE,
+    marginBottom: 4,
+  },
+  cardScanHint: {
+    fontSize: Typography.sizes.xs,
+    color: "rgba(255,255,255,0.55)",
+    marginBottom: 16,
+    letterSpacing: 0.3,
+  },
+  cardStripe: {
     width: "100%",
+    height: 6,
+    backgroundColor: GREEN_500,
   },
+
+  // ── Buttons ──────────────────────────────────────────────────────────────────
   shareButton: {
-    flex: 1,
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    paddingVertical: 14,
+    backgroundColor: GREEN_500,
     borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: GREEN_900,
+    paddingVertical: 14,
+    marginBottom: 10,
+    shadowColor: GREEN_500,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
   },
   shareButtonText: {
     fontSize: Typography.sizes.base,
-    fontWeight: Typography.weights.semibold,
-    color: GREEN_900,
+    fontWeight: Typography.weights.bold,
+    color: WHITE,
   },
   closeButton: {
-    flex: 1,
+    width: "100%",
+    paddingVertical: 12,
     alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 14,
-    backgroundColor: RED_500,
   },
   closeButtonText: {
     fontSize: Typography.sizes.base,
-    fontWeight: Typography.weights.bold,
-    color: WHITE,
+    fontWeight: Typography.weights.medium,
+    color: NEUTRAL_500,
   },
 });

@@ -40,7 +40,9 @@ const STATUS_CONFIG = {
 const getStatusConfig = (status) => STATUS_CONFIG[status] ?? STATUS_CONFIG[1];
 
 export default function AdminDashboard() {
-  const { userData } = useAuthContext();
+  const { userData, accessToken } = useAuthContext();
+  console.log("Token : ", accessToken);
+
   const userId = userData?.userId;
   const router = useRouter();
 
@@ -58,15 +60,19 @@ export default function AdminDashboard() {
     `${ENDPOINTS_EVENTS.GET_BY_USER}?role=HOST&eventStatus=2`,
   );
 
+  console.log("Events. : ", recentEvents);
+
   const totalEvents = recentEvents?.length ?? 0;
 
-  const firstName =
-    profileData?.firstName ??
-    userData?.firstName ??
-    userData?.name ??
-    "Usuario";
-  const lastName = profileData?.lastName ?? userData?.lastName ?? "";
-  const fullName = [firstName, lastName].filter(Boolean).join(" ");
+  const firstName = profileData?.firstName
+    ? profileData.firstName
+    : (userData?.sub?.split("@")?.[0] ?? "Usuario");
+  const lastName =
+    profileData?.lastName ?? userData?.lastName?.substring(0, 3) ?? "";
+
+  const fullName = [firstName, lastName?.substring(0, 3)]
+    .filter(Boolean)
+    .join(" ");
   const avatarUri = profileData?.photo ?? userData?.photo ?? null;
   const initials = (firstName[0] ?? "V").toUpperCase();
 

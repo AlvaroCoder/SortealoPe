@@ -12,8 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import EventCardAsigned from "../../../components/cards/EventCardAsigned";
-import ActiveColectionCard from "../../../components/common/Card/ActiveColectionCard";
-import HeaderBarCard from "../../../components/common/Card/HeaderBarCard";
+import HeaderScreenHome from "../../../components/common/Navigations/HeaderScreenHome";
 import {
   ENDPOINTS_EVENTS,
   ENDPOINTS_USERS,
@@ -50,43 +49,6 @@ export default function SellerDashboard() {
     userId ? `${ENDPOINTS_EVENTS.GET_BY_USER}?role=SELLER&eventStatus=2` : null,
   );
 
-  // ── Display name ───────────────────────────────────────────────────────────
-  const firstName =
-    profileData?.firstName ??
-    userStorage?.firstName ??
-    userStorage?.name ??
-    "Vendedor";
-  const lastName = profileData?.lastName ?? userStorage?.lastName ?? "";
-  const fullName = [firstName, lastName].filter(Boolean).join(" ");
-  const avatarUri = profileData?.photo ?? userStorage?.photo ?? null;
-  const initials = (firstName[0] ?? "V").toUpperCase();
-
-  // ── Header component (everything above the event list) ────────────────────
-  const renderHeader = () => (
-    <View>
-      {/* ── User header ─────────────────────────────────────────────────── */}
-      <HeaderBarCard
-        avatarUri={avatarUri}
-        initials={initials}
-        fullName={fullName}
-        role={"VENDEDOR"}
-      />
-
-      <ActiveColectionCard items={items} />
-
-      {/* ── Section header ──────────────────────────────────────────────── */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Eventos Asignados</Text>
-        <TouchableOpacity
-          onPress={() => router.push("/(app)/(seller)/events")}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.sectionLink}>Ver todos</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   const renderEmpty = () => {
     if (loading)
       return (
@@ -121,7 +83,14 @@ export default function SellerDashboard() {
           }
           return null;
         }}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={() => (
+          <HeaderScreenHome
+            items={items}
+            userStorage={userStorage}
+            profileData={profileData}
+            defaultValueName="Vendedor"
+          />
+        )}
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}

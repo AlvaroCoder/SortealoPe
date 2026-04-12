@@ -40,9 +40,10 @@ export async function ResendNotification(email) {
   });
 }
 
-export async function RefreshToken() {
+export async function RefreshToken(token) {
   return await fetch(REFRESH_TOKEN, {
     method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 

@@ -1,9 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -15,14 +14,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import HeaderBarCard from "../../../components/common/Card/HeaderBarCard";
 import {
-  ENDPOINTS_COLLECTIONS,
   ENDPOINTS_EVENTS,
-  ENDPOINTS_TICKETS,
   ENDPOINTS_USERS,
 } from "../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../constants/theme";
 import { useAuthContext } from "../../../context/AuthContext";
-import { fetchWithAuth } from "../../../lib/fetchWithAuth";
 import { useFetch } from "../../../lib/useFetch";
 import { usePaginatedFetch } from "../../../lib/usePaginatedFetch";
 
@@ -32,19 +28,15 @@ const GREEN_500 = Colors.principal.green[500];
 const GREEN_50 = Colors.principal.green[50];
 const WHITE = "#FFFFFF";
 const BG_PAGE = "#F0F4F8";
-const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
+const NEUTRAL_400 = Colors.principal.neutral[400];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
-// ── Ticket status display config ───────────────────────────────────────────────
-const TICKET_STATUS = {
-  2: { label: "RESERVADO", bg: "#DBEAFE", text: "#1E40AF" },
-  3: { label: "PENDIENTE", bg: "#FEF3C7", text: "#92400E" },
-  4: { label: "CONFIRMADO", bg: "#D1FAE5", text: "#065F46" },
-};
+const SAD_MASCOT_URI =
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1775246084/mascota_sortealo_triste.png";
 
-// ── Days remaining helper ──────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────────
 const getDaysLeft = (dateStr) => {
   if (!dateStr) return null;
   const diff = new Date(dateStr) - new Date();
@@ -52,15 +44,25 @@ const getDaysLeft = (dateStr) => {
   return days > 0 ? days : 0;
 };
 
-// ── Event card (horizontal, 240×160 with image overlay) ───────────────────────
-function FeaturedEventCard({ event }) {
+const formatDate = (dateStr) => {
+  if (!dateStr) return null;
+  return new Date(dateStr).toLocaleDateString("es-PE", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+// ── Full-width event card ──────────────────────────────────────────────────────
+function EventCard({ event }) {
   const router = useRouter();
   const daysLeft = getDaysLeft(event.date);
+  const dateLabel = formatDate(event.date);
 
   return (
     <TouchableOpacity
       style={styles.eventCard}
-      activeOpacity={0.85}
+      activeOpacity={0.88}
       onPress={() =>
         router.push({
           pathname: "/(app)/(buyer)/events/[id]",
@@ -77,77 +79,75 @@ function FeaturedEventCard({ event }) {
           transition={200}
         />
       ) : (
-        <View
-          style={[StyleSheet.absoluteFill, { backgroundColor: NEUTRAL_100 }]}
-        />
+        <View style={[StyleSheet.absoluteFill, styles.eventCardPlaceholder]} />
       )}
 
-      {/* Dark scrim overlay */}
+      {/* Gradient scrim */}
       <View style={styles.eventCardScrim} />
 
-      {/* Bottom-aligned content */}
-      <View style={styles.eventCardContent}>
-        {/* Countdown pill */}
-        {daysLeft !== null && (
-          <View style={styles.eventCountdown}>
-            <Ionicons name="time-outline" size={11} color={WHITE} />
-            <Text style={styles.eventCountdownText}>{daysLeft}d restantes</Text>
-          </View>
-        )}
+      {/* Top-right: days remaining */}
+      {daysLeft !== null && (
+        <View style={styles.countdownPill}>
+          <Ionicons name="time-outline" size={12} color={WHITE} />
+          <Text style={styles.countdownText}>{daysLeft}d restantes</Text>
+        </View>
+      )}
 
+      {/* Bottom content */}
+      <View style={styles.eventCardContent}>
         <Text style={styles.eventCardTitle} numberOfLines={2}>
           {event.title ?? "Evento"}
         </Text>
 
-        {event.place ? (
-          <View style={styles.eventCardMeta}>
-            <Ionicons
-              name="location-outline"
-              size={11}
-              color="rgba(255,255,255,0.8)"
-            />
-            <Text style={styles.eventCardMetaText} numberOfLines={1}>
-              {event.place}
-            </Text>
-          </View>
-        ) : null}
+        <View style={styles.eventCardMeta}>
+          {event.place ? (
+            <View style={styles.metaRow}>
+              <Ionicons
+                name="location-outline"
+                size={12}
+                color="rgba(255,255,255,0.8)"
+              />
+              <Text style={styles.metaText} numberOfLines={1}>
+                {event.place}
+              </Text>
+            </View>
+          ) : null}
+
+          {dateLabel ? (
+            <View style={styles.metaRow}>
+              <Ionicons
+                name="calendar-outline"
+                size={12}
+                color="rgba(255,255,255,0.8)"
+              />
+              <Text style={styles.metaText}>{dateLabel}</Text>
+            </View>
+          ) : null}
+        </View>
+
+        {/* Ticket badge */}
+        <View style={styles.ticketBadge}>
+          <Ionicons name="ticket-outline" size={12} color={GREEN_500} />
+          <Text style={styles.ticketBadgeText}>Tienes tickets</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
 }
 
-// ── Ticket card (half-width grid card) ────────────────────────────────────────
-function TicketCard({ ticket }) {
-  const statusConfig = TICKET_STATUS[ticket.ticketStatus] ?? TICKET_STATUS[2];
-
-  // Format ticket code: prefer serialNumber padded to 4 chars, else last 6 of code
-  const displayCode = ticket.serialNumber
-    ? `#TK-${String(ticket.serialNumber).padStart(4, "0")}`
-    : ticket.code
-      ? `#${ticket.code.slice(-6).toUpperCase()}`
-      : "—";
-
+// ── Empty state ────────────────────────────────────────────────────────────────
+function EmptyState() {
   return (
-    <View style={styles.ticketCard}>
-      {/* Icon */}
-      <View style={styles.ticketIconBg}>
-        <Ionicons name="ticket-outline" size={20} color={GREEN_900} />
-      </View>
-
-      {/* Event title */}
-      <Text style={styles.ticketCardTitle} numberOfLines={2}>
-        {ticket.eventTitle ?? "Evento"}
+    <View style={styles.emptyState}>
+      <Image
+        source={{ uri: SAD_MASCOT_URI }}
+        style={styles.emptyMascot}
+        contentFit="contain"
+      />
+      <Text style={styles.emptyTitle}>Aún no tienes tickets</Text>
+      <Text style={styles.emptySubtitle}>
+        Escanea el QR de un vendedor para reservar tus tickets y aparecer aquí.
       </Text>
-
-      {/* Code */}
-      <Text style={styles.ticketCardCode}>{displayCode}</Text>
-
-      {/* Status badge */}
-      <View style={[styles.ticketBadge, { backgroundColor: statusConfig.bg }]}>
-        <Text style={[styles.ticketBadgeText, { color: statusConfig.text }]}>
-          {statusConfig.label}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -158,11 +158,6 @@ export default function BuyerDashboard() {
   const { userData: userStorage } = useAuthContext();
   const userId = userStorage?.userId;
 
-  // Tickets state
-  const [tickets, setTickets] = useState([]);
-  const [loadingTickets, setLoadingTickets] = useState(false);
-
-  // Search
   const [searchQuery, setSearchQuery] = useState("");
 
   // User profile (for avatar + name)
@@ -170,97 +165,23 @@ export default function BuyerDashboard() {
     userId ? `${ENDPOINTS_USERS.GET_BY_ID}${userId}` : null,
   );
 
-  // Active events where the user is a buyer (role=BUYER, eventStatus=2)
+  // Events where the user is a buyer (role=BUYER, eventStatus=2)
   const {
     items: events,
     loading: loadingEvents,
-    fetched,
     refresh,
   } = usePaginatedFetch(
     userId ? `${ENDPOINTS_EVENTS.GET_BY_USER}?role=BUYER&eventStatus=2` : null,
   );
 
-  // ── Fetch tickets for each event → each collection ─────────────────────────
-  useEffect(() => {
-    if (!fetched) return;
-
-    const evList = events ?? [];
-    if (evList.length === 0) {
-      setTickets([]);
-      return;
-    }
-
-    let cancelled = false;
-    setLoadingTickets(true);
-
-    async function fetchAllTickets() {
-      try {
-        const all = [];
-
-        await Promise.all(
-          evList.map(async (event) => {
-            // Fetch collections for this event
-            const colRes = await fetchWithAuth(
-              `${ENDPOINTS_COLLECTIONS.GET_BY_EVENT}?eventId=${event.id}&page=0&size=50`,
-            );
-            if (!colRes.ok) return;
-            const colJson = await colRes.json();
-            const cols = Array.isArray(colJson)
-              ? colJson
-              : (colJson?.content ?? []);
-
-            // Fetch tickets (status=2 = reservado/comprado) for each collection
-            await Promise.all(
-              cols.map(async (col) => {
-                const res = await fetchWithAuth(
-                  `${ENDPOINTS_TICKETS.GET}?eventId=${event.id}&collectionId=${col.id}&ticketStatus=2&page=0&size=200`,
-                );
-                if (!res.ok) return;
-                const json = await res.json();
-                const items = Array.isArray(json)
-                  ? json
-                  : (json?.content ?? []);
-                items.forEach((t) =>
-                  all.push({
-                    id: t.id,
-                    code: t.code,
-                    serialNumber: t.serialNumber,
-                    ticketStatus: t.ticketStatus?.id ?? 2,
-                    eventTitle: event.title,
-                    place: event.place,
-                    date: event.date,
-                    ticketPrice: event.ticketPrice,
-                    image: event.image,
-                    eventId: event.id,
-                  }),
-                );
-              }),
-            );
-          }),
-        );
-
-        if (!cancelled) setTickets(all);
-      } catch (err) {
-        console.warn("BuyerDashboard fetchAllTickets error:", err);
-      } finally {
-        if (!cancelled) setLoadingTickets(false);
-      }
-    }
-
-    fetchAllTickets();
-    return () => {
-      cancelled = true;
-    };
-  }, [fetched, events]);
-
-  // ── Display name derivation ────────────────────────────────────────────────
-  const firstName =
-    profileData?.firstName ??
-    userStorage?.firstName ??
-    userStorage?.name ??
-    "Comprador";
+  // ── Display name ──────────────────────────────────────────────────────────
+  const firstName = profileData?.firstName
+    ? profileData.firstName
+    : (profileData?.email?.split("@")?.[0] ?? "Comprador");
   const lastName = profileData?.lastName ?? userStorage?.lastName ?? "";
-  const fullName = [firstName, lastName].filter(Boolean).join(" ");
+  const fullName = [firstName, lastName?.substring(0, 3)]
+    .filter(Boolean)
+    .join(" ");
   const avatarUri =
     profileData?.photo ??
     userStorage?.photo ??
@@ -269,7 +190,7 @@ export default function BuyerDashboard() {
     null;
   const initials = (firstName[0] ?? "C").toUpperCase();
 
-  // ── Filtered data based on searchQuery ────────────────────────────────────
+  // ── Search filter ─────────────────────────────────────────────────────────
   const filteredEvents = useMemo(() => {
     if (!searchQuery.trim()) return events;
     const q = searchQuery.toLowerCase();
@@ -280,37 +201,8 @@ export default function BuyerDashboard() {
     );
   }, [events, searchQuery]);
 
-  const filteredTickets = useMemo(() => {
-    if (!searchQuery.trim()) return tickets;
-    const q = searchQuery.toLowerCase();
-    return tickets.filter(
-      (t) =>
-        t.eventTitle?.toLowerCase().includes(q) ||
-        t.place?.toLowerCase().includes(q),
-    );
-  }, [tickets, searchQuery]);
-
-  // Group tickets into rows of 2 for the manual 2-col grid
-  const ticketRows = useMemo(() => {
-    const rows = [];
-    for (let i = 0; i < filteredTickets.length; i += 2) {
-      rows.push({
-        id: `row-${i}`,
-        items: filteredTickets.slice(i, i + 2),
-      });
-    }
-    return rows;
-  }, [filteredTickets]);
-
-  const isLoading = loadingEvents || loadingTickets;
-
-  function handleRefresh() {
-    refresh();
-  }
-
   return (
     <View style={styles.root}>
-      {/* SafeAreaView only for the top (header background fills safe area) */}
       <SafeAreaView style={styles.safeTop} edges={["top"]} />
 
       <ScrollView
@@ -320,9 +212,10 @@ export default function BuyerDashboard() {
         keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
-            refreshing={loadingEvents && tickets.length === 0}
-            onRefresh={handleRefresh}
+            refreshing={loadingEvents && events.length === 0}
+            onRefresh={refresh}
             tintColor={GREEN_500}
+            colors={[GREEN_500]}
           />
         }
       >
@@ -332,7 +225,7 @@ export default function BuyerDashboard() {
           initials={initials}
           fullName={fullName}
           role="COMPRADOR"
-          onAvatarPress={() => router.push("/(app)/(drawer)/profile")}
+          onAvatarPress={() => router.push("/(app)/(buyer)/profile")}
         />
 
         {/* ── Search bar ──────────────────────────────────────────────────── */}
@@ -345,7 +238,7 @@ export default function BuyerDashboard() {
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Buscar rifas, premios o marcas..."
+            placeholder="Buscar rifas o eventos..."
             placeholderTextColor={NEUTRAL_500}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -362,74 +255,30 @@ export default function BuyerDashboard() {
           )}
         </View>
 
-        {/* ── Destacados section (horizontal scroll of event cards) ─────── */}
-        {filteredEvents.length > 0 && (
-          <View>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Eventos Destacados</Text>
-              <Text style={styles.sectionCount}>
-                {filteredEvents.length} evento
-                {filteredEvents.length !== 1 ? "s" : ""}
+        {/* ── Section title ────────────────────────────────────────────────── */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Mis Eventos</Text>
+          {filteredEvents.length > 0 && (
+            <View style={styles.sectionBadge}>
+              <Text style={styles.sectionBadgeText}>
+                {filteredEvents.length}
               </Text>
             </View>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.eventsRow}
-            >
-              {filteredEvents.map((event) => (
-                <FeaturedEventCard key={String(event.id)} event={event} />
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
-        {/* ── Mis tickets activos section ──────────────────────────────── */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Mis tickets activos</Text>
-          {filteredTickets.length > 0 && (
-            <Text style={styles.sectionCount}>
-              {filteredTickets.length} ticket
-              {filteredTickets.length !== 1 ? "s" : ""}
-            </Text>
           )}
         </View>
 
-        {/* Loading state */}
-        {isLoading && (
-          <View style={styles.centered}>
-            <ActivityIndicator size="large" color={GREEN_500} />
+        {/* ── Event list or empty state ─────────────────────────────────────── */}
+        {filteredEvents.length === 0 && !loadingEvents ? (
+          <EmptyState />
+        ) : (
+          <View style={styles.eventList}>
+            {filteredEvents.map((event) => (
+              <EventCard key={String(event.id)} event={event} />
+            ))}
           </View>
         )}
 
-        {/* Empty state */}
-        {!isLoading && filteredTickets.length === 0 && (
-          <View style={styles.emptyTickets}>
-            <Ionicons name="ticket-outline" size={48} color={NEUTRAL_200} />
-            <Text style={styles.emptyText}>
-              {searchQuery.trim()
-                ? "No se encontraron tickets."
-                : "Aun no tienes tickets activos."}
-            </Text>
-          </View>
-        )}
-
-        {/* 2-column ticket grid (rendered manually — no nested FlatList) */}
-        {!isLoading &&
-          ticketRows.map((row) => (
-            <View key={row.id} style={styles.ticketRow}>
-              <TicketCard ticket={row.items[0]} />
-              {row.items[1] ? (
-                <TicketCard ticket={row.items[1]} />
-              ) : (
-                <View style={styles.ticketCardPlaceholder} />
-              )}
-            </View>
-          ))}
-
-        {/* Bottom clearance for the FAB */}
-        <View style={{ height: 90 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* ── FAB: Escanear QR ──────────────────────────────────────────────── */}
@@ -481,11 +330,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
 
-  // ── Section headers ─────────────────────────────────────────────────────────
+  // ── Section header ──────────────────────────────────────────────────────────
   sectionHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    gap: 8,
     paddingHorizontal: 16,
     marginTop: 20,
     marginBottom: 12,
@@ -495,139 +344,127 @@ const styles = StyleSheet.create({
     fontWeight: Typography.weights.extrabold,
     color: GREEN_900,
   },
-  sectionCount: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.semibold,
-    color: NEUTRAL_500,
+  sectionBadge: {
+    backgroundColor: GREEN_50,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: Colors.principal.green[200],
+  },
+  sectionBadgeText: {
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.extrabold,
+    color: GREEN_900,
   },
 
-  // ── Featured events (horizontal scroll) ────────────────────────────────────
-  eventsRow: {
+  // ── Event list (vertical) ───────────────────────────────────────────────────
+  eventList: {
     paddingHorizontal: 16,
-    gap: 12,
+    gap: 14,
   },
+
+  // ── Event card (full-width) ─────────────────────────────────────────────────
   eventCard: {
-    width: 240,
-    height: 160,
-    borderRadius: 18,
+    width: "100%",
+    height: 200,
+    borderRadius: 20,
     overflow: "hidden",
     justifyContent: "flex-end",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  eventCardPlaceholder: {
+    backgroundColor: NEUTRAL_400,
   },
   eventCardScrim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.50)",
   },
-  eventCardContent: {
+  countdownPill: {
     position: "absolute",
-    bottom: 14,
-    left: 14,
+    top: 14,
     right: 14,
-    gap: 4,
-  },
-  eventCountdown: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    alignSelf: "flex-start",
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.50)",
     borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
-  eventCountdownText: {
-    fontSize: 10,
+  countdownText: {
+    fontSize: Typography.sizes.xs,
     color: WHITE,
     fontWeight: Typography.weights.semibold,
   },
+  eventCardContent: {
+    padding: 16,
+    gap: 6,
+  },
   eventCardTitle: {
-    fontSize: Typography.sizes.base,
+    fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.extrabold,
     color: WHITE,
-    lineHeight: 20,
+    lineHeight: 24,
   },
   eventCardMeta: {
-    flexDirection: "row",
-    alignItems: "center",
     gap: 4,
   },
-  eventCardMetaText: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.8)",
-    flex: 1,
-  },
-
-  // ── Ticket 2-col grid ───────────────────────────────────────────────────────
-  ticketRow: {
+  metaRow: {
     flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 12,
-    marginBottom: 12,
-  },
-  ticketCard: {
-    flex: 1,
-    backgroundColor: WHITE,
-    borderRadius: 18,
-    padding: 16,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: NEUTRAL_200,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  ticketCardPlaceholder: {
-    flex: 1,
-  },
-  ticketIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: GREEN_50,
     alignItems: "center",
-    justifyContent: "center",
+    gap: 5,
   },
-  ticketCardTitle: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.bold,
-    color: GREEN_900,
-  },
-  ticketCardCode: {
+  metaText: {
     fontSize: Typography.sizes.xs,
-    color: NEUTRAL_500,
+    color: "rgba(255,255,255,0.80)",
     fontWeight: Typography.weights.medium,
+    flexShrink: 1,
   },
   ticketBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
     alignSelf: "flex-start",
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    backgroundColor: "rgba(0,71,57,0.75)",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginTop: 2,
   },
   ticketBadgeText: {
-    fontSize: 9,
-    fontWeight: Typography.weights.extrabold,
-    letterSpacing: 0.3,
+    fontSize: Typography.sizes.xs,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_500,
   },
 
-  // ── States ──────────────────────────────────────────────────────────────────
-  centered: {
+  // ── Empty state ─────────────────────────────────────────────────────────────
+  emptyState: {
     alignItems: "center",
-    paddingVertical: 40,
-  },
-  emptyTickets: {
-    alignItems: "center",
-    paddingVertical: 40,
-    backgroundColor: WHITE,
-    marginHorizontal: 16,
-    borderRadius: 16,
+    paddingHorizontal: 32,
+    paddingTop: 32,
     gap: 12,
   },
-  emptyText: {
+  emptyMascot: {
+    width: 180,
+    height: 180,
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontSize: Typography.sizes.xl,
+    fontWeight: Typography.weights.extrabold,
+    color: GREEN_900,
+    textAlign: "center",
+  },
+  emptySubtitle: {
     fontSize: Typography.sizes.sm,
     color: NEUTRAL_500,
     textAlign: "center",
-    paddingHorizontal: 24,
+    lineHeight: 21,
   },
 
   // ── FAB ─────────────────────────────────────────────────────────────────────

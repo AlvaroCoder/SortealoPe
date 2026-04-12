@@ -5,6 +5,8 @@ export default function LayoutTickets() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="vender" />
+      <Stack.Screen name="sortear" />
+      <Stack.Screen name="sorteo/index" />
     </Stack>
   );
 }

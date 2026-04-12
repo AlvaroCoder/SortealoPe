@@ -52,9 +52,9 @@ export const ENDPOINTS_TICKETS = {
   // GET /tickets/status          (público)
   GET_STATUS: `${BASE_URL}/tickets/status`,
   // POST /tickets/reservation?eventId=  Body: { ticketCodes: [uuid, ...] }
-  RESERVATION: `${BASE_URL}/tickets/reservation`,
-  // PATCH /tickets/bookTickets/{reservationCode}
-  BOOK_TICKETS: `${BASE_URL}/tickets/bookTickets/`,
+  RESERVATION: `${BASE_URL}/reservations`,
+  // PATCH /reservations{reservationCode}
+  BOOK_TICKETS: `${BASE_URL}/reservations`,
   // PATCH /tickets/confirmTicket?eventId=&ticketCode=  Body: { modalityId, operationNumber }
   CONFIRM: `${BASE_URL}/tickets/confirmTicket`,
   // PATCH /tickets/releaseTicket?eventId=&ticketCode=
@@ -77,6 +77,16 @@ export const ENDPOINTS_IMAGES = {
   UPLOAD: `${BASE_URL}/images`,
   // POST /images/user  (multipart: "file" + "userId") → ImageDto { url }, actualiza user.photo
   UPLOAD_USER: `${BASE_URL}/images/user`,
+};
+
+// ─── Reservations (protegidas) ────────────────────────────────────────────────
+export const ENDPOINTS_RESERVATIONS = {
+  // GET /reservations?eventId=&collectionId=&reservationStatus=&page=&size=
+  GET: `${BASE_URL}/reservations`,
+  // GET /reservations/tickets?reservationId=&page=&size=
+  GET_TICKETS: `${BASE_URL}/reservations/tickets`,
+  // POST /reservations/confirm?eventId=  Body: { reservationCode, modalityId, image }
+  CONFIRM: `${BASE_URL}/reservations/confirm`,
 };
 
 // ─── Admin (protegidos) ───────────────────────────────────────────────────────

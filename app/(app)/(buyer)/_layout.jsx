@@ -6,6 +6,7 @@ export default function LayoutBuyer() {
       <Stack.Screen name="index" />
       <Stack.Screen name="scan/index" />
       <Stack.Screen name="events/[id]" />
+      <Stack.Screen name="profile" />
     </Stack>
   );
 }

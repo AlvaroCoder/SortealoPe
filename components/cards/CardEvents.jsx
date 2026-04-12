@@ -134,23 +134,6 @@ export default function CardEvents({ item, selectedStatus }) {
 
       {/* ── Bottom section: actions ──────────────────────────────────── */}
       <View style={styles.cardBottom}>
-        {statusValue === 1 && (
-          <>
-            <Text style={styles.cardBottomHint}>En espera de confirmación</Text>
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: "/(app)/event/edit",
-                  params: { id: item.id },
-                })
-              }
-              activeOpacity={0.7}
-            >
-              <Text style={styles.editBtn}>Editar ✎</Text>
-            </TouchableOpacity>
-          </>
-        )}
-
         {statusValue === 2 && (
           <>
             {/* Event ID chip */}
@@ -160,8 +143,8 @@ export default function CardEvents({ item, selectedStatus }) {
             <TouchableOpacity
               onPress={() =>
                 router.push({
-                  pathname: "/(app)/event/[id]",
-                  params: { id: item.id, eventStatus: 2 },
+                  pathname: "/(app)/(admin)/events/[id]",
+                  params: { id: item.id, eventStatus: item.eventStatus ?? 2 },
                 })
               }
               activeOpacity={0.7}

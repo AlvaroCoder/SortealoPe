@@ -43,11 +43,19 @@ const BRACKET_RADIUS = 8;
 //   sortealope://tickets/claim?reservationCode=UUID  (production)
 //   exp://IP:port/--/tickets/claim?reservationCode=UUID  (Expo Go)
 function extractReservationCode(data) {
+  console.log("Data extraida : ", data);
+
   if (!data) return null;
   try {
     const url = new URL(data);
+    console.log(url);
+
+    const codigoReservacion = url.searchParams.get("reservationCode");
+    console.log("Codigo reservacion : ", codigoReservacion);
+
     return url.searchParams.get("reservationCode") ?? null;
   } catch {
+    console.error("Error parsing URL:", data);
     return null;
   }
 }
@@ -149,6 +157,8 @@ export default function BuyerScanQR() {
     setScanning(false);
 
     const reservationCode = extractReservationCode(data);
+    console.log("codigo de reserva : ", reservationCode);
+
     if (reservationCode) {
       setStatus("loading");
       handleBookTickets(reservationCode);
@@ -161,13 +171,17 @@ export default function BuyerScanQR() {
   const handleBookTickets = async (reservationCode) => {
     try {
       const res = await BookTickets(reservationCode);
+      console.log(res.status);
+
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.message ?? "No se pudo confirmar la compra.");
+        throw new Error("No se pudo confirmar la compra.");
       }
+
       setStatus("success");
       setConfirmed(true);
     } catch (err) {
+      console.log("Error : ", err);
+
       setStatus("error");
       Alert.alert("Error al confirmar", err.message, [
         {
@@ -231,7 +245,8 @@ export default function BuyerScanQR() {
       : isLoading
         ? "hourglass-outline"
         : "qr-code-outline";
-  const cardIconColor = isSuccess || isLoading ? GREEN_500 : isError ? RED_500 : GREEN_500;
+  const cardIconColor =
+    isSuccess || isLoading ? GREEN_500 : isError ? RED_500 : GREEN_500;
   const cardTitle = isSuccess
     ? "¡Tickets confirmados!"
     : isError

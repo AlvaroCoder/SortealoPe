@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -30,16 +31,11 @@ const WHITE = "#FFFFFF";
 const BG_PAGE = "#FFFFFF";
 const ORANGE = "#F59E0B";
 
-// ── Status map ───────────────────────────────────────────────────────────────
 const STATUS_MAP = {
   1: { label: "EN ESPERA", bg: "#F1F5F9", text: "#475569" },
   2: { label: "ACTIVO", bg: "#D1FAE5", text: "#065F46" },
   3: { label: "SORTEADO", bg: GREEN_900, text: WHITE },
 };
-
-const BAR_DAYS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
-const BAR_HEIGHTS = [30, 45, 60, 38, 100, 70, 50];
-const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
 const MOCK_WINNERS = [
   { rank: 1, name: "Elena Rodríguez", ticket: "#4521" },
@@ -61,8 +57,6 @@ export default function AdminEventDetailPage() {
 
   const { isAdmin } = useRaffleContext();
 
-  const [chartPeriod, setChartPeriod] = useState("semanal");
-
   const [countdown, setCountdown] = useState({
     days: 0,
     hours: 0,
@@ -71,7 +65,7 @@ export default function AdminEventDetailPage() {
     expired: false,
   });
 
-  const { data, loading } = useFetch(
+  const { data, loading, refetch } = useFetch(
     `${ENDPOINTS_EVENTS.GET_BY_ID}${eventId}?eventStatus=${eventStatus}`,
   );
   const event = data;
@@ -152,8 +146,6 @@ export default function AdminEventDetailPage() {
       return name[0]?.toUpperCase() ?? "?";
     });
 
-  const BAR_CONTAINER_HEIGHT = 80;
-
   function renderStatusRow() {
     return (
       <View style={styles.statusRow}>
@@ -171,7 +163,6 @@ export default function AdminEventDetailPage() {
             {statusCfg.label}
           </Text>
         </View>
-        <Text style={styles.eventIdText}>ID: #EV-{eventId}</Text>
         <TouchableOpacity
           onPress={() =>
             router.push({
@@ -428,87 +419,34 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** Rendimiento de Ventas card — blocked, coming soon */
-  function renderChartCard() {
+  /** Empezar a sortear card — visible only when event is active (status=2) */
+  function renderSortearCard() {
     return (
-      <View style={[styles.card, { overflow: "hidden" }]}>
-        {/* Header row */}
-        <View style={styles.chartHeaderRow}>
-          <Text style={styles.chartTitle}>Rendimiento de Ventas</Text>
-          <View style={styles.toggleRow}>
-            <TouchableOpacity
-              onPress={() => setChartPeriod("diario")}
-              style={[
-                styles.toggleChip,
-                chartPeriod === "diario" && styles.toggleChipActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.toggleChipText,
-                  chartPeriod === "diario" && styles.toggleChipTextActive,
-                ]}
-              >
-                DIARIO
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setChartPeriod("semanal")}
-              style={[
-                styles.toggleChip,
-                chartPeriod === "semanal" && styles.toggleChipActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.toggleChipText,
-                  chartPeriod === "semanal" && styles.toggleChipTextActive,
-                ]}
-              >
-                SEMANAL
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Bar chart — plain Views, no library */}
-        <View style={[styles.barChart, { height: BAR_CONTAINER_HEIGHT + 24 }]}>
-          {BAR_DAYS.map((day, i) => (
-            <View key={day} style={styles.barColumn}>
-              <View style={styles.barWrapper}>
-                <View
-                  style={[
-                    styles.bar,
-                    {
-                      height: (BAR_HEIGHTS[i] / 100) * BAR_CONTAINER_HEIGHT,
-                      backgroundColor: i === todayIdx ? GREEN_500 : NEUTRAL_100,
-                    },
-                  ]}
-                />
-              </View>
-              <Text
-                style={[
-                  styles.barDayLabel,
-                  i === todayIdx && { color: GREEN_500, fontWeight: "700" },
-                ]}
-              >
-                {day}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Lock overlay */}
-        <View style={styles.lockedOverlay}>
-          <View style={styles.lockedIconBox}>
-            <Ionicons name="lock-closed" size={22} color={WHITE} />
-          </View>
-          <Text style={styles.lockedTitle}>Próximamente</Text>
-          <Text style={styles.lockedSubtitle}>
-            Esta función estará disponible pronto.
+      <TouchableOpacity
+        style={styles.sortearCard}
+        activeOpacity={0.85}
+        onPress={() =>
+          router.push({
+            pathname: "/(app)/(admin)/tickets/sortear",
+            params: { eventId, eventTitle: event?.title ?? "" },
+          })
+        }
+      >
+        <Image
+          source={{
+            uri: "https://res.cloudinary.com/dabyqnijl/image/upload/v1775886772/RifaloPeSuper.png",
+          }}
+          style={styles.sortearMascot}
+          contentFit="contain"
+        />
+        <View style={styles.sortearText}>
+          <Text style={styles.sortearTitle}>¡Es hora de sortear!</Text>
+          <Text style={styles.sortearSubtitle}>
+            Inicia el sorteo y elige al ganador
           </Text>
         </View>
-      </View>
+        <Ionicons name="chevron-forward" size={20} color={WHITE} />
+      </TouchableOpacity>
     );
   }
 
@@ -571,6 +509,14 @@ export default function AdminEventDetailPage() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refetch}
+            tintColor={GREEN_900}
+            colors={[GREEN_900]}
+          />
+        }
       >
         {/* Status chip + ID */}
         {renderStatusRow()}
@@ -599,8 +545,8 @@ export default function AdminEventDetailPage() {
         {/* Ganadores */}
         {eventStatus >= 3 && renderWinnersCard()}
 
-        {/* Rendimiento de Ventas (bar chart) */}
-        {renderChartCard()}
+        {/* Sortear */}
+        {Number(eventStatus) === 2 && renderSortearCard()}
 
         <View style={{ marginHorizontal: 20 }}>
           <GuideStatusCard />
@@ -1208,6 +1154,42 @@ const styles = StyleSheet.create({
   countdownDateText: {
     fontSize: Typography.sizes.xs,
     color: "rgba(255,255,255,0.60)",
+    fontWeight: Typography.weights.medium,
+  },
+
+  // ── Sortear card ─────────────────────────────────────────────────────────
+  sortearCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: GREEN_900,
+    borderRadius: 20,
+    marginHorizontal: 20,
+    marginBottom: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    gap: 14,
+    shadowColor: GREEN_900,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  sortearMascot: {
+    width: 64,
+    height: 64,
+  },
+  sortearText: {
+    flex: 1,
+    gap: 4,
+  },
+  sortearTitle: {
+    fontSize: Typography.sizes.lg,
+    fontWeight: Typography.weights.extrabold,
+    color: WHITE,
+  },
+  sortearSubtitle: {
+    fontSize: Typography.sizes.xs,
+    color: "rgba(255,255,255,0.70)",
     fontWeight: Typography.weights.medium,
   },
 
