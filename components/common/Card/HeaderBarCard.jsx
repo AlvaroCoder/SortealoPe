@@ -25,6 +25,7 @@ export default function HeaderBarCard({ avatarUri, initials, fullName, role, onA
             source={{ uri: avatarUri }}
             style={styles.avatar}
             contentFit="cover"
+            cachePolicy="memory-disk"
           />
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>

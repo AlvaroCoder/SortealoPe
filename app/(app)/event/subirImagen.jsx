@@ -104,6 +104,7 @@ export default function SubirImagen() {
               style={StyleSheet.absoluteFill}
               contentFit="cover"
               transition={200}
+              cachePolicy="memory-disk"
             />
           ) : (
             <View style={styles.previewEmpty}>
@@ -177,6 +178,7 @@ export default function SubirImagen() {
                   style={styles.sampleImage}
                   contentFit="cover"
                   transition={150}
+                  cachePolicy="memory-disk"
                 />
 
                 {isSample(url) && (

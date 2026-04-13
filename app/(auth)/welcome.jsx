@@ -120,6 +120,7 @@ export default function Welcome() {
               source={{ uri: photoUri }}
               style={styles.avatarImg}
               contentFit="cover"
+              cachePolicy="memory-disk"
             />
           ) : (
             <View style={styles.avatarPlaceholder}>
@@ -219,6 +220,7 @@ export default function Welcome() {
               source={{ uri: MASCOT_URI }}
               style={styles.mascotImage}
               contentFit="contain"
+              cachePolicy="memory-disk"
             />
           </View>
         </ScrollView>

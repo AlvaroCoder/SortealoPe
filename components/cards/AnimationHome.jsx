@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useEffect, useRef } from "react";
 import {
   Animated,
   Dimensions,
-  Image,
   StyleSheet,
   Text,
   View,
@@ -168,7 +168,8 @@ export default function AnimationHome() {
           <Image
             source={{ uri: LOGO_URL }}
             style={styles.logo}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
           />
           <Title styleTitle={styles.titleText}>RIFALOPE</Title>
         </View>

@@ -1,5 +1,6 @@
+import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import StyleCardEventMain from "../../../assets/styles/components/StyleCardEventMain";
 import { Colors } from "../../../constants/theme";
 import Title from "../Titles/Title";
@@ -48,7 +49,9 @@ export default function CardEventMain({
       <View>
         <Image
           style={styles.image}
-          source={{uri : urlImagen}}
+          source={{ uri: urlImagen }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
         />
       </View>
       <View style={styles.headerContent}>

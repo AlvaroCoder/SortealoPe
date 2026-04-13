@@ -43,6 +43,7 @@ export default function GuideStatusCard() {
           source={{ uri: MASCOT_URL }}
           style={styles.statusGuideIcon}
           contentFit="contain"
+          cachePolicy="memory-disk"
         />
         <View style={styles.statusGuideHeaderText}>
           <Text style={styles.statusGuideTitle}>Guía de estados</Text>

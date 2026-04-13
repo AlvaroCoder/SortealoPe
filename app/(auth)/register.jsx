@@ -122,6 +122,7 @@ export default function Register() {
             source={{ uri: URL_LOGO_IMAGE }}
             style={styles.image}
             contentFit="contain"
+            cachePolicy="memory-disk"
           />
         </View>
       </ScrollView>

@@ -105,6 +105,7 @@ export default function EventSuccessScreen() {
           source={{ uri: MASCOT_URI }}
           style={styles.mascot}
           contentFit="contain"
+          cachePolicy="memory-disk"
         />
       </Animated.View>
 

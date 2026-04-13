@@ -202,11 +202,7 @@ export default function BuyerEventDetail() {
   const [qrVisible, setQrVisible] = useState(false);
 
   // Fetch event info (returns Page<EventDto> — extract matching event)
-  const {
-    data: eventsPage,
-    loading: loadingEvent,
-    refetch,
-  } = useFetch(
+  const { data: eventsPage, loading: loadingEvent } = useFetch(
     eventId ? `${ENDPOINTS_EVENTS.GET_BY_USER}?role=BUYER&eventStatus=2` : null,
   );
 
@@ -279,6 +275,7 @@ export default function BuyerEventDetail() {
             style={StyleSheet.absoluteFill}
             contentFit="cover"
             transition={200}
+            cachePolicy="memory-disk"
           />
         ) : (
           <View
@@ -406,6 +403,7 @@ export default function BuyerEventDetail() {
             style={styles.bannerMascot}
             contentFit="contain"
             transition={200}
+            cachePolicy="memory-disk"
           />
           <View style={styles.bannerTextWrap}>
             <Text

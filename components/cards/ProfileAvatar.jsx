@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, Text, View } from 'react-native';
 import { Colors, Typography } from '../../constants/theme';
 
 const NEUTRAL_700 = Colors.principal.neutral[700];
@@ -10,6 +11,8 @@ export default function ProfileAvatar({user}) {
           <Image
               source={{ uri: user?.avatarUrl }}
               style={styles.profileAvatarImage}
+              contentFit="cover"
+              cachePolicy="memory-disk"
           />
           <Text style={styles.profileAvatarName} numberOfLines={1}>{user?.name}</Text>
     </View>

@@ -114,6 +114,7 @@ export default function SellerEventDetail() {
             style={styles.heroImage}
             contentFit="cover"
             transition={200}
+            cachePolicy="memory-disk"
           />
           <View style={styles.heroScrim} />
 

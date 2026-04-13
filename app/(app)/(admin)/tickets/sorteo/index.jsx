@@ -100,6 +100,13 @@ export default function IndexSorteo() {
     Alert.alert("Próximamente", "Esta función estará disponible pronto.");
   };
 
+  const handleSimular = () => {
+    router.push({
+      pathname: "/(app)/(admin)/tickets/sorteo/simular",
+      params: { selectedAnimation, eventTitle },
+    });
+  };
+
   return (
     <View style={styles.root}>
       {/* Status bar spacer */}
@@ -134,6 +141,7 @@ export default function IndexSorteo() {
             source={{ uri: MASCOT_URI }}
             style={styles.mascot}
             contentFit="contain"
+            cachePolicy="memory-disk"
           />
           <Text style={styles.heroTitle}>Configura el Sorteo</Text>
           <Text style={styles.heroSubtitle}>
@@ -220,45 +228,6 @@ export default function IndexSorteo() {
           </View>
         </View>
 
-        {/* ── Card: Ganadores ──────────────────────────────────────────────── */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Ionicons name="trophy-outline" size={18} color={GREEN_900} />
-            <Text style={styles.cardTitle}>Número de Ganadores</Text>
-          </View>
-          <Text style={styles.cardSubtitle}>
-            ¿Cuántos ganadores deseas seleccionar en este sorteo?
-          </Text>
-          <Stepper
-            value={winners}
-            onDecrement={() => setWinners((v) => Math.max(1, v - 1))}
-            onIncrement={() => setWinners((v) => Math.min(10, v + 1))}
-            min={1}
-            max={10}
-            unit={winners === 1 ? "ganador" : "ganadores"}
-          />
-        </View>
-
-        {/* ── Card: Tiradas ────────────────────────────────────────────────── */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Ionicons name="water-outline" size={18} color={GREEN_900} />
-            <Text style={styles.cardTitle}>Tickets al Agua</Text>
-          </View>
-          <Text style={styles.cardSubtitle}>
-            Cantidad de tickets eliminados antes de revelar al ganador. Más
-            tiradas = mayor emoción en el sorteo.
-          </Text>
-          <Stepper
-            value={tiradas}
-            onDecrement={() => setTiradas((v) => Math.max(1, v - 1))}
-            onIncrement={() => setTiradas((v) => Math.min(50, v + 1))}
-            min={1}
-            max={50}
-            unit={tiradas === 1 ? "tirada" : "tiradas"}
-          />
-        </View>
-
         {/* ── Resumen de configuración ─────────────────────────────────────── */}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Resumen</Text>
@@ -267,18 +236,6 @@ export default function IndexSorteo() {
               <Ionicons name="color-wand-outline" size={16} color={GREEN_500} />
               <Text style={styles.summaryLabel}>Animación</Text>
               <Text style={styles.summaryValue}>{selectedOpt?.label}</Text>
-            </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryItem}>
-              <Ionicons name="people-outline" size={16} color={GREEN_500} />
-              <Text style={styles.summaryLabel}>Ganadores</Text>
-              <Text style={styles.summaryValue}>{winners}</Text>
-            </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryItem}>
-              <Ionicons name="water-outline" size={16} color={GREEN_500} />
-              <Text style={styles.summaryLabel}>Tiradas</Text>
-              <Text style={styles.summaryValue}>{tiradas}</Text>
             </View>
           </View>
         </View>
@@ -304,6 +261,15 @@ export default function IndexSorteo() {
         >
           <Ionicons name="trophy-outline" size={20} color={WHITE} />
           <Text style={styles.sortearBtnText}>Iniciar Sorteo</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.simularBtn}
+          activeOpacity={0.85}
+          onPress={handleSimular}
+        >
+          <Ionicons name="play-circle-outline" size={18} color={GREEN_900} />
+          <Text style={styles.simularBtnText}>Simular sorteo</Text>
         </TouchableOpacity>
       </SafeAreaView>
     </View>
@@ -567,11 +533,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 14,
     paddingBottom: 12,
+    gap: 10,
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: -4 },
     elevation: 8,
+    display: "flex",
+    flexDirection: "row",
   },
   sortearBtn: {
     flexDirection: "row",
@@ -581,15 +550,29 @@ const styles = StyleSheet.create({
     backgroundColor: GREEN_900,
     borderRadius: 18,
     paddingVertical: 18,
-    shadowColor: GREEN_900,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
+    flex: 1,
   },
   sortearBtnText: {
     fontSize: Typography.sizes.lg,
     fontWeight: Typography.weights.extrabold,
     color: WHITE,
+  },
+
+  simularBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: WHITE,
+    borderRadius: 18,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: GREEN_900,
+    flex: 1,
+  },
+  simularBtnText: {
+    fontSize: Typography.sizes.base,
+    fontWeight: Typography.weights.bold,
+    color: GREEN_900,
   },
 });

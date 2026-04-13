@@ -84,6 +84,7 @@ function EmptyState() {
           source={{ uri: URL_MASCOTA }}
           style={styles.mascota}
           contentFit="contain"
+          cachePolicy="memory-disk"
         />
         <View style={styles.emptyTexts}>
           <Text style={styles.emptyTitle}>Sin eventos activos</Text>

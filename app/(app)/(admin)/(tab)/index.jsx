@@ -112,7 +112,11 @@ export default function AdminDashboard() {
         onPress={() =>
           router.push({
             pathname: "/(app)/(admin)/events/[id]",
-            params: { id: item.id, eventStatus: item.eventStatus ?? 2 },
+            params: {
+              id: item.id,
+              eventStatus: item.eventStatus ?? 2,
+              userId,
+            },
           })
         }
       >
@@ -123,6 +127,7 @@ export default function AdminDashboard() {
               style={styles.eventImage}
               contentFit="cover"
               transition={300}
+              cachePolicy="memory-disk"
             />
           ) : (
             <View style={[styles.eventImage, styles.eventImagePlaceholder]} />

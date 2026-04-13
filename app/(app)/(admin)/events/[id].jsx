@@ -53,7 +53,7 @@ const MAX_AVATARS = 4;
 
 export default function AdminEventDetailPage() {
   const router = useRouter();
-  const { id: eventId, eventStatus } = useLocalSearchParams();
+  const { id: eventId, eventStatus, userId } = useLocalSearchParams();
 
   const { isAdmin } = useRaffleContext();
 
@@ -69,6 +69,11 @@ export default function AdminEventDetailPage() {
     `${ENDPOINTS_EVENTS.GET_BY_ID}${eventId}?eventStatus=${eventStatus}`,
   );
   const event = data;
+  const coleccion = data?.collections;
+
+  const idColeccionAdmin = coleccion?.filter(
+    (c) => c?.seller?.id === Number(userId),
+  )?.[0]?.id;
 
   const availableTickets =
     data?.collections
@@ -190,6 +195,7 @@ export default function AdminEventDetailPage() {
           style={styles.imageCardImg}
           contentFit="cover"
           transition={200}
+          cachePolicy="memory-disk"
         />
       </View>
     );
@@ -427,7 +433,7 @@ export default function AdminEventDetailPage() {
         activeOpacity={0.85}
         onPress={() =>
           router.push({
-            pathname: "/(app)/(admin)/tickets/sortear",
+            pathname: "/(app)/(admin)/tickets/sorteo",
             params: { eventId, eventTitle: event?.title ?? "" },
           })
         }
@@ -581,8 +587,12 @@ export default function AdminEventDetailPage() {
           activeOpacity={0.85}
           onPress={() =>
             router.push({
-              pathname: "/(app)/tickets/confirmar/[id]",
-              params: { id: eventId },
+              pathname: "/(app)/(admin)/tickets/confirmar",
+              params: {
+                id: eventId,
+                collectionId: idColeccionAdmin,
+                ticketPrice,
+              },
             })
           }
         >

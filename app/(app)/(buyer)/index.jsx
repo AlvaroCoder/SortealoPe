@@ -77,6 +77,7 @@ function EventCard({ event }) {
           style={StyleSheet.absoluteFill}
           contentFit="cover"
           transition={200}
+          cachePolicy="memory-disk"
         />
       ) : (
         <View style={[StyleSheet.absoluteFill, styles.eventCardPlaceholder]} />
@@ -143,6 +144,7 @@ function EmptyState() {
         source={{ uri: SAD_MASCOT_URI }}
         style={styles.emptyMascot}
         contentFit="contain"
+        cachePolicy="memory-disk"
       />
       <Text style={styles.emptyTitle}>Aún no tienes tickets</Text>
       <Text style={styles.emptySubtitle}>

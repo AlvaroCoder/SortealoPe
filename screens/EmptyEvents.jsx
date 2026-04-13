@@ -11,7 +11,7 @@ const URL_IMAGEN =
 export default function EmptyEvents() {
   return (
     <View style={styles.emptyState}>
-      <Image source={URL_IMAGEN} style={{ width: 80, height: 100 }} />
+      <Image source={{ uri: URL_IMAGEN }} style={{ width: 80, height: 100 }} cachePolicy="memory-disk" />
       <Text style={styles.emptyTitle}>Sin eventos</Text>
       <Text style={styles.emptySubtitle}>
         No hay eventos en esta categoría.

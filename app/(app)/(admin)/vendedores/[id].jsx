@@ -165,6 +165,7 @@ export default function AdminVendedorDetailPage() {
                 style={styles.avatarImage}
                 contentFit="cover"
                 transition={200}
+                cachePolicy="memory-disk"
               />
             ) : (
               <View style={styles.avatarFallback}>
@@ -302,7 +303,7 @@ export default function AdminVendedorDetailPage() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyBox}>
-            <Image source={URL_IMAGEN} style={{ width: 80, height: 120 }} />
+            <Image source={{ uri: URL_IMAGEN }} style={{ width: 80, height: 120 }} cachePolicy="memory-disk" />
             <Text style={styles.emptyTitle}>Sin tickets vendidos</Text>
             <Text style={styles.emptySubtitle}>
               Aún no se han registrado ventas para este vendedor.

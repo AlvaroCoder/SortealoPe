@@ -279,6 +279,7 @@ export default function AdminProfileTab() {
                 style={styles.avatarImage}
                 contentFit="cover"
                 transition={200}
+                cachePolicy="memory-disk"
               />
             ) : (
               <View style={styles.avatar}>

@@ -65,8 +65,10 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
       <Text style={styles.inputLabel}>Ejemplo visual del Ticket </Text>
       <View style={{ width: "100%", alignItems: "center", marginBottom: 15 }}>
         <Image
-          source={URL_IMAGEN_RIFA}
+          source={{ uri: URL_IMAGEN_RIFA }}
           style={{ width: 320, height: 180, borderRadius: 20 }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
         />
       </View>
 
@@ -81,6 +83,7 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
             style={styles.previewImage}
             contentFit="cover"
             transition={200}
+            cachePolicy="memory-disk"
           />
           <TouchableOpacity
             style={styles.changeButton}

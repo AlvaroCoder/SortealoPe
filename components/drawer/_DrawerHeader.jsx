@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../constants/theme";
 
 const GREEN_50 = Colors.principal.green[50];
@@ -17,7 +18,8 @@ export default function DrawerHeader({ tagline }) {
           <Image
             source={{ uri: URL_IMAGEN_MASCOTA }}
             style={styles.mascotImage}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
           />
         </View>
       </View>

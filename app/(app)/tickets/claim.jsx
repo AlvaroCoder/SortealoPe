@@ -75,6 +75,7 @@ export default function TicketClaimScreen() {
           source={{ uri: MASCOT_URI }}
           style={styles.mascot}
           contentFit="contain"
+          cachePolicy="memory-disk"
         />
         <Text style={styles.brandName}>RIFALOPE</Text>
       </View>

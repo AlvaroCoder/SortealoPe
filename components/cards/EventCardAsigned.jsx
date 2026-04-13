@@ -48,6 +48,7 @@ export default function EventCardAsigned({ item }) {
           style={styles.eventThumb}
           contentFit="cover"
           transition={200}
+          cachePolicy="memory-disk"
         />
       ) : (
         <View style={[styles.eventThumb, styles.eventThumbPlaceholder]}>

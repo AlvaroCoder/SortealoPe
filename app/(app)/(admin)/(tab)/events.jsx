@@ -79,6 +79,7 @@ export default function EventsTab() {
             style={styles.avatar}
             contentFit="cover"
             transition={200}
+            cachePolicy="memory-disk"
           />
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>

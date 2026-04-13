@@ -61,6 +61,7 @@ export default function SellerDashboard() {
         <Image
           source={{ uri: URL_IMAGEN }}
           style={{ width: 80, height: 120 }}
+          cachePolicy="memory-disk"
         />
         <Text style={styles.emptyText}>
           No tienes eventos activos asignados

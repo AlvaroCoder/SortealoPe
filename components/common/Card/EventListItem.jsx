@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors, Typography } from "../../../constants/theme";
 import { useDateFormatter } from "../../../lib/dateFormatter";
 
@@ -28,7 +29,8 @@ const EventListItem = ({ event, compact = false, eventStatus = 1 }) => {
       <Image
         source={{ uri: event?.image }}
         style={[itemStyles.image, compact && itemStyles.imageCompact]}
-        resizeMode="cover"
+        contentFit="cover"
+        cachePolicy="memory-disk"
       />
 
       <View style={[itemStyles.content, compact && itemStyles.contentCompact]}>

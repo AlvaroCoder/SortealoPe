@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Typography } from "../../../../constants/theme";
@@ -19,9 +19,8 @@ const MASCOT_URI =
   "https://res.cloudinary.com/dabyqnijl/image/upload/v1775886772/RifaloPeSuper.png";
 
 // ── Screen ────────────────────────────────────────────────────────────────────
-export default function ExitoConfirmar() {
+export default function AdminExitoConfirmar() {
   const router = useRouter();
-  const { eventId, collectionId } = useLocalSearchParams();
 
   const handleConfirmarMas = () => {
     // Go back to confirmar (2 screens: exitoConfirmar ← ingresarDatosVenta ← confirmar)
@@ -31,7 +30,7 @@ export default function ExitoConfirmar() {
 
   const handleVolverEvento = () => {
     // Pop all the way back past confirmar to the event detail
-    router.dismiss(4);
+    router.dismiss(3);
   };
 
   return (
@@ -62,11 +61,7 @@ export default function ExitoConfirmar() {
         {/* Chips */}
         <View style={styles.chipsRow}>
           <View style={styles.chip}>
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={13}
-              color={GREEN_500}
-            />
+            <Ionicons name="shield-checkmark-outline" size={13} color={GREEN_500} />
             <Text style={styles.chipText}>Pago validado</Text>
           </View>
           <View style={styles.chip}>
@@ -78,7 +73,6 @@ export default function ExitoConfirmar() {
 
       {/* ── Actions ────────────────────────────────────────────────────────── */}
       <View style={styles.actions}>
-        {/* Primary: confirmar más */}
         <TouchableOpacity
           style={styles.primaryBtn}
           onPress={handleConfirmarMas}
@@ -88,7 +82,6 @@ export default function ExitoConfirmar() {
           <Text style={styles.primaryBtnText}>Confirmar más reservas</Text>
         </TouchableOpacity>
 
-        {/* Secondary: volver al evento */}
         <TouchableOpacity
           style={styles.secondaryBtn}
           onPress={handleVolverEvento}
@@ -109,7 +102,6 @@ const styles = StyleSheet.create({
     backgroundColor: NEUTRAL_50,
   },
 
-  // ── Content ──────────────────────────────────────────────────────────────────
   content: {
     flex: 1,
     alignItems: "center",
@@ -153,11 +145,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  // ── Chips ────────────────────────────────────────────────────────────────────
-  chipsRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  chipsRow: { flexDirection: "row", gap: 8 },
   chip: {
     flexDirection: "row",
     alignItems: "center",
@@ -175,7 +163,6 @@ const styles = StyleSheet.create({
     color: GREEN_900,
   },
 
-  // ── Actions ──────────────────────────────────────────────────────────────────
   actions: {
     paddingHorizontal: 20,
     paddingBottom: 12,

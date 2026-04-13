@@ -173,6 +173,7 @@ const Step2Content = ({ collectionCode, ticketQuantity, onClose }) => {
               source={{ uri: MASCOT_URI }}
               style={styles.mascot}
               contentFit="contain"
+              cachePolicy="memory-disk"
             />
             <Text style={styles.brandName}>RIFALOPE</Text>
             <Text style={styles.brandTagline}>Invitación de Vendedor</Text>

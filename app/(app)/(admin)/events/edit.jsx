@@ -262,6 +262,7 @@ export default function AdminEditEventPage() {
                 style={styles.bannerImage}
                 contentFit="cover"
                 transition={200}
+                cachePolicy="memory-disk"
               />
             ) : (
               <View style={styles.bannerPlaceholder}>
