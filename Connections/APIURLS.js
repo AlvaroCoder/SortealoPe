@@ -27,6 +27,8 @@ export const ENDPOINTS_EVENTS = {
   UPDATE_TICKETS: `${BASE_URL}/events/eventTickets/`,
   // PATCH /events/finish/{eventId}
   FINISH: `${BASE_URL}/events/finish/`,
+  // GET /events/run?isWinnerTicket=&eventId=
+  RUN: `${BASE_URL}/events/run`,
 };
 
 // ─── Collections (protegidos) ─────────────────────────────────────────────────

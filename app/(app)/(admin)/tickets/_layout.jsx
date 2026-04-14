@@ -8,7 +8,6 @@ export default function LayoutTickets() {
       <Stack.Screen name="confirmar" />
       <Stack.Screen name="ingresarDatosVenta" />
       <Stack.Screen name="exitoConfirmar" />
-      <Stack.Screen name="sortear" />
     </Stack>
   );
 }

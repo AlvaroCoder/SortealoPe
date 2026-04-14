@@ -48,56 +48,18 @@ const ANIMATION_OPTIONS = [
     accent: "#7C3AED",
   },
 ];
-// ── Stepper component ──────────────────────────────────────────────────────────
-function Stepper({ value, onDecrement, onIncrement, min, max, unit }) {
-  return (
-    <View style={styles.stepper}>
-      <TouchableOpacity
-        style={[styles.stepperBtn, value <= min && styles.stepperBtnDisabled]}
-        onPress={onDecrement}
-        disabled={value <= min}
-        activeOpacity={0.7}
-      >
-        <Ionicons
-          name="remove"
-          size={22}
-          color={value <= min ? NEUTRAL_400 : GREEN_900}
-        />
-      </TouchableOpacity>
-
-      <View style={styles.stepperValue}>
-        <Text style={styles.stepperNumber}>{value}</Text>
-        {unit && <Text style={styles.stepperUnit}>{unit}</Text>}
-      </View>
-
-      <TouchableOpacity
-        style={[styles.stepperBtn, value >= max && styles.stepperBtnDisabled]}
-        onPress={onIncrement}
-        disabled={value >= max}
-        activeOpacity={0.7}
-      >
-        <Ionicons
-          name="add"
-          size={22}
-          color={value >= max ? NEUTRAL_400 : GREEN_900}
-        />
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 export default function IndexSorteo() {
   const router = useRouter();
-  const { eventTitle } = useLocalSearchParams();
+  const { eventTitle, eventId } = useLocalSearchParams();
 
   const [selectedAnimation, setSelectedAnimation] = useState("spinning");
-  const [winners, setWinners] = useState(1);
-  const [tiradas, setTiradas] = useState(5);
-
-  const selectedOpt = ANIMATION_OPTIONS.find((o) => o.id === selectedAnimation);
 
   const handleSortear = () => {
-    Alert.alert("Próximamente", "Esta función estará disponible pronto.");
+    router.push({
+      pathname: "/(app)/(admin)/tickets/sorteo/ejecutar",
+      params: { selectedAnimation, eventId, eventTitle },
+    });
   };
 
   const handleSimular = () => {
@@ -225,18 +187,6 @@ export default function IndexSorteo() {
                 </TouchableOpacity>
               );
             })}
-          </View>
-        </View>
-
-        {/* ── Resumen de configuración ─────────────────────────────────────── */}
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Resumen</Text>
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryItem}>
-              <Ionicons name="color-wand-outline" size={16} color={GREEN_500} />
-              <Text style={styles.summaryLabel}>Animación</Text>
-              <Text style={styles.summaryValue}>{selectedOpt?.label}</Text>
-            </View>
           </View>
         </View>
 
