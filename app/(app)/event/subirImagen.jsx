@@ -4,12 +4,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Dimensions,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Typography } from "../../../constants/theme";
@@ -28,8 +28,9 @@ const WHITE = "#FFFFFF";
 
 // Imágenes de muestra (Cloudinary)
 const SAMPLE_IMAGES = [
-  "https://res.cloudinary.com/dabyqnijl/image/upload/v1775154006/RIFA_1_krstjg.png",
-  "https://res.cloudinary.com/dabyqnijl/image/upload/v1775155359/2_rxbt7n.png",
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1776222193/GENERAL_3_q0p3ik.png",
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1776222133/GENERAL_2_qsz29k.png",
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1776222094/GENERAL_1_frrc3h.png",
 ];
 
 export default function SubirImagen() {

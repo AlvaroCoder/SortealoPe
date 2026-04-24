@@ -213,7 +213,6 @@ export default function Step1Content({ form, setForm, onNext }) {
         opciones.
       </Text>
 
-      {/* Horizontal carousel */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -227,7 +226,6 @@ export default function Step1Content({ form, setForm, onNext }) {
       >
         {filteredPacks.map((item, index) => {
           const tierIndex = Math.min(index, TIER_CONFIGS.length - 1);
-          // Force last item always gold
           const effectiveTier =
             index === filteredPacks.length - 1
               ? TIER_CONFIGS[3]
@@ -258,19 +256,6 @@ export default function Step1Content({ form, setForm, onNext }) {
               />
             );
           })}
-        </View>
-      )}
-
-      {/* Selected summary */}
-      {form?.packId != null && (
-        <View style={styles.summary}>
-          <Ionicons name="checkmark-circle" size={16} color={GREEN_900} />
-          <Text style={styles.summaryText}>
-            {filteredPacks.find((p) => String(p.id) === String(form.packId))
-              ?.name ?? "Plan seleccionado"}
-            {" · "}
-            {form.ticketsPerCollection?.toLocaleString()} tickets
-          </Text>
         </View>
       )}
 

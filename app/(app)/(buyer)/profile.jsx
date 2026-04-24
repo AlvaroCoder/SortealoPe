@@ -1,9 +1,5 @@
-import { Text, View } from "react-native";
+import ProfileScreen from "../profile";
 
-export default function profile() {
-  return (
-    <View>
-      <Text>profile</Text>
-    </View>
-  );
+export default function BuyerProfile() {
+  return <ProfileScreen />;
 }

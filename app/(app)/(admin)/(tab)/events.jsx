@@ -32,7 +32,7 @@ const BG_PAGE = "#F0F4F8";
 
 const FILTER_TABS = [
   { label: "En espera", value: 1 },
-  { label: "Creados", value: 2 },
+  { label: "Activos", value: 2 },
   { label: "Sorteados", value: 3 },
 ];
 
@@ -48,15 +48,20 @@ export default function EventsTab() {
 
   const baseUrl = `${ENDPOINTS_EVENTS.GET_BY_USER}?role=HOST`;
 
-  const filteredUrl =
-    selectedStatus !== null ? `${baseUrl}&eventStatus=${selectedStatus}` : null;
+  // Pre-carga los 3 tabs en paralelo al montar
+  const pending = usePaginatedFetch(`${baseUrl}&eventStatus=1`);
+  const created = usePaginatedFetch(`${baseUrl}&eventStatus=2`);
+  const drawn = usePaginatedFetch(`${baseUrl}&eventStatus=3`);
+
+  const current =
+    selectedStatus === 1 ? pending : selectedStatus === 2 ? created : drawn;
 
   const {
     items,
     loading: loadingPaged,
     loadMore,
     refresh: refreshPaged,
-  } = usePaginatedFetch(filteredUrl);
+  } = current;
 
   const sourceItems = items;
   const loading = loadingPaged;
@@ -211,9 +216,13 @@ export default function EventsTab() {
         data={filteredItems}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <CardEvents item={item} selectedStatus={selectedStatus} />
+          <CardEvents
+            item={item}
+            userId={userData?.userId}
+            selectedStatus={selectedStatus}
+          />
         )}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={renderHeader()}
         ListFooterComponent={renderFooter}
         onEndReached={loadMore}
         onEndReachedThreshold={0.4}

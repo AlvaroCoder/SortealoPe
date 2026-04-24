@@ -1,14 +1,12 @@
-import { useRaffleContext } from "@/context/RaffleContext";
 import { Redirect, Stack } from "expo-router";
+import { useAuthContext } from "../../../context/AuthContext";
 
 export default function AdminLayout() {
-  const { isAdmin, roleLoading } = useRaffleContext();
+  const { isLogged } = useAuthContext();
 
-  // Espera a que el rol se restaure desde AsyncStorage
-  if (roleLoading) return null;
-
-  // Guard: si alguien intenta entrar a /admin sin ser admin, lo redirige
-  if (!isAdmin) return <Redirect href="/(auth)/welcome" />;
+  if (!isLogged) {
+    return <Redirect href="/(auth)/login" />;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

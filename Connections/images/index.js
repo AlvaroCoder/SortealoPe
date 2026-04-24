@@ -20,9 +20,9 @@ export async function UploadImage(formData) {
 
 // POST /images/user — sube foto de perfil y actualiza user.photo en una sola llamada
 // formData debe incluir: "file" (imagen) + "userId" (ID del usuario)
-export async function UploadUserImage(formData) {
+export async function UploadUserImage(formData, userId) {
   const token = await AsyncStorage.getItem("token");
-  return fetch(ENDPOINTS_IMAGES.UPLOAD_USER, {
+  return fetch(`${ENDPOINTS_IMAGES.UPLOAD_USER}?userId=${userId}`, {
     method: "POST",
     headers: {
       Authorization: token ? `Bearer ${token}` : undefined,

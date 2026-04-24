@@ -4,23 +4,24 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActionSheetIOS,
-  ActivityIndicator,
-  Alert,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActionSheetIOS,
+    ActivityIndicator,
+    Alert,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ENDPOINTS_USERS } from "../../../../Connections/APIURLS";
-import { UploadUserImage } from "../../../../Connections/images";
-import { Colors, Typography } from "../../../../constants/theme";
-import { useAuthContext } from "../../../../context/AuthContext";
-import { useFetch } from "../../../../lib/useFetch";
-import LoadingScreen from "../../../../screens/LoadingScreen";
+import { ENDPOINTS_USERS } from "../../../Connections/APIURLS";
+import { UploadUserImage } from "../../../Connections/images";
+import { Colors, Typography } from "../../../constants/theme";
+import { useAuthContext } from "../../../context/AuthContext";
+import { useRaffleContext } from "../../../context/RaffleContext";
+import { useFetch } from "../../../lib/useFetch";
+import LoadingScreen from "../../../screens/LoadingScreen";
 
 // ── Color constants ────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
@@ -38,13 +39,33 @@ const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
 const ROLE_CONFIG = {
-  badge: "ADMIN",
-  label: "Administrador",
-  icon: "shield-checkmark-outline",
-  badgeBg: NEUTRAL_100,
-  badgeText: NEUTRAL_500,
-  roleBg: GREEN_500,
-  roleText: GREEN_900,
+  Administrador: {
+    badge: "ADMIN",
+    label: "Administrador",
+    icon: "shield-checkmark-outline",
+    badgeBg: NEUTRAL_100,
+    badgeText: NEUTRAL_500,
+    roleBg: GREEN_500,
+    roleText: GREEN_900,
+  },
+  Vendedor: {
+    badge: "VENDEDOR",
+    label: "Vendedor",
+    icon: "storefront-outline",
+    badgeBg: GREEN_500,
+    badgeText: GREEN_900,
+    roleBg: GREEN_500,
+    roleText: GREEN_900,
+  },
+  Comprador: {
+    badge: "COMPRADOR",
+    label: "Comprador",
+    icon: "star-outline",
+    badgeBg: "#D1FAE5",
+    badgeText: GREEN_900,
+    roleBg: GREEN_500,
+    roleText: GREEN_900,
+  },
 };
 
 function ProfileSection({ title, children }) {
@@ -72,9 +93,12 @@ function ProfileRow({ icon, label, value, last = false }) {
   );
 }
 
-export default function AdminProfileTab() {
+export default function ProfileScreen() {
   const { signout, loading, userData: userStorage } = useAuthContext();
+  const { userRole } = useRaffleContext();
   const router = useRouter();
+
+  const roleConfig = ROLE_CONFIG[userRole] ?? ROLE_CONFIG.Comprador;
 
   const { data: userData, loading: loadingFetch } = useFetch(
     userStorage?.userId
@@ -82,32 +106,37 @@ export default function AdminProfileTab() {
       : null,
   );
 
+  // Avatar state
   const [avatarUri, setAvatarUri] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // ── Derived values ─────────────────────────────────────────────────────────
+  // ── Derived values ────────────────────────────────────────────────────────────
   const displayName =
     userData?.firstName && userData?.lastName
       ? `${userData.firstName} ${userData.lastName}`
       : userData?.username || userData?.email || "Usuario";
 
   const initials = (() => {
-    if (userData?.firstName && userData?.lastName)
+    if (userData?.firstName && userData?.lastName) {
       return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase();
+    }
     if (userData?.username) return userData.username[0].toUpperCase();
     if (userData?.email) return userData.email[0].toUpperCase();
     return "?";
   })();
 
-  const profileImageSource = avatarUri ?? userData?.photo ?? null;
+  console.log("User Data : ", userData);
 
-  // ── Logout ─────────────────────────────────────────────────────────────────
+  const profileImageSource = avatarUri ?? userData?.photo ?? null;
+  console.log(profileImageSource);
+
+  // ── Logout ────────────────────────────────────────────────────────────────────
   const handleLogout = async () => {
     await signout();
     router.replace("/(auth)/login");
   };
 
-  // ── Image picker ───────────────────────────────────────────────────────────
+  // ── Image picker ──────────────────────────────────────────────────────────────
   const launchPicker = async (useCamera) => {
     const permFn = useCamera
       ? ImagePicker.requestCameraPermissionsAsync
@@ -185,7 +214,7 @@ export default function AdminProfileTab() {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────────
   if (loading || loadingFetch) return <LoadingScreen />;
 
   return (
@@ -196,23 +225,25 @@ export default function AdminProfileTab() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* ── Banner ─────────────────────────────────────────────────────── */}
+        {/* ── Banner ───────────────────────────────────────────────────────── */}
         <View style={styles.banner}>
           <View style={styles.bannerCircle} />
 
-          {/* Top bar: brand + ADMIN badge */}
+          {/* Top bar: brand + role badge */}
           <View style={styles.brandRow}>
-            <Text style={styles.brandText}>Sortealo</Text>
+            <TouchableOpacity
+              onPress={() => router.push("/")}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.brandText}>Sortealo</Text>
+            </TouchableOpacity>
             <View
-              style={[
-                styles.rolePill,
-                { backgroundColor: ROLE_CONFIG.badgeBg },
-              ]}
+              style={[styles.rolePill, { backgroundColor: roleConfig.badgeBg }]}
             >
               <Text
-                style={[styles.rolePillText, { color: ROLE_CONFIG.badgeText }]}
+                style={[styles.rolePillText, { color: roleConfig.badgeText }]}
               >
-                {ROLE_CONFIG.badge}
+                {roleConfig.badge}
               </Text>
             </View>
           </View>
@@ -254,22 +285,22 @@ export default function AdminProfileTab() {
 
           {/* Role badge */}
           <View
-            style={[styles.roleBadge, { backgroundColor: ROLE_CONFIG.roleBg }]}
+            style={[styles.roleBadge, { backgroundColor: roleConfig.roleBg }]}
           >
             <Ionicons
-              name={ROLE_CONFIG.icon}
+              name={roleConfig.icon}
               size={13}
-              color={ROLE_CONFIG.roleText}
+              color={roleConfig.roleText}
             />
             <Text
-              style={[styles.roleBadgeText, { color: ROLE_CONFIG.roleText }]}
+              style={[styles.roleBadgeText, { color: roleConfig.roleText }]}
             >
-              {ROLE_CONFIG.label}
+              {roleConfig.label}
             </Text>
           </View>
         </View>
 
-        {/* ── Content ────────────────────────────────────────────────────── */}
+        {/* ── Content ──────────────────────────────────────────────────────── */}
         <View style={styles.content}>
           <ProfileSection title="Datos personales">
             <ProfileRow
@@ -305,7 +336,7 @@ export default function AdminProfileTab() {
             />
           </ProfileSection>
 
-          {/* Edit button */}
+          {/* Edit button — navigates to dedicated edit screen */}
           <TouchableOpacity
             style={styles.editButton}
             onPress={() => router.push("/(app)/profile/edit")}

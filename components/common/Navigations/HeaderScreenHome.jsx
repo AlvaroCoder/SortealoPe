@@ -13,16 +13,22 @@ export default function HeaderScreenHome({
   profileData,
   defaultValueName = "Vendedor",
 }) {
-  const firstName = userStorage?.sub?.split("@")?.[0] ?? defaultValueName;
+  const firstName = profileData?.firstName
+    ? profileData.firstName
+    : (userStorage?.sub?.split("@")?.[0] ?? defaultValueName);
+
   const lastName = profileData?.lastName ?? userStorage?.lastName ?? "";
   const fullName = [firstName, lastName].filter(Boolean).join(" ");
   const avatarUri = profileData?.photo ?? userStorage?.photo ?? null;
   const initials = (firstName[0] ?? "V").toUpperCase();
 
+  const filterItems = items?.filter(
+    (item) => item?.host?.id !== profileData?.id,
+  );
+
   const router = useRouter();
   return (
     <View>
-      {/* ── User header ─────────────────────────────────────────────────── */}
       <HeaderBarCard
         avatarUri={avatarUri}
         initials={initials}
@@ -30,9 +36,8 @@ export default function HeaderScreenHome({
         role={"VENDEDOR"}
       />
 
-      <ActiveColectionCard items={items} />
+      <ActiveColectionCard items={filterItems} />
 
-      {/* ── Section header ──────────────────────────────────────────────── */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Eventos Asignados</Text>
         <TouchableOpacity

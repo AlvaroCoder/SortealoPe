@@ -129,9 +129,11 @@ export default function Welcome() {
               </Text>
             </View>
           )}
-          <Text style={styles.helloText} numberOfLines={1}>
-            ¡Hola, {firstName}!
-          </Text>
+          <TouchableOpacity onPress={() => router.push("/(app)/profile")}>
+            <View style={styles.helloText}>
+              <Text numberOfLines={1}>¡Hola, {firstName}!</Text>
+            </View>
+          </TouchableOpacity>
         </View>
         <Text style={styles.brandText}>RifaloPe</Text>
       </View>
@@ -290,6 +292,9 @@ const styles = StyleSheet.create({
   helloText: {
     color: NEUTRAL_700,
     flex: 1,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   brandText: {
     color: GREEN_900,

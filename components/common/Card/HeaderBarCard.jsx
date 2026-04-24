@@ -4,20 +4,27 @@ import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors, Typography } from "../../../constants/theme";
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_50 = Colors.principal.green[50];
 const WHITE = "#FFFFFF";
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 
-export default function HeaderBarCard({ avatarUri, initials, fullName, role, onAvatarPress }) {
+export default function HeaderBarCard({
+  avatarUri,
+  initials,
+  fullName,
+  role,
+  onAvatarPress,
+}) {
   const router = useRouter();
 
   return (
     <View style={styles.userHeader}>
       <TouchableOpacity
-        onPress={onAvatarPress ?? (() => router.push("/(app)/(seller)/profile"))}
+        onPress={
+          onAvatarPress ?? (() => router.push("/(app)/(seller)/profile"))
+        }
         activeOpacity={0.8}
       >
         {avatarUri ? (
@@ -57,7 +64,6 @@ export default function HeaderBarCard({ avatarUri, initials, fullName, role, onA
 }
 
 const styles = StyleSheet.create({
-  // ── User header ─────────────────────────────────────────────────────────────
   userHeader: {
     flexDirection: "row",
     alignItems: "center",

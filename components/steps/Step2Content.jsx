@@ -20,10 +20,113 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const RED_500 = Colors.principal.red[500];
 
+// ── URL place helpers ──────────────────────────────────────────────────────────
+const PLATFORM_MAP = [
+  {
+    match: /facebook\.com|fb\.com|fb\.watch/i,
+    name: "Facebook",
+    icon: "logo-facebook",
+    color: "#1877F2",
+  },
+  {
+    match: /instagram\.com|instagr\.am/i,
+    name: "Instagram",
+    icon: "logo-instagram",
+    color: "#E1306C",
+  },
+  {
+    match: /tiktok\.com/i,
+    name: "TikTok",
+    icon: "logo-tiktok",
+    color: "#010101",
+  },
+];
+
+function detectPlatform(value) {
+  if (!value || !/^https?:\/\//i.test(value)) return null;
+  return (
+    PLATFORM_MAP.find((p) => p.match.test(value)) ?? {
+      name: "Enlace",
+      icon: "link-outline",
+      color: GREEN_900,
+    }
+  );
+}
+
+function shortenUrl(url) {
+  try {
+    const { hostname, pathname } = new URL(url);
+    const domain = hostname.replace(/^www\./, "");
+    const path =
+      pathname.length > 1
+        ? pathname.slice(0, 22) + (pathname.length > 22 ? "…" : "")
+        : "";
+    return `${domain}${path}`;
+  } catch {
+    return url.slice(0, 40) + (url.length > 40 ? "…" : "");
+  }
+}
+
+function PlaceUrlPreview({ value }) {
+  const info = detectPlatform(value);
+  if (!info) return null;
+  return (
+    <View
+      style={[
+        urlStyles.chip,
+        { borderColor: info.color + "44", backgroundColor: info.color + "12" },
+      ]}
+    >
+      <Ionicons name={info.icon} size={15} color={info.color} />
+      <Text
+        style={[urlStyles.chipText, { color: info.color }]}
+        numberOfLines={1}
+      >
+        {shortenUrl(value)}
+      </Text>
+    </View>
+  );
+}
+
+const urlStyles = StyleSheet.create({
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    marginTop: 6,
+    maxWidth: "100%",
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: "600",
+    flexShrink: 1,
+  },
+});
+
 export default function Step2Content({ form, setForm, onNext, onBack }) {
   const [validationErrors, setValidationErrors] = useState({});
 
   const updateForm = (key, value) => {
+    if (key === "title") {
+      setError(
+        key,
+        value?.length >= 255
+          ? "El título no puede exceder los 255 caracteres."
+          : "",
+      );
+    } else if (key === "description") {
+      setError(
+        key,
+        value?.length >= 255
+          ? "La descripción no puede exceder los 255 caracteres."
+          : "",
+      );
+    }
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -149,7 +252,17 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
           numberOfLines={4}
           required={true}
         />
-        <ErrorMessage error={validationErrors.description} />
+        <View style={styles.descriptionFooter}>
+          <ErrorMessage error={validationErrors.description} />
+          <Text
+            style={[
+              styles.charCounter,
+              (form?.description?.length ?? 0) >= 255 && { color: RED_500 },
+            ]}
+          >
+            {form?.description?.length ?? 0}/255
+          </Text>
+        </View>
 
         <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
           Detalles y fechas
@@ -168,7 +281,7 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
         <OutlineTextField
           title="Cantidad de Tickets por Vendedor"
           keyboardType="numeric"
-          placeholder="Total de tickets a generar"
+          placeholder="Cantidad de Tickets por Vendedor"
           value={
             form?.ticketsPerCollection
               ? form.ticketsPerCollection.toString()
@@ -181,14 +294,16 @@ export default function Step2Content({ form, setForm, onNext, onBack }) {
         />
         <ErrorMessage error={validationErrors.ticketsPerCollection} />
 
+        {/* TODO: agregar autocompletado de lugares aquí */}
         <OutlineTextField
           title="Lugar del evento"
-          placeholder="Ej: Sede Central/Zoom"
+          placeholder="Ej: Sede Central / link de Facebook"
           value={form?.place}
           onChangeText={(text) => updateForm("place", text)}
           required={true}
         />
         <ErrorMessage error={validationErrors.place} />
+        <PlaceUrlPreview value={form?.place} />
 
         <DatePickerInput
           label="Fecha de Cierre del Sorteo (DD/MM/AAAA)"
@@ -273,6 +388,17 @@ const styles = StyleSheet.create({
     color: RED_500,
     marginTop: 4,
     marginLeft: 5,
+  },
+  descriptionFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  charCounter: {
+    fontSize: Typography.sizes.xs,
+    color: NEUTRAL_700,
+    marginLeft: "auto",
   },
   textArea: {
     minHeight: 100,

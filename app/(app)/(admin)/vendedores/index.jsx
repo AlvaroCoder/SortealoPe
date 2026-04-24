@@ -1,16 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ListHeaderComponente from "../../../../components/cards/ListHeaderComponente";
 import { ENDPOINTS_EVENTS } from "../../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../../constants/theme";
 import { useFetch } from "../../../../lib/useFetch";
@@ -20,7 +20,6 @@ import LoadingScreen from "../../../../screens/LoadingScreen";
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_700 = Colors.principal.green[700];
 const GREEN_500 = Colors.principal.green[500];
-const BLUE_500 = Colors.principal.blue[500];
 const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_400 = Colors.principal.neutral[400] ?? "#94A3B8";
@@ -61,130 +60,24 @@ export default function AdminVendedoresPage() {
     .slice()
     .sort((a, b) => (b.soldTickets ?? 0) - (a.soldTickets ?? 0));
 
-  // Aggregate metrics
-  const totalSold = collections.reduce((s, c) => s + (c.soldTickets ?? 0), 0);
-  const totalCollected = totalSold * ticketPrice;
-  const totalSellers = collections.length;
-
   // Client-side search
-  const filtered = searchText.trim()
-    ? collections.filter((c) => {
-        const name =
-          `${c.seller?.firstName ?? ""} ${c.seller?.lastName ?? ""} ${c.seller?.username ?? ""}`.toLowerCase();
-        return name.includes(searchText.toLowerCase());
-      })
-    : collections;
+  const filtered = useMemo(() => {
+    const query = searchText
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    if (!query) return collections;
 
-  // ── Sub-renders ──────────────────────────────────────────────────────────
-
-  function renderListHeader() {
-    return (
-      <View style={styles.headerBlock}>
-        {/* ── Top nav bar ─────────────────────────────────────────── */}
-        <View style={styles.topBar}>
-          <TouchableOpacity
-            style={styles.navBtn}
-            onPress={() => router.back()}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="arrow-back" size={22} color={GREEN_900} />
-          </TouchableOpacity>
-          <View style={styles.topBarCenter}>
-            <Text style={styles.topBarTitle}>Vendedores del Evento</Text>
-            <Text style={styles.topBarSubtitle} numberOfLines={1}>
-              {event?.title ?? "—"}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.navBtn}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="settings-outline" size={22} color={GREEN_900} />
-          </TouchableOpacity>
-        </View>
-
-        {/* ── Total recaudado dark card ────────────────────────────── */}
-        <View style={styles.totalCard}>
-          {/* Decorative circle */}
-          <View style={styles.totalCardCircle} />
-          <Text style={styles.totalLabel}>TOTAL RECAUDADO</Text>
-          <Text style={styles.totalAmount}>{formatMoney(totalCollected)}</Text>
-          {/* Decorative icon */}
-          <Ionicons
-            name="wallet-outline"
-            size={90}
-            color="rgba(255,255,255,0.07)"
-            style={styles.totalDecorIcon}
-          />
-        </View>
-
-        {/* ── Mini metric cards ────────────────────────────────────── */}
-        <View style={styles.miniRow}>
-          <View style={styles.miniCard}>
-            <Ionicons
-              name="ticket-outline"
-              size={22}
-              color={GREEN_500}
-              style={styles.miniIcon}
-            />
-            <Text style={styles.miniLabel}>Boletos Vendidos</Text>
-            <Text style={[styles.miniValue, { color: GREEN_900 }]}>
-              {totalSold.toLocaleString()}
-            </Text>
-          </View>
-          <View style={styles.miniCard}>
-            <Ionicons
-              name="people-outline"
-              size={22}
-              color={BLUE_500}
-              style={styles.miniIcon}
-            />
-            <Text style={styles.miniLabel}>Vendedores</Text>
-            <Text style={[styles.miniValue, { color: GREEN_900 }]}>
-              {totalSellers} Activos
-            </Text>
-          </View>
-        </View>
-
-        {/* ── Search bar ───────────────────────────────────────────── */}
-        <View style={styles.searchContainer}>
-          <Ionicons
-            name="search-outline"
-            size={18}
-            color={NEUTRAL_500}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar vendedor por nombre..."
-            placeholderTextColor={NEUTRAL_400}
-            value={searchText}
-            onChangeText={setSearchText}
-            autoCorrect={false}
-            autoCapitalize="none"
-            returnKeyType="search"
-          />
-          {searchText.length > 0 && (
-            <TouchableOpacity
-              onPress={() => setSearchText("")}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Ionicons name="close-circle" size={18} color={NEUTRAL_400} />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* ── Section header ────────────────────────────────────────── */}
-        <View style={styles.rankingHeader}>
-          <Text style={styles.rankingTitle}>Ranking de Ventas</Text>
-          <TouchableOpacity style={styles.verTodosBtn}>
-            <Text style={styles.verTodosText}>Ver todos</Text>
-            <Ionicons name="chevron-forward" size={14} color={GREEN_500} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
+    return collections.filter((c) => {
+      const name =
+        `${c.seller?.firstName ?? ""} ${c.seller?.lastName ?? ""} ${c.seller?.username ?? ""}`
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+      return name.includes(query);
+    });
+  }, [searchText, collections]);
 
   function renderSellerCard({ item: col, index }) {
     const rank = index + 1;
@@ -260,14 +153,6 @@ export default function AdminVendedoresPage() {
                 <View style={styles.sellerBadge}>
                   <Text style={styles.sellerBadgeText}>{badgeLabel}</Text>
                 </View>
-                <Text
-                  style={[
-                    styles.onlineText,
-                    { color: isOnline ? GREEN_500 : NEUTRAL_400 },
-                  ]}
-                >
-                  {isOnline ? "Online" : "Offline"}
-                </Text>
               </View>
             </View>
             <View style={styles.revenueBlock}>
@@ -306,7 +191,13 @@ export default function AdminVendedoresPage() {
         data={filtered}
         keyExtractor={(item, i) => String(item.id ?? i)}
         renderItem={renderSellerCard}
-        ListHeaderComponent={renderListHeader}
+        ListHeaderComponent={
+          <ListHeaderComponente
+            event={event}
+            searchText={searchText}
+            setSearchText={setSearchText}
+          />
+        }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
@@ -331,43 +222,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 32,
   },
-
-  // ── Header block ───────────────────────────────────────────────────────────
-  headerBlock: {
-    paddingBottom: 8,
-  },
-
-  // ── Top nav bar ────────────────────────────────────────────────────────────
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: WHITE,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: NEUTRAL_200,
-  },
-  navBtn: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  topBarCenter: {
-    flex: 1,
-    alignItems: "center",
-  },
-  topBarTitle: {
-    fontSize: Typography.sizes.base,
-    fontWeight: Typography.weights.bold,
-    color: GREEN_900,
-  },
-  topBarSubtitle: {
-    fontSize: Typography.sizes.xs,
-    color: NEUTRAL_500,
-    marginTop: 1,
-  },
-
   // ── Total recaudado card ────────────────────────────────────────────────────
   totalCard: {
     backgroundColor: GREEN_900,

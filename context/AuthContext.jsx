@@ -14,6 +14,7 @@ const AuthContext = createContext({
   loading: false,
   isLogged: false,
   userData: null,
+  timeExpirationJwt: null,
   accessToken: null,
   signin: async () => {},
   signout: async () => {},
@@ -31,17 +32,27 @@ export function AuthProvider({ children }) {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
+  const [timeExpirationJwt, setTimeExpirationJwt] = useState(0);
 
   useEffect(() => {
     async function restoreSession() {
       try {
         setLoading(true);
         const token = await AsyncStorage.getItem("token");
-        console.log("Token : ", token);
-
         if (!token) return;
+
+        const tokenDecode = jwtDecode(token);
+        const expMs = tokenDecode?.exp ? tokenDecode.exp * 1000 : 0;
+
+        // Token expirado → limpiar y no loguear
+        if (expMs && Date.now() > expMs) {
+          await AsyncStorage.removeItem("token");
+          return;
+        }
+
+        setTimeExpirationJwt(new Date(expMs).toUTCString());
         setAccessToken(token);
-        setUserData(jwtDecode(token));
+        setUserData(tokenDecode);
         setIsLogged(true);
       } catch (err) {
         console.log("Session restore error:", err);
@@ -50,7 +61,7 @@ export function AuthProvider({ children }) {
       }
     }
     restoreSession();
-  }, []);
+  }, [isLogged]);
 
   // Helper interno: almacena token JWT y actualiza estado
   const _storeToken = async (token) => {
@@ -181,6 +192,7 @@ export function AuthProvider({ children }) {
         loading,
         isLogged,
         userData,
+        timeExpirationJwt,
         accessToken,
         signin,
         signout,

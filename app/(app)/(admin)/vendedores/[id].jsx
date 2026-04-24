@@ -3,17 +3,19 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import GuideStatusCard from "../../../../components/cards/GuideStatusCard";
+import TicketCard from "../../../../components/common/Card/TicketCard";
 import {
-    ENDPOINTS_EVENTS,
-    ENDPOINTS_TICKETS,
-    ENDPOINTS_USERS,
+  ENDPOINTS_EVENTS,
+  ENDPOINTS_TICKETS,
+  ENDPOINTS_USERS,
 } from "../../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../../constants/theme";
 import { useFetch } from "../../../../lib/useFetch";
@@ -24,13 +26,12 @@ const GREEN_900 = Colors.principal.green[900];
 const GREEN_700 = Colors.principal.green[700];
 const GREEN_500 = Colors.principal.green[500];
 const GREEN_100 = Colors.principal.green[100];
-const GREEN_50 = Colors.principal.green[50];
 const BLUE_500 = Colors.principal.blue[500];
-const NEUTRAL_100 = Colors.principal.neutral[100];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_400 = Colors.principal.neutral[400] ?? "#94A3B8";
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
+const ORANGE = "#F59E0B";
 const WHITE = "#FFFFFF";
 const BG_PAGE = "#F0F4F8";
 
@@ -65,7 +66,7 @@ export default function AdminVendedorDetailPage() {
 
   const { data: ticketsPage, loading: loadingTickets } = useFetch(
     collectionId
-      ? `${ENDPOINTS_TICKETS.GET}?eventId=${eventId}&collectionId=${collectionId}&ticketStatus=3&page=0&size=200`
+      ? `${ENDPOINTS_TICKETS.GET}?eventId=${eventId}&collectionId=${collectionId}&ticketStatus=4&page=0&size=10`
       : null,
   );
 
@@ -95,6 +96,7 @@ export default function AdminVendedorDetailPage() {
   // ── Collection metrics ─────────────────────────────────────────────────────
   const {
     soldTickets,
+    onHoldTickets,
     reservedTickets,
     availableTickets,
     totalTickets,
@@ -109,9 +111,11 @@ export default function AdminVendedorDetailPage() {
     const sold = col?.soldTickets ?? 0;
     const reserved = col?.reservedTickets ?? 0;
     const available = col?.availableTickets ?? 0;
+    const onHoldTickets = col?.onHoldTickets ?? 0;
     return {
       soldTickets: sold,
       reservedTickets: reserved,
+      onHoldTickets: onHoldTickets,
       availableTickets: available,
       totalTickets: sold + reserved + available,
       ticketPrice,
@@ -145,12 +149,6 @@ export default function AdminVendedorDetailPage() {
               {event?.title ?? "—"}
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.navBtn}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="settings-outline" size={22} color={GREEN_900} />
-          </TouchableOpacity>
         </View>
 
         {/* ── Vendor hero banner ────────────────────────────────────── */}
@@ -240,6 +238,17 @@ export default function AdminVendedorDetailPage() {
             <Text style={[styles.metricValue, { color: BLUE_500 }]}>
               {reservedTickets}
             </Text>
+            <Text style={styles.metricLabel}>Reservados</Text>
+          </View>
+          <View style={styles.metricCard}>
+            <View
+              style={[styles.metricIcon, { backgroundColor: ORANGE + "22" }]}
+            >
+              <Ionicons name="time-outline" size={20} color={ORANGE} />
+            </View>
+            <Text style={[styles.metricValue, { color: ORANGE }]}>
+              {onHoldTickets}
+            </Text>
             <Text style={styles.metricLabel}>En espera</Text>
           </View>
           <View style={styles.metricCard}>
@@ -258,6 +267,11 @@ export default function AdminVendedorDetailPage() {
           </View>
         </View>
 
+        {/* ── Guía de estados ──────────────────────────────────────── */}
+        <View style={styles.guideWrap}>
+          <GuideStatusCard />
+        </View>
+
         {/* ── Tickets vendidos section header ───────────────────────── */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Tickets Vendidos</Text>
@@ -269,41 +283,24 @@ export default function AdminVendedorDetailPage() {
     );
   }
 
-  function renderTicket({ item: ticket, index }) {
-    const shortCode = ticket.code?.slice(-8).toUpperCase() ?? "——";
-    return (
-      <View style={styles.ticketRow}>
-        <View style={styles.ticketNumBadge}>
-          <Text style={styles.ticketNum}>{index + 1}</Text>
-        </View>
-        <View style={styles.ticketIcon}>
-          <Ionicons name="ticket-outline" size={18} color={GREEN_900} />
-        </View>
-        <View style={styles.ticketInfo}>
-          <Text style={styles.ticketCode}>#{shortCode}</Text>
-          <Text style={styles.ticketCodeFull} numberOfLines={1}>
-            {ticket.code}
-          </Text>
-        </View>
-        <View style={styles.ticketStatusChip}>
-          <Text style={styles.ticketStatusText}>VENDIDO</Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
       <FlatList
         data={tickets}
         keyExtractor={(item, i) => String(item.id ?? item.code ?? i)}
-        renderItem={renderTicket}
-        ListHeaderComponent={renderListHeader}
+        renderItem={({ item, index }) => (
+          <TicketCard item={item} index={index} />
+        )}
+        ListHeaderComponent={renderListHeader()}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyBox}>
-            <Image source={{ uri: URL_IMAGEN }} style={{ width: 80, height: 120 }} cachePolicy="memory-disk" />
+            <Image
+              source={{ uri: URL_IMAGEN }}
+              style={{ width: 80, height: 120 }}
+              cachePolicy="memory-disk"
+            />
             <Text style={styles.emptyTitle}>Sin tickets vendidos</Text>
             <Text style={styles.emptySubtitle}>
               Aún no se han registrado ventas para este vendedor.
@@ -539,6 +536,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  // ── Guide status card wrapper ───────────────────────────────────────────────
+  guideWrap: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+
   // ── Section header ─────────────────────────────────────────────────────────
   sectionHeader: {
     flexDirection: "row",
@@ -565,79 +568,6 @@ const styles = StyleSheet.create({
     fontSize: Typography.sizes.xs,
     fontWeight: Typography.weights.bold,
     color: WHITE,
-  },
-
-  // ── Ticket row ─────────────────────────────────────────────────────────────
-  ticketRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: WHITE,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    borderRadius: 14,
-    padding: 14,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: NEUTRAL_200,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  ticketNumBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: NEUTRAL_100,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  ticketNum: {
-    fontSize: Typography.sizes.xs,
-    fontWeight: Typography.weights.bold,
-    color: NEUTRAL_500,
-  },
-  ticketIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: GREEN_50,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    borderWidth: 1,
-    borderColor: GREEN_500 + "40",
-  },
-  ticketInfo: {
-    flex: 1,
-  },
-  ticketCode: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.bold,
-    color: GREEN_900,
-  },
-  ticketCodeFull: {
-    fontSize: 10,
-    color: NEUTRAL_400,
-    marginTop: 1,
-    fontFamily: "monospace",
-  },
-  ticketStatusChip: {
-    backgroundColor: GREEN_500 + "22",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: GREEN_500 + "55",
-    flexShrink: 0,
-  },
-  ticketStatusText: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: GREEN_700,
-    letterSpacing: 0.4,
   },
 
   // ── Empty state ────────────────────────────────────────────────────────────

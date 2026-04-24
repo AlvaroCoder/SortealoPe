@@ -8,6 +8,7 @@ export default function RootLayoutTicket() {
       <Stack.Screen name="list" />
       <Stack.Screen name="ingresarDatosVenta" />
       <Stack.Screen name="exitoConfirmar" />
+      <Stack.Screen name="reservation" />
     </Stack>
   );
 }

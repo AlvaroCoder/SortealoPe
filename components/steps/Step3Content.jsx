@@ -23,7 +23,7 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 
 const URL_IMAGEN_RIFA =
-  "https://res.cloudinary.com/dabyqnijl/image/upload/v1775154006/RIFA_1_krstjg.png";
+  "https://res.cloudinary.com/dabyqnijl/image/upload/v1776222133/GENERAL_2_qsz29k.png";
 
 export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
   const router = useRouter();
@@ -54,7 +54,8 @@ export default function Step3Content({ form = {}, setForm, onSubmit, onBack }) {
 
   return (
     <ScrollView style={styles.stepContent} showsVerticalScrollIndicator={false}>
-      <Title>4. Diseño y Archivos Promocionales</Title>{/* Bug fix: was labeled "3." but this is step 4 of 4 */}
+      <Title>4. Diseño y Archivos Promocionales</Title>
+      {/* Bug fix: was labeled "3." but this is step 4 of 4 */}
 
       <Text style={styles.stepSubtitleText}>
         Sube las piezas gráficas de tu evento. Recuerda que deben cumplir con el

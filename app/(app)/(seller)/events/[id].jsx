@@ -219,7 +219,7 @@ export default function SellerEventDetail() {
             availableTickets={availableTickets}
             onPressVendidos={() =>
               router.push({
-                pathname: "/(app)/(seller)/tickets/list",
+                pathname: "/(app)/(seller)/tickets/reservation",
                 params: {
                   eventId,
                   collectionId: String(myCollectionId ?? ""),

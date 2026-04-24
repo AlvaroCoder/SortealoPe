@@ -186,7 +186,11 @@ export default function AdminCreateEvent() {
         status: 1,
       };
 
+      console.log("Payload : ", payload);
+
       const response = await CreateEvent(payload);
+      console.log("Create response : ", await response.json());
+
       if (response.ok) {
         router.replace("/(app)/(admin)/events/success");
       } else {

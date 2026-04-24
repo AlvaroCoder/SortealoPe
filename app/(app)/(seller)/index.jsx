@@ -49,6 +49,8 @@ export default function SellerDashboard() {
     userId ? `${ENDPOINTS_EVENTS.GET_BY_USER}?role=SELLER&eventStatus=2` : null,
   );
 
+  const filterItems = items.filter((item) => item?.host?.id !== userId);
+
   const renderEmpty = () => {
     if (loading)
       return (
@@ -75,15 +77,11 @@ export default function SellerDashboard() {
       <SafeAreaView style={styles.safeTop} edges={["top"]} />
 
       <FlatList
-        data={items}
+        data={filterItems}
         keyExtractor={(item, i) => String(item.id ?? i)}
-        renderItem={({ item }) => {
-          if (item?.host?.id !== userId) {
-            // Extra guard to only show events where user is host{
-            return <EventCardAsigned item={item} userId={userId} />;
-          }
-          return null;
-        }}
+        renderItem={({ item }) => (
+          <EventCardAsigned item={item} userId={userId} />
+        )}
         ListHeaderComponent={() => (
           <HeaderScreenHome
             items={items}

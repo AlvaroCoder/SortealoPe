@@ -4,6 +4,9 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  Linking,
+  Modal,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -95,6 +98,8 @@ export default function AdminEventDetailPage() {
   const activeSellers = (data?.collections ?? []).length;
   const progressPct = totalTickets > 0 ? soldTickets / totalTickets : 0;
 
+  const [placeModalVisible, setPlaceModalVisible] = useState(false);
+
   useEffect(() => {
     if (!event?.date) return;
     const target = new Date(event.date).getTime();
@@ -150,6 +155,8 @@ export default function AdminEventDetailPage() {
         "?";
       return name[0]?.toUpperCase() ?? "?";
     });
+
+  const showModalLugar = () => setPlaceModalVisible(true);
 
   function renderStatusRow() {
     return (
@@ -233,9 +240,11 @@ export default function AdminEventDetailPage() {
               </View>
               <View style={styles.infoTexts}>
                 <Text style={styles.infoLabel}>Lugar</Text>
-                <Text style={styles.infoValue} numberOfLines={1}>
-                  {event.place}
-                </Text>
+                <TouchableOpacity onPress={showModalLugar}>
+                  <Text style={styles.infoValue} numberOfLines={1}>
+                    {event.place}
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -560,6 +569,13 @@ export default function AdminEventDetailPage() {
         <View style={{ height: 20 }} />
       </ScrollView>
 
+      {/* ── Modal: Lugar del evento ───────────────────────────────────────── */}
+      <PlaceModal
+        visible={placeModalVisible}
+        place={event?.place ?? ""}
+        onClose={() => setPlaceModalVisible(false)}
+      />
+
       {/* ── Sticky bottom bar ─────────────────────────────────────────────── */}
       <View style={styles.bottomBar}>
         {/* Vender Tickets */}
@@ -622,6 +638,195 @@ export default function AdminEventDetailPage() {
     </SafeAreaView>
   );
 }
+
+// ── Place modal helpers ───────────────────────────────────────────────────────
+const PLACE_PLATFORMS = [
+  { match: /facebook\.com|fb\.com|fb\.watch/i, name: "Facebook",  icon: "logo-facebook",  color: "#1877F2" },
+  { match: /instagram\.com|instagr\.am/i,       name: "Instagram", icon: "logo-instagram", color: "#E1306C" },
+  { match: /tiktok\.com/i,                       name: "TikTok",   icon: "logo-tiktok",    color: "#010101" },
+  { match: /youtube\.com|youtu\.be/i,            name: "YouTube",  icon: "logo-youtube",   color: "#FF0000" },
+];
+
+function detectPlacePlatform(value) {
+  if (!value || !/^https?:\/\//i.test(value)) return null;
+  return (
+    PLACE_PLATFORMS.find((p) => p.match.test(value)) ?? {
+      name: "Enlace",
+      icon: "link-outline",
+      color: GREEN_900,
+    }
+  );
+}
+
+function PlaceModal({ visible, place, onClose }) {
+  const platform = detectPlacePlatform(place);
+  const isUrl = !!platform;
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <Pressable style={placeModalStyles.backdrop} onPress={onClose}>
+        <Pressable
+          style={placeModalStyles.sheet}
+          onPress={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <View style={placeModalStyles.header}>
+            <View style={placeModalStyles.iconWrap}>
+              <Ionicons name="location" size={24} color={BLUE_500} />
+            </View>
+            <TouchableOpacity
+              onPress={onClose}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={placeModalStyles.closeBtn}
+            >
+              <Ionicons name="close" size={20} color={NEUTRAL_500} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Label */}
+          <Text style={placeModalStyles.label}>LUGAR DEL EVENTO</Text>
+
+          {/* Place text */}
+          <Text style={placeModalStyles.placeText}>{place}</Text>
+
+          {/* Platform chip — only if URL */}
+          {isUrl && (
+            <View
+              style={[
+                placeModalStyles.platformChip,
+                { borderColor: platform.color + "44", backgroundColor: platform.color + "12" },
+              ]}
+            >
+              <Ionicons name={platform.icon} size={15} color={platform.color} />
+              <Text style={[placeModalStyles.platformChipText, { color: platform.color }]}>
+                {platform.name}
+              </Text>
+            </View>
+          )}
+
+          {/* Open link button */}
+          {isUrl && (
+            <TouchableOpacity
+              style={placeModalStyles.openBtn}
+              activeOpacity={0.85}
+              onPress={() => Linking.openURL(place).catch(() => {})}
+            >
+              <Ionicons name="open-outline" size={16} color={WHITE} />
+              <Text style={placeModalStyles.openBtnText}>Abrir enlace</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Close button */}
+          <TouchableOpacity
+            style={placeModalStyles.closeFullBtn}
+            onPress={onClose}
+            activeOpacity={0.85}
+          >
+            <Text style={placeModalStyles.closeFullBtnText}>Cerrar</Text>
+          </TouchableOpacity>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+const placeModalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: WHITE,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+    paddingTop: 20,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  iconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#EFF6FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: NEUTRAL_100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  label: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    color: NEUTRAL_400,
+    marginBottom: 8,
+  },
+  placeText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: NEUTRAL_700,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  platformChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    marginBottom: 16,
+  },
+  platformChipText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  openBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: BLUE_500,
+    borderRadius: 14,
+    paddingVertical: 13,
+    marginBottom: 10,
+  },
+  openBtnText: {
+    color: WHITE,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  closeFullBtn: {
+    backgroundColor: GREEN_900,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  closeFullBtnText: {
+    color: WHITE,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+});
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
