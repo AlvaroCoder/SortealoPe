@@ -12,13 +12,16 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
       },
       "ios": {
         "distribution": "store"
       }
-    },
-    "production": {
-      "autoIncrement": true
     }
   },
   "submit": {

@@ -160,12 +160,6 @@ function PackCard({ item, tier, isSelected, onPress, index }) {
           ]}
         />
 
-        {/* Price */}
-        <Text style={[styles.price, { color: tier.subColor }]}>Precio</Text>
-        <Text style={[styles.priceValue, { color: tier.textColor }]}>
-          S/ {Number(item.price ?? 0).toFixed(2)}
-        </Text>
-
         {/* Gold sparkle icon */}
         {isGold && (
           <View style={styles.goldStar}>

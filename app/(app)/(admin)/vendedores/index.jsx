@@ -1,22 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ListHeaderComponente from "../../../../components/cards/ListHeaderComponente";
+import SellerCard from "../../../../components/cards/SellerCard";
 import { ENDPOINTS_EVENTS } from "../../../../Connections/APIURLS";
 import { Colors, Typography } from "../../../../constants/theme";
 import { useFetch } from "../../../../lib/useFetch";
 import LoadingScreen from "../../../../screens/LoadingScreen";
 
-// ── Color tokens ──────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_700 = Colors.principal.green[700];
 const GREEN_500 = Colors.principal.green[500];
@@ -28,24 +21,7 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 const BG_PAGE = "#F0F4F8";
 
-// ── Rank badge labels ─────────────────────────────────────────────────────────
-const RANK_LABELS = ["PREMIUM SELLER", "RISING STAR", "VERIFIED", "ACTIVO"];
-const RANK_BADGE_BG = {
-  1: GREEN_900,
-  2: "#6B7280",
-  3: "#92400E",
-};
-
-// ── Money formatter ───────────────────────────────────────────────────────────
-function formatMoney(n) {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1000) return `$${(n / 1000).toFixed(1)}k`;
-  return `S/.${n.toFixed(0)}`;
-}
-
-// ── Main screen ───────────────────────────────────────────────────────────────
 export default function AdminVendedoresPage() {
-  const router = useRouter();
   const { eventId, eventStatus } = useLocalSearchParams();
   const [searchText, setSearchText] = useState("");
 
@@ -57,7 +33,7 @@ export default function AdminVendedoresPage() {
 
   // Sort collections by soldTickets desc → ranking
   const collections = (event?.collections ?? [])
-    .slice()
+    .slice(0, 3)
     .sort((a, b) => (b.soldTickets ?? 0) - (a.soldTickets ?? 0));
 
   // Client-side search
@@ -79,110 +55,6 @@ export default function AdminVendedoresPage() {
     });
   }, [searchText, collections]);
 
-  function renderSellerCard({ item: col, index }) {
-    const rank = index + 1;
-    const seller = col.seller;
-    const sold = col.soldTickets ?? 0;
-    const available = col.availableTickets ?? 0;
-    const reserved = col.reservedTickets ?? 0;
-    const totalTickets = sold + available + reserved;
-    const progress = totalTickets > 0 ? sold / totalTickets : 0;
-    const revenue = sold * ticketPrice;
-    const isOnline = sold > 0;
-
-    const name =
-      seller?.firstName && seller?.lastName
-        ? `${seller.firstName} ${seller.lastName}`
-        : (seller?.username ?? seller?.email ?? "Vendedor");
-
-    const initial = name[0]?.toUpperCase() ?? "?";
-    const badgeLabel = RANK_LABELS[Math.min(rank - 1, RANK_LABELS.length - 1)];
-    const rankBg = RANK_BADGE_BG[rank] ?? NEUTRAL_400;
-
-    return (
-      <TouchableOpacity
-        style={styles.sellerCard}
-        activeOpacity={0.85}
-        onPress={() =>
-          router.push({
-            pathname: "/(app)/(admin)/vendedores/[id]",
-            params: {
-              id: seller?.id,
-              eventId,
-              collectionId: col.id,
-              eventStatus,
-            },
-          })
-        }
-      >
-        {/* Avatar + rank badge + online dot */}
-        <View style={styles.avatarWrap}>
-          {seller?.photo ? (
-            <Image
-              source={{ uri: seller.photo }}
-              style={styles.avatar}
-              contentFit="cover"
-              transition={200}
-              cachePolicy="memory-disk"
-            />
-          ) : (
-            <View style={[styles.avatar, styles.avatarFallback]}>
-              <Text style={styles.avatarInitial}>{initial}</Text>
-            </View>
-          )}
-          <View style={[styles.rankBadge, { backgroundColor: rankBg }]}>
-            <Text style={styles.rankBadgeText}>#{rank}</Text>
-          </View>
-          <View
-            style={[
-              styles.onlineDot,
-              { backgroundColor: isOnline ? GREEN_500 : NEUTRAL_400 },
-            ]}
-          />
-        </View>
-
-        {/* Info section */}
-        <View style={styles.sellerInfo}>
-          {/* Top row: name + revenue */}
-          <View style={styles.sellerTopRow}>
-            <View style={styles.sellerNameBlock}>
-              <Text style={styles.sellerName} numberOfLines={1}>
-                {name}
-              </Text>
-              <View style={styles.sellerMeta}>
-                <View style={styles.sellerBadge}>
-                  <Text style={styles.sellerBadgeText}>{badgeLabel}</Text>
-                </View>
-              </View>
-            </View>
-            <View style={styles.revenueBlock}>
-              <Text style={styles.revenueAmount}>{formatMoney(revenue)}</Text>
-            </View>
-          </View>
-
-          {/* Divider */}
-          <View style={styles.cardDivider} />
-
-          {/* Progress row */}
-          <View style={styles.progressRow}>
-            <Text style={styles.progressLabel}>Progreso de meta</Text>
-            <Text style={styles.progressCount}>
-              {sold} / {totalTickets} boletos
-            </Text>
-          </View>
-          <View style={styles.progressBarBg}>
-            <View
-              style={[
-                styles.progressBarFill,
-                { width: `${Math.min(100, Math.round(progress * 100))}%` },
-              ]}
-            />
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  }
-
   if (loading) return <LoadingScreen />;
 
   return (
@@ -190,12 +62,22 @@ export default function AdminVendedoresPage() {
       <FlatList
         data={filtered}
         keyExtractor={(item, i) => String(item.id ?? i)}
-        renderItem={renderSellerCard}
+        renderItem={({ item, index }) => (
+          <SellerCard
+            item={item}
+            index={index}
+            eventId={eventId}
+            ticketPrice={ticketPrice}
+            eventStatus={eventStatus}
+          />
+        )}
         ListHeaderComponent={
           <ListHeaderComponente
             event={event}
             searchText={searchText}
             setSearchText={setSearchText}
+            eventId={eventId}
+            eventStatus={eventStatus}
           />
         }
         showsVerticalScrollIndicator={false}

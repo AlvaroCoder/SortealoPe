@@ -240,6 +240,9 @@ export default function AdminVendedorDetailPage() {
             </Text>
             <Text style={styles.metricLabel}>Reservados</Text>
           </View>
+        </View>
+
+        <View style={styles.metricsRow}>
           <View style={styles.metricCard}>
             <View
               style={[styles.metricIcon, { backgroundColor: ORANGE + "22" }]}
@@ -266,7 +269,6 @@ export default function AdminVendedorDetailPage() {
             <Text style={styles.metricLabel}>Disponibles</Text>
           </View>
         </View>
-
         {/* ── Guía de estados ──────────────────────────────────────── */}
         <View style={styles.guideWrap}>
           <GuideStatusCard />

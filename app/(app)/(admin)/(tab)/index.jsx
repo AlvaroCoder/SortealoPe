@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -10,15 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import HeaderBarCard from "../../../../components/common/Card/HeaderBarCard";
-import {
-  ENDPOINTS_EVENTS,
-  ENDPOINTS_USERS,
-} from "../../../../Connections/APIURLS";
+import CardEvents from "../../../../components/cards/CardEvents";
+import { ENDPOINTS_EVENTS } from "../../../../Connections/APIURLS";
 import { Colors } from "../../../../constants/theme";
 import { useAuthContext } from "../../../../context/AuthContext";
-import { useFetch } from "../../../../lib/useFetch";
 import { usePaginatedFetch } from "../../../../lib/usePaginatedFetch";
 
 const GREEN_900 = Colors.principal.green[900];
@@ -30,24 +24,10 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 const WHITE = "#FFFFFF";
 const BG_PAGE = "#F0F4F8";
 
-const STATUS_CONFIG = {
-  1: { label: "EN ESPERA", bg: "#E2E8F0", text: "#64748B" },
-  2: { label: "ACTIVO", bg: "#D1FAE5", text: "#065F46" },
-  3: { label: "FINALIZADO", bg: "#E2E8F0", text: "#475569" },
-  4: { label: "PAUSADO", bg: "#FEF3C7", text: "#92400E" },
-};
-
-const getStatusConfig = (status) => STATUS_CONFIG[status] ?? STATUS_CONFIG[1];
-
 export default function AdminDashboard() {
   const { userData } = useAuthContext();
   const userId = userData?.userId;
   const router = useRouter();
-
-  const { data: profileData } = useFetch(
-    userId ? `${ENDPOINTS_USERS.GET_BY_ID}${userId}` : null,
-  );
-
   const {
     items: recentEvents,
     loading: loadingEvents,
@@ -58,32 +38,10 @@ export default function AdminDashboard() {
     `${ENDPOINTS_EVENTS.GET_BY_USER}?role=HOST&eventStatus=2`,
   );
 
-  const totalEvents = recentEvents?.length ?? 0;
-
-  const firstName = profileData?.firstName
-    ? profileData.firstName
-    : (userData?.sub?.split("@")?.[0] ?? "Usuario");
-  const lastName =
-    profileData?.lastName ?? userData?.lastName?.substring(0, 3) ?? "";
-
-  const fullName = [firstName, lastName].filter(Boolean).join(" ");
-
-  const avatarUri = profileData?.photo ?? userData?.photo ?? null;
-  const initials = (firstName[0] ?? "V").toUpperCase();
-
   const renderHeader = () => (
     <View>
-      <HeaderBarCard
-        avatarUri={avatarUri}
-        initials={initials}
-        fullName={fullName}
-        role={"ADMIN"}
-      />
-
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>
-          Mis eventos recientes ({totalEvents})
-        </Text>
+        <Text style={styles.sectionTitle}>Ultimos eventos activos</Text>
         <TouchableOpacity
           onPress={() => router.push("/(app)/(admin)/(tab)/events")}
           activeOpacity={0.7}
@@ -93,74 +51,6 @@ export default function AdminDashboard() {
       </View>
     </View>
   );
-
-  const renderEventCard = ({ item }) => {
-    const status = getStatusConfig(item.eventStatus ?? item.status ?? 2);
-    const sold = item.soldTickets ?? item.ticketsSold ?? 0;
-    const total = item.ticketsPerCollection ?? item.totalTickets ?? 0;
-    const progress = total > 0 ? Math.min(sold / total, 1) : 0;
-
-    return (
-      <TouchableOpacity
-        style={styles.eventCard}
-        activeOpacity={0.85}
-        onPress={() =>
-          router.push({
-            pathname: "/(app)/(admin)/events/[id]",
-            params: {
-              id: item.id,
-              eventStatus: item.eventStatus ?? 2,
-              userId,
-            },
-          })
-        }
-      >
-        <View style={styles.eventImageWrapper}>
-          {item.image ? (
-            <Image
-              source={{ uri: item.image }}
-              style={styles.eventImage}
-              contentFit="cover"
-              transition={300}
-              cachePolicy="memory-disk"
-            />
-          ) : (
-            <View style={[styles.eventImage, styles.eventImagePlaceholder]} />
-          )}
-          <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-            <Text style={[styles.statusBadgeText, { color: status.text }]}>
-              {status.label}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.eventInfo}>
-          <View style={styles.eventInfoRow}>
-            <Text style={styles.eventTitle} numberOfLines={2}>
-              {item.title ?? "Evento"}
-            </Text>
-            {total > 0 && (
-              <View style={styles.ticketsBox}>
-                <Text style={styles.ticketsLabel}>Tickets</Text>
-                <Text style={styles.ticketsValue}>
-                  {sold}/{total}
-                </Text>
-              </View>
-            )}
-          </View>
-          {/* Progress bar */}
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${Math.round(progress * 100)}%` },
-              ]}
-            />
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
 
   const renderFooter = () => {
     if (!hasMore) return null;
@@ -204,12 +94,12 @@ export default function AdminDashboard() {
 
   return (
     <View style={styles.screen}>
-      <SafeAreaView style={styles.safeTop} edges={["top"]} />
-
       <FlatList
         data={recentEvents}
         keyExtractor={(item) => String(item.id)}
-        renderItem={renderEventCard}
+        renderItem={({ item }) => (
+          <CardEvents item={item} userId={userId} selectedStatus={2} />
+        )}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmpty}
@@ -243,12 +133,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: BG_PAGE,
-  },
-  safeTop: {
-    backgroundColor: WHITE,
-  },
-  listContent: {
-    paddingBottom: 100, // space above tab bar + FAB
   },
 
   // Metrics

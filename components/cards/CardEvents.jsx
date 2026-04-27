@@ -20,8 +20,6 @@ const STATUS_CONFIG = {
 const getStatusConfig = (status) => STATUS_CONFIG[status] ?? STATUS_CONFIG[1];
 
 export default function CardEvents({ item, userId, selectedStatus }) {
-  console.log("Item , ", item);
-
   const router = useRouter();
   const status = getStatusConfig(selectedStatus);
   const sold = item.soldTickets ?? item.ticketsSold ?? 0;

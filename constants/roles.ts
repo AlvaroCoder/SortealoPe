@@ -13,27 +13,27 @@ export const ROLE_CONFIG: Record<
   UserRole,
   {
     label: string;
-    color: string; // fondo del chip
+    color: string;
     textColor: string; // texto del chip
     homeRoute: string; // ruta de destino post-login (fase 3)
   }
 > = {
   [USER_ROLES.ADMIN]: {
     label: "Administrador",
-    color: "#004739", // green[900] — tu color dominante
+    color: "#004739",
     textColor: "#FFFFFF",
     homeRoute: "/(app)/(drawer)/home", // tu ruta actual, cambia en fase 3
   },
   [USER_ROLES.SELLER]: {
     label: "Vendedor",
-    color: "#1E82D9", // blue[500]
+    color: "#1E82D9",
     textColor: "#FFFFFF",
     homeRoute: "/(app)/(drawer)/home",
   },
   [USER_ROLES.BUYER]: {
     label: "Comprador",
-    color: "#16CD91", // green[500] — tu acento
-    textColor: "#004739", // texto oscuro sobre fondo claro
+    color: "#16CD91",
+    textColor: "#004739",
     homeRoute: "/(app)/(drawer)/home",
   },
 };

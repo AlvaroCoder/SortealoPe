@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import HeaderTabUser from "../../../../components/common/Navigations/HeaderTabUser";
 import { Colors } from "../../../../constants/theme";
 
 const GREEN_900 = Colors.principal.green[900];
@@ -77,7 +78,9 @@ export default function AdminTabLayout() {
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        header: () => <HeaderTabUser />,
+      }}
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="events" />

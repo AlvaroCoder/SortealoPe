@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Sharing from "expo-sharing";
 import { useRef, useState } from "react";
@@ -194,9 +195,7 @@ const Step2Content = ({ collectionCode, ticketQuantity, onClose }) => {
           <Text style={styles.cardTicketCount}>
             {parseInt(ticketQuantity, 10).toLocaleString()} tickets asignados
           </Text>
-          <Text style={styles.cardScanHint}>
-            Escanea con la app RIFALOPE
-          </Text>
+          <Text style={styles.cardScanHint}>Escanea con la app RIFALOPE</Text>
 
           {/* Bottom stripe */}
           <View style={styles.cardStripe} />
@@ -295,7 +294,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 28,
-    paddingBottom: 40,
+    paddingBottom: Constants.statusBarHeight + 10,
   },
   closeX: {
     alignSelf: "flex-end",

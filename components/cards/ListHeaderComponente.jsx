@@ -1,13 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
 import { Colors, Typography } from "../../constants/theme";
 
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
 const BLUE_500 = Colors.principal.blue[500];
-const NEUTRAL_400 = Colors.principal.neutral[400] ?? "#94A3B8";
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_200 = Colors.principal.neutral[200];
 const GREEN_700 = Colors.principal.green[700];
@@ -19,6 +17,8 @@ export default function ListHeaderComponente({
   event,
   searchText,
   setSearchText,
+  eventId,
+  eventStatus,
 }) {
   const router = useRouter();
 
@@ -96,34 +96,21 @@ export default function ListHeaderComponente({
         </View>
       </View>
 
-      <View style={styles.searchContainer}>
-        <Ionicons
-          name="search-outline"
-          size={18}
-          color={NEUTRAL_500}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar vendedor por nombre..."
-          placeholderTextColor={NEUTRAL_400}
-          value={searchText}
-          onChangeText={setSearchText}
-        />
-        {searchText.length > 0 && (
-          <TouchableOpacity
-            onPress={() => setSearchText("")}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="close-circle" size={18} color={NEUTRAL_400} />
-          </TouchableOpacity>
-        )}
-      </View>
-
       {/* ── Section header ────────────────────────────────────────── */}
       <View style={styles.rankingHeader}>
-        <Text style={styles.rankingTitle}>Ranking</Text>
-        <TouchableOpacity style={styles.verTodosBtn}>
+        <Text style={styles.rankingTitle}>Ranking Top 3</Text>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/(app)/(admin)/vendedores/list",
+              params: {
+                eventId,
+                eventStatus,
+              },
+            })
+          }
+          style={styles.verTodosBtn}
+        >
           <Text style={styles.verTodosText}>Ver todos</Text>
           <Ionicons name="chevron-forward" size={14} color={GREEN_500} />
         </TouchableOpacity>
@@ -285,6 +272,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     marginBottom: 10,
+    marginTop: 20,
   },
   rankingTitle: {
     fontSize: Typography.sizes.lg,

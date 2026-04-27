@@ -14,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { ENDPOINTS_USERS } from "../../../../Connections/APIURLS";
 import { UploadUserImage } from "../../../../Connections/images";
 import { Colors, Typography } from "../../../../constants/theme";
@@ -190,8 +189,6 @@ export default function AdminProfileTab() {
 
   return (
     <View style={styles.root}>
-      <SafeAreaView style={styles.safeTop} edges={["top"]} />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}

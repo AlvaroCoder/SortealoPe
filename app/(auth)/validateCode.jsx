@@ -53,7 +53,7 @@ function SuccessScreen({ email, onDone }) {
     // Auto-navigate after SUCCESS_DISPLAY_MS
     const timer = setTimeout(onDone, SUCCESS_DISPLAY_MS);
     return () => clearTimeout(timer);
-  }, []);
+  }, [fadeAnim, onDone, scaleAnim]);
 
   return (
     <LinearGradient
@@ -146,7 +146,10 @@ export default function ValidateCode() {
   const handleResend = async () => {
     const result = await resendCode(userData?.email);
     if (result?.error) {
-      return Alert.alert("Error", "No se pudo reenviar el código. Intenta de nuevo.");
+      return Alert.alert(
+        "Error",
+        "No se pudo reenviar el código. Intenta de nuevo.",
+      );
     }
     setCode(Array(DIGITS).fill(""));
     setTimeLeft(INITIAL_TIME);
@@ -214,7 +217,9 @@ export default function ValidateCode() {
           onPress={canResend ? handleResend : null}
           disabled={!canResend}
         >
-          <Text style={[styles.resendText, !canResend && styles.resendDisabled]}>
+          <Text
+            style={[styles.resendText, !canResend && styles.resendDisabled]}
+          >
             Reenviar código
           </Text>
         </TouchableOpacity>

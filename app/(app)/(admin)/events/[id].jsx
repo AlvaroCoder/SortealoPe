@@ -71,7 +71,9 @@ export default function AdminEventDetailPage() {
   const { data, loading, refetch } = useFetch(
     `${ENDPOINTS_EVENTS.GET_BY_ID}${eventId}?eventStatus=${eventStatus}`,
   );
+
   const event = data;
+
   const coleccion = data?.collections;
 
   const idColeccionAdmin = coleccion?.filter(
@@ -434,37 +436,6 @@ export default function AdminEventDetailPage() {
     );
   }
 
-  /** Empezar a sortear card — visible only when event is active (status=2) */
-  function renderSortearCard() {
-    return (
-      <TouchableOpacity
-        style={styles.sortearCard}
-        activeOpacity={0.85}
-        onPress={() =>
-          router.push({
-            pathname: "/(app)/(admin)/tickets/sorteo",
-            params: { eventId, eventTitle: event?.title ?? "" },
-          })
-        }
-      >
-        <Image
-          source={{
-            uri: "https://res.cloudinary.com/dabyqnijl/image/upload/v1775886772/RifaloPeSuper.png",
-          }}
-          style={styles.sortearMascot}
-          contentFit="contain"
-        />
-        <View style={styles.sortearText}>
-          <Text style={styles.sortearTitle}>¡Es hora de sortear!</Text>
-          <Text style={styles.sortearSubtitle}>
-            Inicia el sorteo y elige al ganador
-          </Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color={WHITE} />
-      </TouchableOpacity>
-    );
-  }
-
   /** Ganadores card */
   function renderWinnersCard() {
     const hasSorteo = Number(eventStatus) === 3;
@@ -560,9 +531,6 @@ export default function AdminEventDetailPage() {
         {/* Ganadores */}
         {eventStatus >= 3 && renderWinnersCard()}
 
-        {/* Sortear */}
-        {Number(eventStatus) === 2 && renderSortearCard()}
-
         <View style={{ marginHorizontal: 20 }}>
           <GuideStatusCard />
         </View>
@@ -641,10 +609,30 @@ export default function AdminEventDetailPage() {
 
 // ── Place modal helpers ───────────────────────────────────────────────────────
 const PLACE_PLATFORMS = [
-  { match: /facebook\.com|fb\.com|fb\.watch/i, name: "Facebook",  icon: "logo-facebook",  color: "#1877F2" },
-  { match: /instagram\.com|instagr\.am/i,       name: "Instagram", icon: "logo-instagram", color: "#E1306C" },
-  { match: /tiktok\.com/i,                       name: "TikTok",   icon: "logo-tiktok",    color: "#010101" },
-  { match: /youtube\.com|youtu\.be/i,            name: "YouTube",  icon: "logo-youtube",   color: "#FF0000" },
+  {
+    match: /facebook\.com|fb\.com|fb\.watch/i,
+    name: "Facebook",
+    icon: "logo-facebook",
+    color: "#1877F2",
+  },
+  {
+    match: /instagram\.com|instagr\.am/i,
+    name: "Instagram",
+    icon: "logo-instagram",
+    color: "#E1306C",
+  },
+  {
+    match: /tiktok\.com/i,
+    name: "TikTok",
+    icon: "logo-tiktok",
+    color: "#010101",
+  },
+  {
+    match: /youtube\.com|youtu\.be/i,
+    name: "YouTube",
+    icon: "logo-youtube",
+    color: "#FF0000",
+  },
 ];
 
 function detectPlacePlatform(value) {
@@ -699,11 +687,19 @@ function PlaceModal({ visible, place, onClose }) {
             <View
               style={[
                 placeModalStyles.platformChip,
-                { borderColor: platform.color + "44", backgroundColor: platform.color + "12" },
+                {
+                  borderColor: platform.color + "44",
+                  backgroundColor: platform.color + "12",
+                },
               ]}
             >
               <Ionicons name={platform.icon} size={15} color={platform.color} />
-              <Text style={[placeModalStyles.platformChipText, { color: platform.color }]}>
+              <Text
+                style={[
+                  placeModalStyles.platformChipText,
+                  { color: platform.color },
+                ]}
+              >
                 {platform.name}
               </Text>
             </View>

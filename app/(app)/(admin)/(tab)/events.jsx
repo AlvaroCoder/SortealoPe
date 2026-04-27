@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -12,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import CardEvents from "../../../../components/cards/CardEvents";
 import { ENDPOINTS_EVENTS } from "../../../../Connections/APIURLS";
 import { Colors } from "../../../../constants/theme";
@@ -43,12 +41,8 @@ export default function EventsTab() {
   const [selectedStatus, setSelectedStatus] = useState(1);
   const [searchText, setSearchText] = useState("");
 
-  const firstName = userData?.sub?.split("@")[0] ?? "Usuario";
-  const avatarUri = userData?.photo ?? null;
-
   const baseUrl = `${ENDPOINTS_EVENTS.GET_BY_USER}?role=HOST`;
 
-  // Pre-carga los 3 tabs en paralelo al montar
   const pending = usePaginatedFetch(`${baseUrl}&eventStatus=1`);
   const created = usePaginatedFetch(`${baseUrl}&eventStatus=2`);
   const drawn = usePaginatedFetch(`${baseUrl}&eventStatus=3`);
@@ -74,32 +68,6 @@ export default function EventsTab() {
           String(ev.id).includes(searchText),
       )
     : sourceItems;
-
-  const renderHeaderBar = () => (
-    <View style={styles.headerBar}>
-      <View style={styles.headerLeft}>
-        {avatarUri ? (
-          <Image
-            source={{ uri: avatarUri }}
-            style={styles.avatar}
-            contentFit="cover"
-            transition={200}
-            cachePolicy="memory-disk"
-          />
-        ) : (
-          <View style={[styles.avatar, styles.avatarPlaceholder]}>
-            <Text style={styles.avatarInitial}>
-              {firstName[0]?.toUpperCase() ?? "U"}
-            </Text>
-          </View>
-        )}
-        <Text style={styles.headerBrand}>RifaloPe</Text>
-      </View>
-      <View style={styles.adminBadge}>
-        <Text style={styles.adminBadgeText}>ADMIN</Text>
-      </View>
-    </View>
-  );
 
   const renderHeader = () => (
     <View>
@@ -208,9 +176,6 @@ export default function EventsTab() {
   return (
     <View style={styles.screen}>
       {loading && <LoadingScreen />}
-      <SafeAreaView edges={["top"]} style={{ backgroundColor: WHITE }}>
-        {renderHeaderBar()}
-      </SafeAreaView>
 
       <FlatList
         data={filteredItems}
@@ -222,7 +187,7 @@ export default function EventsTab() {
             selectedStatus={selectedStatus}
           />
         )}
-        ListHeaderComponent={renderHeader()}
+        ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         onEndReached={loadMore}
         onEndReachedThreshold={0.4}
@@ -254,9 +219,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: BG_PAGE,
-  },
-  listContent: {
-    paddingBottom: 120,
   },
   headerBar: {
     flexDirection: "row",

@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import * as DocumentPicker from "expo-document-picker";
 import { useState } from "react";
 import {
@@ -67,7 +68,6 @@ export default function ImportExcelModal({ visible, onClose, eventId }) {
       });
 
       const response = await CreateCollectionsByExcel(eventId, formData);
-      console.log("Respuesta : ", await response.text());
 
       if (response.ok) {
         Alert.alert("Éxito", "Vendedores importados correctamente.", [
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
-    paddingBottom: 36,
+    paddingBottom: Constants.statusBarHeight + 10,
   },
   header: {
     flexDirection: "row",

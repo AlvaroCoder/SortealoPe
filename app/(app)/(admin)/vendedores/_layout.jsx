@@ -6,6 +6,7 @@ export default function LayoutVendedoresAdmin() {
       <Stack.Screen name="index" />
       <Stack.Screen name="[id]" />
       <Stack.Screen name="agregar" />
+      <Stack.Screen name="list" />
     </Stack>
   );
 }
