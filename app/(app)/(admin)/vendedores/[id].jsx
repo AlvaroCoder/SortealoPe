@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo } from "react";
@@ -21,7 +22,6 @@ import { Colors, Typography } from "../../../../constants/theme";
 import { useFetch } from "../../../../lib/useFetch";
 import LoadingScreen from "../../../../screens/LoadingScreen";
 
-// ── Color tokens ──────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_700 = Colors.principal.green[700];
 const GREEN_500 = Colors.principal.green[500];
@@ -314,17 +314,15 @@ export default function AdminVendedorDetailPage() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: BG_PAGE,
   },
   listContent: {
-    paddingBottom: 32,
+    paddingBottom: Constants.statusBarHeight + 10,
   },
 
-  // ── Top nav bar ────────────────────────────────────────────────────────────
   topBar: {
     flexDirection: "row",
     alignItems: "center",

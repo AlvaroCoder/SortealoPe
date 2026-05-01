@@ -483,9 +483,6 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 48,
-  },
 
   bannerWrap: {
     height: 200,

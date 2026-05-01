@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 24,
-    paddingBottom: 40,
+    paddingBottom: Constants.statusBarHeight + 10,
   },
   stepLabel: {
     fontSize: 12,
