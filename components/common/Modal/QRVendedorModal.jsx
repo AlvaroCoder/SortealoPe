@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Sharing from "expo-sharing";
 import { useRef, useState } from "react";
@@ -16,6 +15,7 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import ViewShot from "react-native-view-shot";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CreateCollection } from "../../../Connections/collections";
 import { Colors, Typography } from "../../../constants/theme";
 import ButtonGradiend from "../Buttons/ButtonGradiendt";
@@ -233,6 +233,7 @@ export default function QRVendedorModal({
   eventId,
   initialQuantity = "10",
 }) {
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState(1);
   const [ticketQuantity, setTicketQuantity] = useState(initialQuantity);
   const [collectionCode, setCollectionCode] = useState(null);
@@ -257,7 +258,7 @@ export default function QRVendedorModal({
       onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, { paddingBottom: insets.bottom + 10 }]}>
           {/* Close X */}
           <TouchableOpacity style={styles.closeX} onPress={handleClose}>
             <Ionicons name="close" size={20} color={NEUTRAL_500} />
@@ -294,7 +295,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 28,
-    paddingBottom: Constants.statusBarHeight + 10,
   },
   closeX: {
     alignSelf: "flex-end",

@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -63,6 +64,13 @@ export default function HeaderTabUser() {
           </View>
         </View>
       </View>
+
+      <TouchableOpacity
+        style={styles.bellBtn}
+        onPress={() => router.push("/welcome")}
+      >
+        <Ionicons name="home-outline" size={22} color={GREEN_900} />
+      </TouchableOpacity>
     </View>
   );
 }

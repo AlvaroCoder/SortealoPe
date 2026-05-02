@@ -17,7 +17,6 @@ import { Colors, Typography } from "../../../../constants/theme";
 const URL_IMAGEN =
   "https://res.cloudinary.com/dabyqnijl/image/upload/v1775314294/mascotas_zlqjn5.png";
 
-// ── Color constants ────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_50 = Colors.principal.green[50];
 const GREEN_100 = Colors.principal.green[100];
@@ -27,7 +26,6 @@ const NEUTRAL_200 = Colors.principal.neutral[200];
 const NEUTRAL_500 = Colors.principal.neutral[500];
 const NEUTRAL_700 = Colors.principal.neutral[700];
 
-// ── Action card ────────────────────────────────────────────────────────────────
 function ActionCard({ icon, title, description, onPress }) {
   return (
     <TouchableOpacity
@@ -57,7 +55,6 @@ export default function AgregarVendedor() {
 
   return (
     <View style={styles.root}>
-      {/* Status bar spacer */}
       <View style={styles.statusBar} />
 
       {/* ── Top nav bar ───────────────────────────────────────────────────── */}

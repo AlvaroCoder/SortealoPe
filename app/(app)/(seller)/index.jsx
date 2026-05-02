@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import EventCardAsigned from "../../../components/cards/EventCardAsigned";
 import HeaderScreenHome from "../../../components/common/Navigations/HeaderScreenHome";
 import {
@@ -37,6 +37,7 @@ const NEUTRAL_700 = Colors.principal.neutral[700];
 // ── Main screen ────────────────────────────────────────────────────────────────
 export default function SellerDashboard() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { userData: userStorage } = useAuthContext();
   const userId = userStorage?.userId;
 
@@ -104,13 +105,14 @@ export default function SellerDashboard() {
 
       {/* ── FAB: Vender ticket ────────────────────────────────────────── */}
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
         activeOpacity={0.85}
         onPress={() => router.push("/(app)/(seller)/scan")}
       >
         <Ionicons name="qr-code-outline" size={20} color={WHITE} />
         <Text style={styles.fabText}>Unirse a Evento</Text>
       </TouchableOpacity>
+      <SafeAreaView style={styles.safeTop} edges={["bottom"]} />
     </View>
   );
 }
@@ -264,7 +266,6 @@ const styles = StyleSheet.create({
   // ── FAB ─────────────────────────────────────────────────────────────────────
   fab: {
     position: "absolute",
-    bottom: 45,
     right: 20,
     left: 20,
     flexDirection: "row",

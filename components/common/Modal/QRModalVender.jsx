@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import ViewShot from "react-native-view-shot";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors, Typography } from "../../../constants/theme";
 import { createTicketClaimURL } from "../../../lib/deepLinks";
 
@@ -37,6 +38,7 @@ export default function QRModalVender({
   onSellMore,
   onClose,
 }) {
+  const insets = useSafeAreaInsets();
   const deepLink = reservationCode ? createTicketClaimURL(reservationCode) : "";
 
   const viewShotRef = useRef(null);
@@ -66,7 +68,7 @@ export default function QRModalVender({
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalSheet}>
+        <View style={[styles.modalSheet, { paddingBottom: insets.bottom + 20 }]}>
           <View style={styles.modalHandle} />
 
           <View style={styles.qrSuccessIcon}>
@@ -177,7 +179,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 28,
-    paddingBottom: 40,
     alignItems: "center",
   },
   modalHandle: {

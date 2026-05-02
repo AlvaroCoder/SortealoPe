@@ -11,7 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import HeaderBarCard from "../../../components/common/Card/HeaderBarCard";
 import {
   ENDPOINTS_EVENTS,
@@ -21,7 +24,6 @@ import { Colors, Typography } from "../../../constants/theme";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useFetch } from "../../../lib/useFetch";
 import { usePaginatedFetch } from "../../../lib/usePaginatedFetch";
-
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const GREEN_900 = Colors.principal.green[900];
 const GREEN_500 = Colors.principal.green[500];
@@ -53,7 +55,6 @@ const formatDate = (dateStr) => {
   });
 };
 
-// ── Full-width event card ──────────────────────────────────────────────────────
 function EventCard({ event }) {
   const router = useRouter();
   const daysLeft = getDaysLeft(event.date);
@@ -83,10 +84,8 @@ function EventCard({ event }) {
         <View style={[StyleSheet.absoluteFill, styles.eventCardPlaceholder]} />
       )}
 
-      {/* Gradient scrim */}
       <View style={styles.eventCardScrim} />
 
-      {/* Top-right: days remaining */}
       {daysLeft !== null && (
         <View style={styles.countdownPill}>
           <Ionicons name="time-outline" size={12} color={WHITE} />
@@ -94,7 +93,6 @@ function EventCard({ event }) {
         </View>
       )}
 
-      {/* Bottom content */}
       <View style={styles.eventCardContent}>
         <Text style={styles.eventCardTitle} numberOfLines={2}>
           {event.title ?? "Evento"}
@@ -157,6 +155,7 @@ function EmptyState() {
 // ── Main buyer dashboard ───────────────────────────────────────────────────────
 export default function BuyerDashboard() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { userData: userStorage } = useAuthContext();
   const userId = userStorage?.userId;
 
@@ -283,15 +282,15 @@ export default function BuyerDashboard() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* ── FAB: Escanear QR ──────────────────────────────────────────────── */}
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
         activeOpacity={0.85}
         onPress={() => router.push("/(app)/(buyer)/scan")}
       >
         <Ionicons name="scan-outline" size={20} color={WHITE} />
         <Text style={styles.fabText}>Escanear QR</Text>
       </TouchableOpacity>
+      <SafeAreaView style={styles.safeTop} edges={["bottom"]} />
     </View>
   );
 }
@@ -472,7 +471,6 @@ const styles = StyleSheet.create({
   // ── FAB ─────────────────────────────────────────────────────────────────────
   fab: {
     position: "absolute",
-    bottom: 45,
     right: 20,
     left: 20,
     flexDirection: "row",
